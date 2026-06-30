@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #dc143c;
+  --color-secondary: #f1f1f3;
+  --color-accent: #FF00E5;
+  --color-dark: #ffffff;
+  --color-header: #1c1c1c;
+  --color-surface: #f7f6f4;
+
+  /* Texty */
+  --color-text-base: #0f0f10;      /* hlavní text — místo text-white */
+  --color-text-strong: #fafafa;    /* silný text — místo text-white/80 */
+  --color-text-muted: #6b7280;     /* tlumený — místo text-white/50 */
+  --color-text-subtle: #9ca3af;    /* velmi tlumený — místo text-white/30 */
+
+  /* Bordery */
+  --color-border: #e5e7eb;         /* místo border-white/10 */
+  --color-border-strong: #d1d5db;  /* místo border-white/20 */
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #0f0f10;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}

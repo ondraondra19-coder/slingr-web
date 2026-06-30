@@ -1,0 +1,200 @@
+"use client";
+
+import { useState, useEffect, useCallback, useRef } from "react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { getProductBySlug } from "@/lib/products";
+
+const slidesData = [
+  {
+    id: 1,
+    label: "Bestseller",
+    headline: "Silikonové pouzdro",
+    headlineAccent: "na Apple Pencil",
+    sub: "Pro i USB-C verze. Výběr ze 7 barev, vlastní barevná kombinace.",
+    cta: "Vybrat barvu",
+    slug: "pouzdro-apple-pencil",
+  },
+  {
+    id: 2,
+    label: "Novinka",
+    headline: "MagSafe",
+    headlineAccent: "peněženka",
+    sub: "Prémiová kůže. Silné magnety. Pojme až 3 karty.",
+    cta: "Koupit nyní",
+    slug: "magsafe-penezenka",
+  },
+  {
+    id: 3,
+    label: "Doporučujeme",
+    headline: "Magnetická folie",
+    headlineAccent: "na iPad",
+    sub: "Simuluje pocit psaní na papír. Kompatibilní s Apple Pencil.",
+    cta: "Prozkoumat",
+    slug: "magneticka-paperlike-folie-ipad",
+  },
+  {
+    id: 4,
+    label: "Tip na dárek",
+    headline: "Silikonový řemínek",
+    headlineAccent: "na Apple Watch",
+    sub: "Sportovní design. 5 barev. Velikosti 38–45 mm.",
+    cta: "Vybrat velikost",
+    slug: "silikonovy-reminek-apple-watch",
+  },
+];
+
+const slides = slidesData.map(s => ({
+  ...s,
+  href: `/produkt/${s.slug}`,
+  img: getProductBySlug(s.slug)?.img ?? "",
+}));
+
+export default function HomeSlider() {
+  const [current, setCurrent] = useState(0);
+  const [animating, setAnimating] = useState(false);
+  const [direction, setDirection] = useState<"left" | "right">("right");
+  const [paused, setPaused] = useState(false);
+  // Klíč pro reset časovače při každém načtení stránky
+  const [mountKey] = useState(() => Date.now());
+  const timeoutRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const go = useCallback((idx: number, dir: "left" | "right") => {
+    if (animating) return;
+    setDirection(dir);
+    setAnimating(true);
+    setTimeout(() => {
+      setCurrent(idx);
+      setAnimating(false);
+    }, 350);
+  }, [animating]);
+
+  const prev = useCallback(() => {
+    go((current - 1 + slides.length) % slides.length, "left");
+  }, [current, go]);
+
+  const next = useCallback(() => {
+    go((current + 1) % slides.length, "right");
+  }, [current, go]);
+
+  // mountKey zajistí čistý start při každém načtení stránky
+  useEffect(() => {
+    if (paused) {
+      if (timeoutRef.current) clearInterval(timeoutRef.current);
+      return;
+    }
+    timeoutRef.current = setInterval(next, 6000);
+    return () => { if (timeoutRef.current) clearInterval(timeoutRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [next, paused, mountKey]);
+
+  const slide = slides[current];
+
+  return (
+    <section
+      className="relative w-full overflow-hidden bg-dark"
+      style={{ height: "clamp(480px, 68vh, 680px)" }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 opacity-[0.025] pointer-events-none"
+        style={{
+          backgroundImage: "radial-gradient(circle, var(--color-primary) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+        }}
+      />
+
+      {/* Slide content */}
+      <div
+        key={slide.id}
+        className={`absolute inset-0 flex items-center transition-opacity duration-350 ${animating ? "opacity-0" : "opacity-100"}`}
+        style={{ transform: animating ? `translateX(${direction === "right" ? "24px" : "-24px"})` : "translateX(0)", transition: "opacity 350ms ease, transform 350ms ease" }}
+      >
+        <div className="w-full max-w-screen-2xl mx-auto px-6 lg:px-12 flex items-center justify-between h-full gap-8">
+
+          {/* Text side */}
+          <div className="flex flex-col gap-5 max-w-lg">
+
+            {/* Label */}
+            <span className="inline-flex items-center gap-2 w-fit px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-widest">
+              {slide.label}
+            </span>
+
+            {/* Headline */}
+            <h2 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-[1.1] tracking-tight">
+              <span className="text-text-base">{slide.headline}</span>
+              <br />
+              <span className="text-primary">{slide.headlineAccent}</span>
+            </h2>
+
+            {/* Sub */}
+            <p className="text-text-muted text-base leading-relaxed max-w-sm">{slide.sub}</p>
+
+            {/* CTA */}
+            <div className="flex items-center gap-3 mt-1">
+              <a
+                href={slide.href}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-dark font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all duration-150"
+              >
+                {slide.cta}
+                <ArrowRight size={14} />
+              </a>
+            </div>
+
+          </div>
+
+          {/* Image side */}
+          <div className="hidden md:flex shrink-0 items-center justify-center relative"
+            style={{ width: "clamp(280px, 32vw, 440px)", height: "clamp(280px, 32vw, 440px)" }}
+          >
+            {/* Soft glow behind image */}
+            <div className="absolute inset-8 rounded-full bg-primary/8 blur-3xl" />
+            <div className="relative w-full h-full">
+              <Image
+                src={slide.img}
+                alt={slide.headline}
+                fill
+                className="object-contain drop-shadow-xl"
+                priority
+              />
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Arrows */}
+      <button
+        onClick={prev}
+        aria-label="Předchozí slide"
+        className="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-secondary border border-border flex items-center justify-center text-text-muted hover:text-text-base hover:border-border-strong transition-all duration-150 z-10"
+      >
+        <ChevronLeft size={17} />
+      </button>
+      <button
+        onClick={next}
+        aria-label="Další slide"
+        className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-secondary border border-border flex items-center justify-center text-text-muted hover:text-text-base hover:border-border-strong transition-all duration-150 z-10"
+      >
+        <ChevronRight size={17} />
+      </button>
+
+      {/* Dots */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => go(i, i > current ? "right" : "left")}
+            aria-label={`Slide ${i + 1}`}
+            className={`rounded-full transition-all duration-300 ${
+              i === current ? "w-6 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-text-subtle hover:bg-text-muted"
+            }`}
+          />
+        ))}
+      </div>
+
+    </section>
+  );
+}

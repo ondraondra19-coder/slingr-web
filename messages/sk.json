@@ -1,0 +1,79 @@
+{
+  "header": {
+    "cart": "Košík",
+    "products": "produktov"
+  },
+  "search": {
+    "placeholder": "Hľadať produkty..."
+  },
+  "cart": {
+    "title": "Košík",
+    "empty": "Košík je prázdny",
+    "emptyDesc": "Pridajte produkty a vráťte sa sem.",
+    "continueShopping": "Pokračovať v nákupe",
+    "subtotal": "Medzisúčet",
+    "shipping": "Doprava",
+    "shippingNote": "Zvolíte v ďalšom kroku",
+    "totalNoShipping": "Spolu bez dopravy",
+    "continueToShipping": "Pokračovať k doprave",
+    "securePayment": "Zabezpečená platba · SSL šifrovanie",
+    "summary": "Súhrn",
+    "item_one": "položka",
+    "item_few": "položky",
+    "item_many": "položiek",
+    "step1": "Košík",
+    "step2": "Doprava a platba",
+    "step3": "Informácie",
+    "bestsellers": "Naše bestsellery",
+    "bestsellersSubtitle": "Výber pre vás",
+    "relatedTitle": "Hodí sa k tomu",
+    "relatedSubtitle": "K produktu"
+  },
+  "product": {
+    "addToCart": "Pridať do košíka",
+    "outOfStock": "Pripomenúť, keď bude skladom",
+    "selectVariant": "Vyberte variantu",
+    "selectPrompt": "Prosím vyberte",
+    "added": "Pridané",
+    "color": "Farba",
+    "model": "Model",
+    "bodyColor": "Farba tela",
+    "capColor": "Farba hlavičky",
+    "customCombo": "Vlastná farebná kombinácia",
+    "description": "Popis produktu",
+    "related": "Súvisiace produkty",
+    "home": "Domov",
+    "expedition": "Expedícia do 24 h",
+    "returns": "Vrátenie do 30 dní",
+    "warranty": "Záruka 2 roky",
+    "notifyTitle": "Pripomenúť, keď bude skladom",
+    "notifyDesc": "Zadaj svoj e-mail a my ti napíšeme, keď produkt naskladníme.",
+    "notifyDone": "Hotovo!",
+    "notifyDoneDesc": "Keď bude tovar dostupný, dáme ti vedieť.",
+    "close": "Zavrieť",
+    "remind": "Pripomenúť",
+    "stockNone": "Nie je skladom",
+    "stockVariant": "Táto varianta nie je skladom",
+    "stockPlenty": "Skladom (5+ ks)",
+    "stockLow": "Posledný"
+  },
+  "footer": {
+    "newsletter": "Buďte prvý, kto sa dozvie o novinkách",
+    "newsletterDesc": "Zľavy, nové produkty a tipy priamo do schránky. Odhlásiť sa možno kedykoľvek.",
+    "subscribe": "Odoberať",
+    "subscribed": "Prihlásenie prebehlo úspešne",
+    "emailPlaceholder": "váš@email.sk",
+    "emailError": "Zadajte platný e-mail",
+    "rights": "Všetky práva vyhradené.",
+    "description": "Originálne Apple príslušenstvo za férové ceny. Každý kus otestovaný a pripravený na expedíciu do 24 hodín."
+  },
+"infogrid": {
+  "teamTitle": "Spoznaj náš tím",
+  "teamSubtitle": "TechGadgets",
+  "teamBtn": "Spoznať",
+  "contactTitle": "Kontaktuj nás",
+  "contactSubtitle": "sme tu pre teba",
+  "contactBtn": "Kontaktovať",
+  "hours": "Po–Pia: 9:00–17:00"
+}
+}

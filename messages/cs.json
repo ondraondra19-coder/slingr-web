@@ -1,0 +1,79 @@
+{
+  "header": {
+    "cart": "Košík",
+    "products": "produktů"
+  },
+  "search": {
+    "placeholder": "Hledat produkty..."
+  },
+  "cart": {
+    "title": "Košík",
+    "empty": "Košík je prázdný",
+    "emptyDesc": "Přidejte produkty a vraťte se sem.",
+    "continueShopping": "Pokračovat v nákupu",
+    "subtotal": "Mezisoučet",
+    "shipping": "Doprava",
+    "shippingNote": "Zvolíte v dalším kroku",
+    "totalNoShipping": "Celkem bez dopravy",
+    "continueToShipping": "Pokračovat k dopravě",
+    "securePayment": "Zabezpečená platba · SSL šifrování",
+    "summary": "Souhrn",
+    "item_one": "položka",
+    "item_few": "položky",
+    "item_many": "položek",
+    "step1": "Košík",
+    "step2": "Doprava a platba",
+    "step3": "Informace",
+    "bestsellers": "Naše bestsellery",
+    "bestsellersSubtitle": "Výběr pro vás",
+    "relatedTitle": "Hodí se k tomu",
+    "relatedSubtitle": "K produktu"
+  },
+  "product": {
+    "addToCart": "Přidat do košíku",
+    "outOfStock": "Připomenout, až bude skladem",
+    "selectVariant": "Vyberte variantu",
+    "selectPrompt": "Prosím vyberte",
+    "added": "Přidáno",
+    "color": "Barva",
+    "model": "Model",
+    "bodyColor": "Barva těla",
+    "capColor": "Barva hlavičky",
+    "customCombo": "Vlastní barevná kombinace",
+    "description": "Popis produktu",
+    "related": "Související produkty",
+    "home": "Domů",
+    "expedition": "Expedice do 24 h",
+    "returns": "Vrácení do 30 dní",
+    "warranty": "Záruka 2 roky",
+    "notifyTitle": "Připomenout, až bude skladem",
+    "notifyDesc": "Zadej svůj e-mail a my ti napíšeme, jakmile produkt naskladníme.",
+    "notifyDone": "Hotovo!",
+    "notifyDoneDesc": "Jakmile bude zboží dostupné, dáme ti vědět.",
+    "close": "Zavřít",
+    "remind": "Připomenout",
+    "stockNone": "Není skladem",
+    "stockVariant": "Tato varianta není skladem",
+    "stockPlenty": "Skladem (5+ ks)",
+    "stockLow": "Poslední"
+  },
+  "footer": {
+    "newsletter": "Buďte první, kdo se dozví o novinkách",
+    "newsletterDesc": "Slevy, nové produkty a tipy přímo do schránky. Odhlásit se lze kdykoliv.",
+    "subscribe": "Odebírat",
+    "subscribed": "Přihlášení proběhlo úspěšně",
+    "emailPlaceholder": "váš@email.cz",
+    "emailError": "Zadejte platný e-mail",
+    "rights": "Všechna práva vyhrazena.",
+    "description": "Originální Apple příslušenství za férové ceny. Každý kus testován a připraven k expedici do 24 hodin."
+  },
+  "infogrid": {
+  "teamTitle": "Poznej náš tým",
+  "teamSubtitle": "TechGadgets",
+  "teamBtn": "Poznat",
+  "contactTitle": "Kontaktuj nás",
+  "contactSubtitle": "jsme tu pro tebe",
+  "contactBtn": "Kontaktovat",
+  "hours": "Po–Pá: 9:00–17:00"
+}
+}

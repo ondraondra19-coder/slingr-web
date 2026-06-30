@@ -1,0 +1,79 @@
+{
+  "header": {
+    "cart": "Cart",
+    "products": "products"
+  },
+  "search": {
+    "placeholder": "Search products..."
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty",
+    "emptyDesc": "Add products and come back here.",
+    "continueShopping": "Continue shopping",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "shippingNote": "Choose in the next step",
+    "totalNoShipping": "Total (excl. shipping)",
+    "continueToShipping": "Continue to shipping",
+    "securePayment": "Secure payment · SSL encryption",
+    "summary": "Summary",
+    "item_one": "item",
+    "item_few": "items",
+    "item_many": "items",
+    "step1": "Cart",
+    "step2": "Shipping & payment",
+    "step3": "Information",
+    "bestsellers": "Our bestsellers",
+    "bestsellersSubtitle": "Our pick for you",
+    "relatedTitle": "Goes well with",
+    "relatedSubtitle": "Related to"
+  },
+  "product": {
+    "addToCart": "Add to cart",
+    "outOfStock": "Notify me when available",
+    "selectVariant": "Select a variant",
+    "selectPrompt": "Please select",
+    "added": "Added",
+    "color": "Color",
+    "model": "Model",
+    "bodyColor": "Body color",
+    "capColor": "Cap color",
+    "customCombo": "Custom color combination",
+    "description": "Product description",
+    "related": "Related products",
+    "home": "Home",
+    "expedition": "Ships within 24h",
+    "returns": "30-day returns",
+    "warranty": "2-year warranty",
+    "notifyTitle": "Notify me when available",
+    "notifyDesc": "Enter your email and we'll let you know when the product is back in stock.",
+    "notifyDone": "Done!",
+    "notifyDoneDesc": "We'll notify you as soon as the product is available.",
+    "close": "Close",
+    "remind": "Notify me",
+    "stockNone": "Out of stock",
+    "stockVariant": "This variant is out of stock",
+    "stockPlenty": "In stock (5+ pcs)",
+    "stockLow": "Last"
+  },
+  "footer": {
+    "newsletter": "Be the first to know about new arrivals",
+    "newsletterDesc": "Deals, new products and tips straight to your inbox. Unsubscribe anytime.",
+    "subscribe": "Subscribe",
+    "subscribed": "Successfully subscribed",
+    "emailPlaceholder": "your@email.com",
+    "emailError": "Please enter a valid email",
+    "rights": "All rights reserved.",
+    "description": "Original Apple accessories at fair prices. Every item tested and ready to ship within 24 hours."
+  },
+  "infogrid": {
+  "teamTitle": "Meet our team",
+  "teamSubtitle": "TechGadgets",
+  "teamBtn": "Learn more",
+  "contactTitle": "Contact us",
+  "contactSubtitle": "we're here for you",
+  "contactBtn": "Get in touch",
+  "hours": "Mon–Fri: 9:00–17:00"
+}
+}
