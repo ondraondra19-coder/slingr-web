@@ -9,11 +9,11 @@ import {
 } from "@/lib/reservations";
 
 // ── GET ────────────────────────────────────────────────────────────────────
-// Vrátí skutečně dostupné množství pro danou variantu produktu:
-// sklad − rezervace ostatních uživatelů (moje vlastní rezervace se NEODEČÍTÁ,
-// protože ta je už "moje" — viz getReservedQuantity(..., excludeSessionId)).
+// Vrátí dostupnost pro danou variantu:
+// available = sklad − rezervace OSTATNÍCH (moje vlastní se neodečítá)
+// myReservation = kolik já sám mám zarezervováno
 //
-// Query: ?slug=pouzdro-apple-pencil&variant=black|pro&sessionId=abc-123
+// Query: ?slug=...&variant=...&sessionId=...
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const slug = searchParams.get("slug");
@@ -31,13 +31,14 @@ export async function GET(req: Request) {
     const reservedByOthers = await getReservedQuantity(slug, variant, sessionId);
     const myReservation = sessionId ? await getMyReservation(slug, variant, sessionId) : 0;
 
+    // Kolik si JEŠTĚ může zákazník přidat nad rámec toho co už má
     const available = Math.max(0, rawStock - reservedByOthers);
 
     return NextResponse.json({
       rawStock,
       reservedByOthers,
       myReservation,
-      available, // kolik si JEŠTĚ může kdokoliv přidat (včetně mě, nad rámec toho co už mám)
+      available,
     });
   } catch (error) {
     console.error("Stock availability error:", error);
@@ -47,8 +48,16 @@ export async function GET(req: Request) {
 
 // ── POST ───────────────────────────────────────────────────────────────────
 // Vytvoří/aktualizuje nebo zruší rezervaci.
-// Body: { slug, variant, sessionId, quantity }
-// quantity = 0 znamená "zruš rezervaci" (odebráno z košíku)
+// quantity = celkové množství které zákazník chce mít (ne delta/přírůstek)
+// quantity = 0 znamená "zruš rezervaci"
+//
+// Logika:
+// maxAllowed = rawStock - reservedByOthers  (co smí mít zákazník celkem)
+// clampedQuantity = min(quantity, maxAllowed)
+//
+// Tím pádem zákazník 1 který má 2 kusy a chce přidat 2 další (quantity=4)
+// dostane clampedQuantity=4 pokud sklad=4 a ostatní nemají nic.
+// Zákazník 2 pak dostane max 0 pokud zákazník 1 má všechny 4.
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -65,23 +74,33 @@ export async function POST(req: Request) {
 
     const variantKey = variant ?? "-|-";
 
+    // quantity = 0 → uvolni rezervaci
     if (!quantity || quantity <= 0) {
       await releaseStock(slug, variantKey, sessionId);
       return NextResponse.json({ ok: true, released: true });
     }
 
-    // Ověříme proti aktuálnímu skladu, ať si nikdo nerezervuje víc než reálně existuje
     const stockData = await getProductStock(slug);
     const rawStock = stockData[variantKey] ?? 0;
+
+    // Rezervace ostatních (moje vlastní se NEpočítá — chceme vědět kolik zbývá pro mě)
     const reservedByOthers = await getReservedQuantity(slug, variantKey, sessionId);
+
+    // Maximální počet kusů který smím mít JÁ celkem
     const maxAllowed = Math.max(0, rawStock - reservedByOthers);
 
+    // Ořežeme na max
     const clampedQuantity = Math.min(quantity, maxAllowed);
 
     if (clampedQuantity <= 0) {
-      return NextResponse.json({ ok: false, reason: "out_of_stock", available: 0 }, { status: 409 });
+      return NextResponse.json({
+        ok: false,
+        reason: "out_of_stock",
+        available: 0,
+      }, { status: 409 });
     }
 
+    // Zapíšeme rezervaci — přepíše předchozí hodnotu pro tohoto zákazníka
     await reserveStock(slug, variantKey, sessionId, clampedQuantity);
 
     return NextResponse.json({

@@ -518,6 +518,7 @@ export default function ProduktClient({
   // ne jen mého vlastního košíku. Polluje se každých pár sekund.
   const {
     available: serverAvailable,
+    canAddMore: serverCanAddMore,
     reservedByOthers,
     loading: stockLoading,
     syncReservation,
@@ -545,12 +546,16 @@ export default function ProduktClient({
     return getItemQuantity(product.slug, cartVariants);
   })();
 
-  // Dostupné množství = serverová hodnota (sklad − cizí rezervace), dokud nenačte,
-  // fallback na lokální výpočet aby UI nebliklo na "není skladem".
+  // available = sklad − rezervace ostatních = kolik smím mít JÁ celkem
+  // canAddMore = available − moje rezervace = kolik si ještě mohu přidat
+  // Fallback na lokální výpočet dokud server nenačte (aby UI nebliklo)
   const availableQty = stockLoading
-    ? Math.max(0, currentStock - inCartQty)
+    ? Math.max(0, currentStock)
     : serverAvailable;
-  const isOutOfStock = currentStock === 0 || (!stockLoading && availableQty === 0 && inCartQty === 0);
+  const canAddMoreQty = stockLoading
+    ? Math.max(0, currentStock - inCartQty)
+    : serverCanAddMore;
+  const isOutOfStock = currentStock === 0 || (!stockLoading && availableQty === 0);
 
   const anyInStock = hasSheetData
     ? Object.values(stockData).some(v => v > 0)
@@ -589,7 +594,7 @@ export default function ProduktClient({
   }
 
   async function handleAddToCart() {
-    if (isOutOfStock) {
+    if (isOutOfStock || canAddMoreQty === 0) {
       setNotifyOpen(true);
       return;
     }
@@ -868,10 +873,10 @@ export default function ProduktClient({
                           {qty}
                         </span>
                         <button
-                          onClick={() => setQty(q => Math.min(availableQty, q + 1))}
-                          disabled={qty >= availableQty}
+                          onClick={() => setQty(q => Math.min(canAddMoreQty, q + 1))}
+                          disabled={qty >= canAddMoreQty}
                           className={`w-10 h-full flex items-center justify-center transition-colors text-base font-light ${
-                            qty >= availableQty
+                            qty >= canAddMoreQty
                               ? "text-border cursor-not-allowed"
                               : "text-text-muted hover:text-text-base hover:bg-surface"
                           }`}

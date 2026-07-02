@@ -1,16 +1,9 @@
 // lib/useCartSync.ts
-// ─────────────────────────────────────────────────────────────────────────────
-// Synchronizuje košík s rezervačním systémem:
-// - při odebrání položky okamžitě uvolní rezervaci
-// - při změně množství ověří dostupnost a případně ořeže
-// ─────────────────────────────────────────────────────────────────────────────
 "use client";
 
 import { useCallback } from "react";
 import { getSessionId } from "./session";
 
-// Sestaví variantKey stejně jako ProduktClient a stock.ts
-// variants = { Barva: "Černá", Model: "Apple Pencil Pro" } → "Černá|Apple Pencil Pro"
 function buildVariantKey(slug: string, variants?: Record<string, string>): string {
   if (!variants || Object.keys(variants).length === 0) return "-|-";
   const values = Object.values(variants);
@@ -21,7 +14,7 @@ function buildVariantKey(slug: string, variants?: Record<string, string>): strin
 export function useCartSync() {
   /**
    * Zavolat při odebrání položky z košíku.
-   * Okamžitě uvolní rezervaci na serveru (nemusí čekat na 20min TTL).
+   * Okamžitě uvolní rezervaci (quantity=0 = smaž).
    */
   const releaseOnRemove = useCallback(async (
     slug: string,
@@ -35,15 +28,14 @@ export function useCartSync() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slug, variant: variantKey, sessionId, quantity: 0 }),
       });
-    } catch {
-      // tichý fail — rezervace expiruje sama po 20 minutách
-    }
+    } catch {}
   }, []);
 
   /**
-   * Zavolat při změně množství (+/-) v košíku.
-   * Ověří dostupnost a vrátí maximální povolené množství.
-   * Pokud server dovolí víc nebo stejně, vrátí požadované množství.
+   * Zavolat při změně množství v košíku (+/-).
+   * Pošle serveru celkové požadované množství.
+   * Server odečte pouze rezervace OSTATNÍCH a vrátí max povolené.
+   * Vrátí skutečně přidělené množství (může být nižší pokud jiní zarezervovali).
    */
   const checkAndSync = useCallback(async (
     slug: string,
@@ -60,9 +52,9 @@ export function useCartSync() {
       });
       const json = await res.json();
       if (json.ok) return json.reservedQuantity ?? newQuantity;
-      if (json.reason === "out_of_stock") return json.available ?? 0;
+      if (json.reason === "out_of_stock") return 0;
     } catch {}
-    return newQuantity; // fallback — neblokuj uživatele při síťové chybě
+    return newQuantity; // fallback při síťové chybě
   }, []);
 
   return { releaseOnRemove, checkAndSync };
