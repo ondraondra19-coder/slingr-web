@@ -10,7 +10,6 @@ import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice } from "@/lib/currency";
 import type { Currency } from "@/lib/currency";
 import DiscountWidget from "@/components/DiscountWidget";
-import { useCartSync } from "@/lib/useCartSync";
 
 const COLOR_LABELS: Record<string, string> = {
   black: "Černá", white: "Bílá", grey: "Šedá", pink: "Růžová",
@@ -44,8 +43,9 @@ function getProductImgs(slug: string, variants?: Record<string, string>): { img:
 }
 
 const BESTSELLER_SLUGS = [
-  "pouzdro-apple-pencil", "magsafe-penezenka", "magneticka-folie-ipad",
-  "silikonovy-reminek-apple-watch", "pouzdro-airpods", "cisticka-displeje", "hroty-apple-pencil", "organizer-kabely",
+  "pouzdro-apple-pencil", "magsafe-penezenka", "paperfeel-ipad",
+  "silikonovy-reminek", "pouzdro-airpods", "cistic-displeje",
+  "hroty-apple-pencil", "organizer-kabely",
 ];
 const bestsellers = BESTSELLER_SLUGS
   .map(slug => products.find(p => p.slug === slug))
@@ -62,26 +62,19 @@ function Stepper({ step }: { step: 1 | 2 | 3 }) {
       {steps.map((s, i) => {
         const done = s.n < step;
         const active = s.n === step;
-        const clickable = s.href !== null;
         return (
           <div key={s.n} className="flex items-center flex-1 last:flex-none">
             <div className="flex flex-col items-center gap-1.5">
-              {clickable ? (
-                <a href={s.href!}>
-                  <span className={`w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center transition-colors ${
-                    done ? "bg-green-500 text-white hover:brightness-110"
-                    : active ? "bg-primary text-white"
-                    : "bg-border text-text-subtle hover:bg-border-strong"
-                  }`}>
-                    {done
-                      ? <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      : s.n}
+              {done && s.href ? (
+                <a href={s.href}>
+                  <span className="w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center bg-primary text-white hover:brightness-110 transition-all">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </span>
                 </a>
               ) : (
-                <span className={`w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center ${
-                  active ? "bg-primary text-white" : "bg-border text-text-subtle"
-                }`}>
+                <span className={`w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center ${active ? "bg-primary text-white" : "bg-border text-text-subtle"}`}>
                   {s.n}
                 </span>
               )}
@@ -90,7 +83,7 @@ function Stepper({ step }: { step: 1 | 2 | 3 }) {
               </span>
             </div>
             {i < steps.length - 1 && (
-              <div className={`flex-1 h-px mx-3 mb-5 transition-colors ${done ? "bg-green-500" : "bg-border"}`} />
+              <div className={`flex-1 h-px mx-3 mb-5 transition-colors ${done ? "bg-primary" : "bg-border"}`} />
             )}
           </div>
         );
@@ -135,11 +128,10 @@ function ProductRow({ title, subtitle, items, currency }: {
 
 export default function KosikPage() {
   const {
-    items, removeItem, updateQuantity, totalItems, getItemPrice, getTotalPrice,
-    appliedDiscount, getDiscountAmount, getFinalPrice,
+    items, removeItem, updateQuantity, totalItems, getItemPrice,
+    getTotalPrice, appliedDiscount, getDiscountAmount, getFinalPrice,
   } = useCart();
   const { currency } = useCurrency();
-  const { releaseOnRemove, checkAndSync } = useCartSync();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -152,50 +144,6 @@ export default function KosikPage() {
   const recommendedProducts = singleProduct ? getRelatedProducts(singleProduct, 6) : bestsellers;
   const recommendedTitle = singleProduct ? "Hodí se k tomu" : "Naše bestsellery";
   const recommendedSubtitle = singleProduct ? `K produktu ${singleProduct.name}` : "Výběr pro vás";
-
-  // Odebrání položky + okamžité uvolnění rezervace
-  async function handleRemove(slug: string, variants?: Record<string, string>, reservationKey?: string) {
-    removeItem(slug, variants);
-    // Pokud reservationKey chybí, zkusíme odvodit z variant
-    const effectiveKey = reservationKey ?? (() => {
-      if (!variants || Object.keys(variants).length === 0) return "-|-";
-      const vals = Object.values(variants);
-      return vals.length === 1 ? `${vals[0]}|-` : `${vals[0]}|${vals[1]}`;
-    })();
-    await releaseOnRemove(slug, effectiveKey);
-  }
-
-  // Změna množství + synchronizace rezervace
-  async function handleQuantityChange(
-    slug: string,
-    newQty: number,
-    variants?: Record<string, string>,
-    reservationKey?: string,
-  ) {
-    if (newQty < 1) {
-      removeItem(slug, variants);
-      const keyForRelease = reservationKey ?? (() => {
-        if (!variants || Object.keys(variants).length === 0) return "-|-";
-        const vals = Object.values(variants);
-        return vals.length === 1 ? `${vals[0]}|-` : `${vals[0]}|${vals[1]}`;
-      })();
-      await releaseOnRemove(slug, keyForRelease);
-      return;
-    }
-    // Pokud reservationKey chybí (starší položka v košíku), zkusíme ho odvodit z variant
-    const effectiveKey = reservationKey ?? (() => {
-      if (!variants || Object.keys(variants).length === 0) return "-|-";
-      const vals = Object.values(variants);
-      return vals.length === 1 ? `${vals[0]}|-` : `${vals[0]}|${vals[1]}`;
-    })();
-    const granted = await checkAndSync(slug, effectiveKey, newQty);
-    if (granted === 0) {
-      // Zcela vyprodáno — odeber z košíku
-      removeItem(slug, variants);
-    } else {
-      updateQuantity(slug, granted, variants);
-    }
-  }
 
   return (
     <>
@@ -271,17 +219,22 @@ export default function KosikPage() {
                                 </p>
                               )}
                               <div className="flex items-center justify-between mt-4 flex-wrap gap-2">
-                                {/* Počítadlo množství */}
                                 <div className="flex items-center gap-1 border border-border rounded-xl overflow-hidden">
                                   <button
-                                    onClick={() => handleQuantityChange(item.slug, item.quantity - 1, item.variants, item.reservationKey)}
+                                    onClick={() => {
+                                      if (item.quantity <= 1) {
+                                        removeItem(item.slug, item.variants);
+                                      } else {
+                                        updateQuantity(item.slug, item.quantity - 1, item.variants);
+                                      }
+                                    }}
                                     className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-text-base hover:bg-border transition-colors"
                                   >
                                     <Minus size={14} />
                                   </button>
                                   <span className="w-9 text-center text-text-base text-sm font-medium">{item.quantity}</span>
                                   <button
-                                    onClick={() => handleQuantityChange(item.slug, item.quantity + 1, item.variants, item.reservationKey)}
+                                    onClick={() => updateQuantity(item.slug, item.quantity + 1, item.variants)}
                                     className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-text-base hover:bg-border transition-colors"
                                   >
                                     <Plus size={14} />
@@ -290,7 +243,7 @@ export default function KosikPage() {
                                 <div className="flex items-center gap-4">
                                   <p className="text-primary font-extrabold text-xl">{formatPrice(itemPrice * item.quantity, currency)}</p>
                                   <button
-                                    onClick={() => handleRemove(item.slug, item.variants, item.reservationKey)}
+                                    onClick={() => removeItem(item.slug, item.variants)}
                                     className="text-text-subtle hover:text-red-500 transition-colors"
                                   >
                                     <Trash2 size={17} />

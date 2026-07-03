@@ -14,7 +14,6 @@ export type CartItem = {
   img: string;
   variants?: Record<string, string>;
   quantity: number;
-  reservationKey?: string; // klíč pro rezervační systém ve formátu "color|size"
 };
 
 type CartContext = {
@@ -22,7 +21,6 @@ type CartContext = {
   addItem: (item: Omit<CartItem, "quantity">, maxQuantity?: number) => void;
   removeItem: (slug: string, variants?: Record<string, string>) => void;
   updateQuantity: (slug: string, quantity: number, variants?: Record<string, string>, maxQuantity?: number) => void;
-  getItemQuantity: (slug: string, variants?: Record<string, string>) => number;
   clearCart: () => void;
   totalItems: number;
   totalPriceCZK: number;
@@ -160,14 +158,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return Math.max(0, getTotalPrice(currency) - getDiscountAmount(currency));
   }, [getTotalPrice, getDiscountAmount]);
 
-  const getItemQuantity = useCallback((slug: string, variants?: Record<string, string>): number => {
-    const found = items.find((i) => itemKey(i.slug, i.variants) === itemKey(slug, variants));
-    return found?.quantity ?? 0;
-  }, [items]);
-
   return (
     <CartCtx.Provider value={{
-      items, addItem, removeItem, updateQuantity, clearCart, getItemQuantity,
+      items, addItem, removeItem, updateQuantity, clearCart,
       totalItems, totalPriceCZK, getItemPrice, getTotalPrice,
       appliedDiscount, applyDiscountCode, removeDiscount,
       isDiscountActive, getDiscountAmount, getFinalPrice,

@@ -7,7 +7,7 @@ import type { Product, ModelColor, ModelColorLayered } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice, CURRENCIES } from "@/lib/currency";
-import { useStockAvailability } from "@/lib/useStockAvailability";
+import { useStockPolling } from "@/lib/useStockPolling";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -35,34 +35,19 @@ const COLOR_MAP: Record<string, string> = {
 
 // ── Stock badge ──────────────────────────────────────────────────────────────
 
-function StockBadge({
-  available,
-  anyInStock,
-  reservedByOthers,
-}: {
-  available: number;
-  anyInStock: boolean;
-  reservedByOthers: number;
-}) {
+function StockBadge({ available, anyInStock }: { available: number; anyInStock: boolean }) {
   const state = !anyInStock ? "none" : available === 0 ? "variant" : available >= 5 ? "plenty" : "low";
   const colorClass = state === "plenty" ? "text-green-600" : state === "low" ? "text-amber-500" : "text-red-500";
   const dotClass = state === "plenty" ? "bg-green-500" : state === "low" ? "bg-amber-400 animate-pulse" : "bg-red-400";
   const label =
     state === "none"    ? "Není skladem" :
-    state === "variant" ? (reservedByOthers > 0 ? "Právě vyprodáno — zákazníci ho mají v košíku" : "Tato varianta není skladem") :
-    state === "plenty"  ? "Skladem (5+ ks)" :
-                          `Dostupné už jen ${available} ${available === 1 ? "ks" : "ks"}`;
+    state === "variant" ? "Tato varianta není skladem" :
+    state === "plenty"  ? "Skladem" :
+                          `Poslední ${available} ${available === 1 ? "kus" : "kusy"}`;
   return (
-    <span key={state} className="flex flex-col gap-1">
-      <span className={`inline-flex items-center gap-1.5 text-[12px] font-semibold ${colorClass}`}>
-        <span className={`w-1.5 h-1.5 rounded-full inline-block ${dotClass}`} />
-        <span>{label}</span>
-      </span>
-      {reservedByOthers > 0 && state !== "variant" && (
-        <span className="text-text-subtle text-[11px]">
-          {reservedByOthers} {reservedByOthers === 1 ? "kus mají" : "kusy mají"} právě v košíku jiní zákazníci
-        </span>
-      )}
+    <span key={state} className={`inline-flex items-center gap-1.5 text-[12px] font-semibold ${colorClass}`}>
+      <span className={`w-1.5 h-1.5 rounded-full inline-block ${dotClass}`} />
+      <span>{label}</span>
     </span>
   );
 }
@@ -399,7 +384,7 @@ export default function ProduktClient({
   related: Product[];
   stockData?: Record<string, number>;
 }) {
-  const { addItem, getItemQuantity } = useCart();
+  const { addItem } = useCart();
   const { currency, mounted: currencyMounted } = useCurrency();
   const productAny = product as any;
 
@@ -496,7 +481,8 @@ export default function ProduktClient({
     return stockData[key] ?? 0;
   }
 
-  const currentStock = getCurrentStock();
+  // Polling skladu ze Sheets — jednoduchý, bez Redis, bez rezervací
+  const { stockData: liveStockData, loading: stockLoading } = useStockPolling(product.slug);
 
   // variantKey ve stejném formátu jako klíče Google Sheets skladu — "color|size"
   const variantKey = (() => {
@@ -514,48 +500,24 @@ export default function ProduktClient({
     return `${activeColor ?? "-"}|${activeSize ?? "-"}`;
   })();
 
-  // Server-side dostupnost — sklad mínus rezervace VŠECH uživatelů (Marek + Filip),
-  // ne jen mého vlastního košíku. Polluje se každých pár sekund.
-  const {
-    available: serverAvailable,
-    canAddMore: serverCanAddMore,
-    reservedByOthers,
-    loading: stockLoading,
-    syncReservation,
-  } = useStockAvailability(product.slug, variantKey);
-
-  // Kolik kusů této varianty už je v MÉM košíku (lokálně, okamžitě, bez čekání na server)
-  const inCartQty = (() => {
-    if (!canAddToCart && hasVariants) return 0; // varianta nevybrána, nemá cenu počítat
-    let cartVariants: Record<string, string> | undefined;
-    if (hasModels) {
-      cartVariants = {
-        Model: model?.label ?? "",
-        ...(isLayered && combo && bodyValue !== capValue
-          ? { Tělo: bodyValue, Hlavička: capValue }
-          : { Barva: legacyColor }),
-      };
-    } else if (hasVariants) {
-      cartVariants = Object.keys(selectedVariants).length > 0 ? selectedVariants : undefined;
-    } else {
-      cartVariants = {};
-      if (hasNewColors && colorValue) cartVariants["Barva"] = newColors.find(c => c.value === colorValue)?.label ?? colorValue;
-      if (hasNewSizes && sizeValue) cartVariants[sizesLabel] = newSizes.find(s => s.value === sizeValue)?.label ?? sizeValue;
-      if (Object.keys(cartVariants).length === 0) cartVariants = undefined;
+  // Aktuální sklad pro tuto variantu — po prvním pollu z live dat, jinak server prop
+  const currentStock = (() => {
+    if (!stockLoading && Object.keys(liveStockData).length > 0) {
+      return liveStockData[variantKey] ?? 0;
     }
-    return getItemQuantity(product.slug, cartVariants);
+    // Fallback na server-side prop dokud polling nenačte
+    if (hasSheetData) {
+      const activeColor = hasNewColors ? colorValue : hasModels ? legacyColor : undefined;
+      const activeSize = hasNewSizes ? sizeValue : hasModels ? modelId : undefined;
+      const key = `${activeColor ?? "-"}|${activeSize ?? "-"}`;
+      return stockData[key] ?? 0;
+    }
+    return product.inStock ? product.stock : 0;
   })();
 
-  // available = sklad − rezervace ostatních = kolik smím mít JÁ celkem
-  // canAddMore = available − moje rezervace = kolik si ještě mohu přidat
-  // Fallback na lokální výpočet dokud server nenačte (aby UI nebliklo)
-  const availableQty = stockLoading
-    ? Math.max(0, currentStock)
-    : serverAvailable;
-  const canAddMoreQty = stockLoading
-    ? Math.max(0, currentStock - inCartQty)
-    : serverCanAddMore;
-  const isOutOfStock = currentStock === 0 || (!stockLoading && availableQty === 0);
+  const availableQty = currentStock;
+  const canAddMoreQty = currentStock;
+  const isOutOfStock = currentStock === 0;
 
   const anyInStock = hasSheetData
     ? Object.values(stockData).some(v => v > 0)
@@ -593,8 +555,8 @@ export default function ProduktClient({
     setCapValue(m?.colors[0]?.value ?? "");
   }
 
-  async function handleAddToCart() {
-    if (isOutOfStock || canAddMoreQty === 0) {
+  function handleAddToCart() {
+    if (isOutOfStock) {
       setNotifyOpen(true);
       return;
     }
@@ -626,19 +588,8 @@ export default function ProduktClient({
         ? legacyImgSrc
         : mainImgSrc;
 
-    // Nejdřív zkusíme server-side rezervaci — ta je autoritativní pro souběh
-    // více lidí. Pokud server řekne "míň, než jsi chtěl", ořežeme i lokálně.
-    const result = await syncReservation(inCartQty + qty);
-    const grantedTotal = result?.ok ? (result.reservedQuantity ?? inCartQty + qty) : inCartQty;
-    const actuallyAdding = Math.max(0, grantedTotal - inCartQty);
-
-    if (actuallyAdding === 0) {
-      // Mezitím to někdo jiný vykoupil — informujeme a obnovíme UI
-      setNotifyOpen(true);
-      return;
-    }
-
-    for (let i = 0; i < actuallyAdding; i++) {
+    // Přidáme qty kusů do košíku, maxQuantity = currentStock jako ochrana
+    for (let i = 0; i < qty; i++) {
       addItem({
         slug: product.slug,
         name: product.name,
@@ -646,7 +597,6 @@ export default function ProduktClient({
         priceRaw: priceRawForCart as any,
         img: imgForCart,
         variants: Object.keys(variantInfo).length > 0 ? variantInfo : undefined,
-        reservationKey: variantKey, // přesný klíč pro uvolnění rezervace z košíku
       }, currentStock);
     }
     setAdded(true);
@@ -705,7 +655,7 @@ export default function ProduktClient({
                       <span>({formatPrice(basePrice, currency)} + {formatPrice(comboExtra, currency)} za různé barvy)</span>
                     </span>
                   )}
-                  <StockBadge available={availableQty} anyInStock={anyInStock} reservedByOthers={reservedByOthers} />
+                  <StockBadge available={availableQty} anyInStock={anyInStock} />
                 </div>
               </div>
 
