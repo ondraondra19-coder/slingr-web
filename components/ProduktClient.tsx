@@ -384,7 +384,7 @@ export default function ProduktClient({
   related: Product[];
   stockData?: Record<string, number>;
 }) {
-  const { addItem } = useCart();
+  const { items: cartItems, addItem } = useCart();
   const { currency, mounted: currencyMounted } = useCurrency();
   const productAny = product as any;
 
@@ -474,11 +474,35 @@ export default function ProduktClient({
     return `${activeColor ?? "-"}|${activeSize ?? "-"}`;
   })();
 
+  // Porovná dvě sady stockKey — použito k rozpoznání, že řádka v košíku je
+  // přesně ta samá varianta, kterou má uživatel právě vybranou (tu nepočítáme
+  // jako "cizí rezervaci").
+  function stockKeysEqual(a: string | string[], b: string | string[]): boolean {
+    const arrA = Array.isArray(a) ? a : [a];
+    const arrB = Array.isArray(b) ? b : [b];
+    if (arrA.length !== arrB.length) return false;
+    return arrA.every(v => arrB.includes(v));
+  }
+
+  // Kolik kusů daného skladového klíče (např. "grey__body|usbc") už zabírají
+  // JINÉ varianty téhož produktu v košíku — ty si sklad reálně dělí s tím, co
+  // uživatel právě vybírá.
+  function reservedByOtherCartLines(key: string): number {
+    return cartItems.reduce((sum, item) => {
+      if (item.slug !== product.slug || !item.stockKey) return sum;
+      if (stockKeysEqual(item.stockKey, stockKeys)) return sum; // stejná varianta jako právě vybraná
+      const keys = Array.isArray(item.stockKey) ? item.stockKey : [item.stockKey];
+      return keys.includes(key) ? sum + item.quantity : sum;
+    }, 0);
+  }
+
   function resolveStock(data: Record<string, number>, keys: string | string[]): number {
-    if (Array.isArray(keys)) {
-      return Math.min(...keys.map(k => data[k] ?? 0));
-    }
-    return data[keys] ?? 0;
+    const list = Array.isArray(keys) ? keys : [keys];
+    return Math.min(...list.map(k => {
+      const total = data[k] ?? 0;
+      const reserved = reservedByOtherCartLines(k);
+      return Math.max(0, total - reserved);
+    }));
   }
 
   // Polling skladu ze Sheets — jednoduchý, bez Redis, bez rezervací
