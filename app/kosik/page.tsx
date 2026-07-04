@@ -157,24 +157,36 @@ export default function KosikPage() {
     if (mounted) fetchStockForItems();
   }, [mounted, fetchStockForItems]);
 
-  // Vrátí sklad pro daný stockKey — u vrstvených barev (víc klíčů) vezme minimum z nich
-  function resolveStock(slugStock: Record<string, number>, stockKey: string | string[]): number | undefined {
-    if (Array.isArray(stockKey)) {
-      const vals = stockKey.map(k => slugStock[k]);
-      if (vals.some(v => v === undefined)) return undefined;
-      return Math.min(...(vals as number[]));
-    }
-    return slugStock[stockKey];
-  }
 
-  // Vrátí max dostupné množství pro konkrétní variantu — používá stockKey uložený při addItem
+
+  // Vrátí max dostupné množství pro konkrétní variantu — používá stockKey uložený při addItem.
+  // Pokud stejný podzdroj (např. "šedé tělo") používá i jiná položka v košíku, odečte se
+  // jí už rezervované množství, ať se dvě varianty nepřebijí přes společný sklad.
   function getMaxQty(item: (typeof items)[0]): number {
     const slugStock = stockMap[item.slug];
     if (!slugStock || Object.keys(slugStock).length === 0) return 999; // fallback dokud nenačte
+
     if (item.stockKey) {
-      const resolved = resolveStock(slugStock, item.stockKey);
-      if (resolved !== undefined) return resolved;
+      const keys = Array.isArray(item.stockKey) ? item.stockKey : [item.stockKey];
+      let minRemaining: number | undefined;
+
+      for (const key of keys) {
+        const totalStock = slugStock[key];
+        if (totalStock === undefined) continue;
+
+        const reservedByOthers = items.reduce((sum, other) => {
+          if (other === item || other.slug !== item.slug || !other.stockKey) return sum;
+          const otherKeys = Array.isArray(other.stockKey) ? other.stockKey : [other.stockKey];
+          return otherKeys.includes(key) ? sum + other.quantity : sum;
+        }, 0);
+
+        const remaining = totalStock - reservedByOthers;
+        minRemaining = minRemaining === undefined ? remaining : Math.min(minRemaining, remaining);
+      }
+
+      if (minRemaining !== undefined) return Math.max(0, minRemaining);
     }
+
     // Fallback pro starší položky bez stockKey — vezmi součet přes všechny varianty
     const vals = Object.values(slugStock);
     return vals.length > 0 ? Math.max(...vals) : 999;
@@ -205,28 +217,63 @@ export default function KosikPage() {
       } catch {}
     }));
 
-    // Ořízni každou položku na skutečně dostupné množství
+    // Ořízni každou položku na skutečně dostupné množství. Položky se stejným
+    // podzdrojem (např. dvě varianty používající "šedé tělo") si sklad reálně
+    // dělí — zpracujeme je v pořadí v košíku a odečítáme z jednoho společného
+    // "poolu" na (slug, klíč), ať se nestane, že si dvě položky navzájem
+    // odsouhlasí víc kusů, než kolik jich reálně na skladě je.
+    const remainingBySlugKey: Record<string, number> = {};
     let anyChanged = false;
+
     for (const item of items) {
       const slugStock = freshStock[item.slug] ?? {};
       let max = 999;
+
       if (Object.keys(slugStock).length > 0) {
-        const resolved = item.stockKey ? resolveStock(slugStock, item.stockKey) : undefined;
-        if (resolved !== undefined) {
-          max = resolved;
+        const keys = item.stockKey
+          ? (Array.isArray(item.stockKey) ? item.stockKey : [item.stockKey])
+          : null;
+
+        if (keys) {
+          let minRemaining: number | undefined;
+          for (const key of keys) {
+            const poolKey = `${item.slug}::${key}`;
+            if (!(poolKey in remainingBySlugKey)) {
+              remainingBySlugKey[poolKey] = slugStock[key] ?? 0;
+            }
+            const remaining = remainingBySlugKey[poolKey];
+            minRemaining = minRemaining === undefined ? remaining : Math.min(minRemaining, remaining);
+          }
+          max = minRemaining ?? 999;
         } else {
           const vals = Object.values(slugStock);
           max = vals.length > 0 ? Math.max(...vals) : 0;
         }
       }
-      if (max === 0) {
+
+      if (max <= 0) {
         // Vyprodáno — odeber z košíku
         removeItem(item.slug, item.variants);
         anyChanged = true;
-      } else if (item.quantity > max) {
-        // Více kusů než je na skladě — ořízni
-        updateQuantity(item.slug, max, item.variants);
+        continue;
+      }
+
+      const finalQty = Math.min(item.quantity, max);
+      if (finalQty !== item.quantity) {
+        // Více kusů než je reálně na skladě — ořízni
+        updateQuantity(item.slug, finalQty, item.variants);
         anyChanged = true;
+      }
+
+      // Odečti spotřebované kusy ze společného poolu, ať je vidí i další položky
+      if (item.stockKey) {
+        const keys = Array.isArray(item.stockKey) ? item.stockKey : [item.stockKey];
+        for (const key of keys) {
+          const poolKey = `${item.slug}::${key}`;
+          if (poolKey in remainingBySlugKey) {
+            remainingBySlugKey[poolKey] -= finalQty;
+          }
+        }
       }
     }
 
