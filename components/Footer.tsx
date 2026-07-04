@@ -55,6 +55,8 @@ const trustItems = [
 
 // ── Newsletter ────────────────────────────────────────────────────────────────
 
+// ── Newsletter ────────────────────────────────────────────────────────────────
+
 function Newsletter() {
   const [email,     setEmail]     = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -85,22 +87,22 @@ function Newsletter() {
           </div>
 
           {/* Form */}
-          <div className="w-full lg:w-auto flex-shrink-0">
+          <div className="w-full lg:w-auto">
             {submitted ? (
-              <div className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-sm font-medium">
+              <div className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-sm font-medium w-full sm:w-auto justify-center sm:justify-start">
                 <Check size={15} strokeWidth={2.5} />
                 <span>Přihlášení proběhlo úspěšně</span>
               </div>
             ) : (
-              <div className="flex gap-2">
-                <div className="relative">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <div className="relative w-full sm:w-auto">
                   <input
                     type="email"
                     value={email}
                     onChange={e => { setEmail(e.target.value); setError(false); }}
                     onKeyDown={e => e.key === "Enter" && handleSubmit()}
                     placeholder="váš@email.cz"
-                    className={`w-64 bg-white/6 border rounded-full px-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-primary/60 transition-colors ${
+                    className={`w-full sm:w-64 bg-white/6 border rounded-full px-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-primary/60 transition-colors ${
                       error ? "border-red-500/60" : "border-white/12"
                     }`}
                   />
@@ -112,7 +114,7 @@ function Newsletter() {
                 </div>
                 <button
                   onClick={handleSubmit}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-dark font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all shrink-0"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-primary text-dark font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all shrink-0 w-full sm:w-auto"
                 >
                   <span>Odebírat</span>
                   <ArrowRight size={14} />

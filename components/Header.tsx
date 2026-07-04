@@ -75,7 +75,8 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="w-full bg-header relative z-50">
+    /* OPRAVA: pt-[env(safe-area-inset-top)] zajistí, že na mobilu černé pozadí proteče až pod notch */
+    <header className="w-full bg-header relative z-50 pt-[env(safe-area-inset-top)]">
 
       {/* ── TOP BAR — pouze desktop ── */}
       <div className="hidden lg:block pt-3">
@@ -161,8 +162,7 @@ export default function Header() {
           />
         </a>
 
-        {/* SearchBar — pouze desktop
-            z-[60] zajistí že search dropdown překryje nav dropdown (z-40) */}
+        {/* SearchBar — pouze desktop */}
         <div className="hidden lg:flex flex-1 max-w-xl relative z-[60]">
           <SearchBar />
         </div>
@@ -190,7 +190,8 @@ export default function Header() {
       </div>
 
       {/* ── MOBILE SEARCHBAR ── */}
-      <div className="lg:hidden px-4 pb-3">
+      {/* OPRAVA: Změněno pb-3 na pb-5 pro opticky vyváženější odsazení od spodního okraje na mobilu */}
+      <div className="lg:hidden px-4 pb-5">
         <SearchBar />
       </div>
 
@@ -238,7 +239,7 @@ export default function Header() {
           </ul>
         </div>
 
-        {/* Nav dropdown — z-40, pod search dropdownem (z-[60]) */}
+        {/* Nav dropdown */}
         {openMenu && (() => {
           const active = navItems.find(i => i.label === openMenu);
           if (!active) return null;
