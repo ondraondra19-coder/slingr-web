@@ -519,6 +519,15 @@ export default function ProduktClient({
   const canAddMoreQty = currentStock;
   const isOutOfStock = currentStock === 0;
 
+  // Když se změní varianta a nový sklad je nižší než qty, ořízni qty
+  useEffect(() => {
+    if (canAddMoreQty > 0 && qty > canAddMoreQty) {
+      setQty(canAddMoreQty);
+    } else if (canAddMoreQty === 0 && !isOutOfStock) {
+      setQty(1);
+    }
+  }, [canAddMoreQty, isOutOfStock]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const anyInStock = hasSheetData
     ? Object.values(stockData).some(v => v > 0)
     : product.inStock && product.stock > 0;
@@ -670,7 +679,7 @@ export default function ProduktClient({
                       — <span>{newColors.find(c => c.value === colorValue)?.label}</span>
                     </span>
                   </p>
-                  <ColorSwatch colors={newColors} selected={colorValue} onChange={setColorValue} />
+                  <ColorSwatch colors={newColors} selected={colorValue} onChange={(v) => { setColorValue(v); setQty(1); }} />
                 </div>
               )}
 
@@ -683,7 +692,7 @@ export default function ProduktClient({
                       — <span>{newSizes.find(s => s.value === sizeValue)?.label}</span>
                     </span>
                   </p>
-                  <SizePills options={newSizes} selected={sizeValue} onChange={setSizeValue} />
+                  <SizePills options={newSizes} selected={sizeValue} onChange={(v) => { setSizeValue(v); setQty(1); }} />
                 </div>
               )}
 
@@ -701,7 +710,7 @@ export default function ProduktClient({
                       <ColorSwatch
                         colors={model.colors as { label: string; value: string; hex?: string }[]}
                         selected={legacyColor}
-                        onChange={setLegacyColor}
+                        onChange={(v) => { setLegacyColor(v); setQty(1); }}
                       />
                     </div>
                   )}
@@ -711,7 +720,7 @@ export default function ProduktClient({
                       <SizePills
                         options={product.models!.map(m => ({ label: m.label, value: m.id }))}
                         selected={modelId}
-                        onChange={handleModelChange}
+                        onChange={(v) => { handleModelChange(v); setQty(1); }}
                       />
                     </div>
                   )}
