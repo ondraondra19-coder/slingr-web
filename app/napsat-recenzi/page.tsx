@@ -6,7 +6,8 @@ import Footer from "@/components/Footer";
 import { Star, ChevronRight, Send, Check, AlertCircle, ChevronDown } from "lucide-react";
 
 const HCAPTCHA_SITE_KEY = "10000000-ffff-ffff-ffff-000000000001";
-const STORAGE_KEY = "techgadgets-reviews";
+// Poznámka: cooldown se nyní vynucuje na serveru (podle IP) přes Upstash Redis.
+// Tento klíč v localStorage slouží jen jako optimistická UX nápověda pro stejný prohlížeč.
 const LAST_REVIEW_KEY = "techgadgets-last-review";
 const COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
@@ -15,20 +16,20 @@ const INITIAL_SHOW = 5;      // kolik recenzí se zobrazí hned
 const LOAD_MORE_COUNT = 10;  // kolik se přidá po kliknutí
 
 type Review = {
-  id: number;
+  id: string;
   initials: string;
   name: string;
   rating: number;
-  date: string;
+  date: string; // ISO string ze serveru
   text: string;
 };
 
-function getInitials(name: string): string {
-  return name.trim().split(" ").map(w => w[0]?.toUpperCase() ?? "").slice(0, 2).join("");
-}
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("cs-CZ", { day: "numeric", month: "numeric", year: "numeric" });
+function formatDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString("cs-CZ", { day: "numeric", month: "numeric", year: "numeric" });
+  } catch {
+    return iso;
+  }
 }
 
 function calcStats(reviews: Review[]) {
@@ -61,7 +62,7 @@ function ReviewCard({ review }: { review: Review }) {
               <Star key={i} size={12} className={i < review.rating ? "fill-primary text-primary" : "fill-border text-border"} />
             ))}
           </div>
-          <span className="text-text-subtle text-xs">{review.date}</span>
+          <span className="text-text-subtle text-xs">{formatDate(review.date)}</span>
         </div>
         <p className={`text-text-muted text-sm mt-2 leading-relaxed ${!expanded && isLong ? "line-clamp-4" : ""}`}>
           {review.text}
@@ -100,16 +101,18 @@ export default function RecenzePage() {
   const [email, setEmail] = useState("");
   const [text, setText] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaId, setCaptchaId] = useState<string | null>(null);
   const [cooldownLeft, setCooldownLeft] = useState<string | null>(null);
   const captchaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) setReviews(JSON.parse(stored));
-    } catch {}
+    fetch("/api/reviews")
+      .then((res) => res.json())
+      .then((data) => setReviews(data.reviews ?? []))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -158,33 +161,46 @@ export default function RecenzePage() {
   const charsLeft = MAX_CHARS - text.length;
   const canSubmit = !!rating && !!name.trim() && !!text.trim() && !!captchaToken && !cooldownLeft && text.length <= MAX_CHARS;
 
-  function handleSubmit() {
-    if (!canSubmit) return;
-    const newReview: Review = {
-      id: Date.now(),
-      initials: getInitials(name),
-      name: name.trim(),
-      rating,
-      date: formatDate(new Date()),
-      text: text.trim(),
-    };
-    const updated = [newReview, ...reviews];
-    setReviews(updated);
+  async function handleSubmit() {
+    if (!canSubmit || submitting) return;
+    setSubmitting(true);
+    setSubmitError(null);
+
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      localStorage.setItem(LAST_REVIEW_KEY, String(Date.now()));
-    } catch {}
-    setSubmitted(true);
-    setCaptchaToken(null);
-    if (captchaId !== null && window.hcaptcha) window.hcaptcha.reset(captchaId);
-    setTimeout(() => {
-      setSubmitted(false);
-      setRating(0);
-      setName("");
-      setEmail("");
-      setText("");
-      setCooldownLeft("23h 59min");
-    }, 3000);
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), rating, text: text.trim(), captchaToken }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setSubmitError(data.error ?? "Nepodařilo se odeslat recenzi.");
+        setCaptchaToken(null);
+        if (captchaId !== null && window.hcaptcha) window.hcaptcha.reset(captchaId);
+        return;
+      }
+
+      setReviews(prev => [data.review, ...prev]);
+      try {
+        localStorage.setItem(LAST_REVIEW_KEY, String(Date.now()));
+      } catch {}
+      setSubmitted(true);
+      setCaptchaToken(null);
+      if (captchaId !== null && window.hcaptcha) window.hcaptcha.reset(captchaId);
+      setTimeout(() => {
+        setSubmitted(false);
+        setRating(0);
+        setName("");
+        setEmail("");
+        setText("");
+        setCooldownLeft("23h 59min");
+      }, 3000);
+    } catch {
+      setSubmitError("Nepodařilo se odeslat recenzi. Zkuste to prosím znovu.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const shownReviews = reviews.slice(0, visibleCount);
@@ -340,14 +356,21 @@ export default function RecenzePage() {
                     )}
                   </div>
 
-                  <button onClick={handleSubmit} disabled={!canSubmit}
+                  {submitError && (
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-red-50 border border-red-200">
+                      <AlertCircle size={16} className="text-red-500 shrink-0" />
+                      <p className="text-red-700 text-sm">{submitError}</p>
+                    </div>
+                  )}
+
+                  <button onClick={handleSubmit} disabled={!canSubmit || submitting}
                     className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all w-fit ${
-                      !canSubmit
+                      !canSubmit || submitting
                         ? "bg-border text-text-subtle cursor-not-allowed"
                         : "bg-primary text-dark hover:brightness-105 active:scale-[0.98]"
                     }`}>
                     <Send size={14} />
-                    Odeslat hodnocení
+                    {submitting ? "Odesílám…" : "Odeslat hodnocení"}
                   </button>
                 </div>
               )

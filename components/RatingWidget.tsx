@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Star, ArrowRight } from "lucide-react";
 
-const STORAGE_KEY = "techgadgets-reviews";
 type StoredReview = { rating: number };
 
 export default function RatingWidget() {
@@ -12,18 +11,20 @@ export default function RatingWidget() {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const reviews: StoredReview[] = stored ? JSON.parse(stored) : [];
-      if (reviews.length === 0) { setAvg(null); setRecommend(null); setTotal(0); return; }
-      const sum = reviews.reduce((a, r) => a + r.rating, 0);
-      const average = Math.round((sum / reviews.length) * 10) / 10;
-      const positiveCount = reviews.filter(r => r.rating >= 3).length;
-      const pct = Math.round((positiveCount / reviews.length) * 100);
-      setAvg(average);
-      setRecommend(pct);
-      setTotal(reviews.length);
-    } catch {}
+    fetch("/api/reviews")
+      .then((res) => res.json())
+      .then((data) => {
+        const reviews: StoredReview[] = data.reviews ?? [];
+        if (reviews.length === 0) { setAvg(null); setRecommend(null); setTotal(0); return; }
+        const sum = reviews.reduce((a, r) => a + r.rating, 0);
+        const average = Math.round((sum / reviews.length) * 10) / 10;
+        const positiveCount = reviews.filter(r => r.rating >= 3).length;
+        const pct = Math.round((positiveCount / reviews.length) * 100);
+        setAvg(average);
+        setRecommend(pct);
+        setTotal(reviews.length);
+      })
+      .catch(() => {});
   }, []);
 
   const fullStars = avg !== null ? Math.floor(avg) : 0;

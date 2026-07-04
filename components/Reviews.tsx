@@ -3,16 +3,22 @@
 import { useState, useEffect } from "react";
 import { Star, ArrowRight, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 
-const STORAGE_KEY = "techgadgets-reviews";
-
 type Review = {
-  id: number;
+  id: string;
   initials: string;
   name: string;
   rating: number;
-  date: string;
+  date: string; // ISO string ze serveru
   text: string;
 };
+
+function formatDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString("cs-CZ", { day: "numeric", month: "numeric", year: "numeric" });
+  } catch {
+    return iso;
+  }
+}
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -48,7 +54,7 @@ function ReviewCard({ review }: { review: Review }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-text-base text-sm font-semibold leading-none">{review.name}</p>
-          <p className="text-text-subtle text-xs mt-0.5">{review.date}</p>
+          <p className="text-text-subtle text-xs mt-0.5">{formatDate(review.date)}</p>
         </div>
         <StarRating rating={review.rating} />
       </div>
@@ -84,10 +90,10 @@ export default function Reviews() {
   const [visibleCount, setVisibleCount] = useState(3);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) setReviews(JSON.parse(stored));
-    } catch {}
+    fetch("/api/reviews")
+      .then((res) => res.json())
+      .then((data) => setReviews(data.reviews ?? []))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {

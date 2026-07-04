@@ -1,0 +1,90 @@
+// lib/reviews.ts
+// Recenze uložené v Upstash Redis — viditelné pro všechny návštěvníky.
+import { getRedis } from "./redis";
+
+export type Review = {
+  id: string;
+  initials: string;
+  name: string;
+  rating: number; // 1-5
+  date: string;   // ISO string, formátování na klientu
+  text: string;
+};
+
+const LIST_KEY = "reviews:list";
+const MAX_REVIEWS = 1000; // pojistka proti neomezenému růstu klíče
+
+function getInitials(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .slice(0, 2)
+    .join("");
+}
+
+// ── Čtení všech recenzí (nejnovější první) ──────────────────────────────────
+export async function getAllReviews(): Promise<Review[]> {
+  const redis = getRedis();
+  const raw = await redis.lrange<string>(LIST_KEY, 0, -1);
+
+  const reviews: Review[] = [];
+  for (const item of raw) {
+    try {
+      // @upstash/redis může vracet už parsovaný objekt, nebo string – ošetříme obojí.
+      const parsed: Review = typeof item === "string" ? JSON.parse(item) : (item as unknown as Review);
+      reviews.push(parsed);
+    } catch {
+      // Poškozenou položku tiše přeskočíme, ať nespadne celý výpis.
+    }
+  }
+  return reviews;
+}
+
+// ── Vstup pro vytvoření nové recenze (validace probíhá v API route) ─────────
+export type NewReviewInput = {
+  name: string;
+  rating: number;
+  text: string;
+};
+
+export async function addReview(input: NewReviewInput): Promise<Review> {
+  const redis = getRedis();
+
+  const review: Review = {
+    id: crypto.randomUUID(),
+    initials: getInitials(input.name),
+    name: input.name.trim(),
+    rating: input.rating,
+    date: new Date().toISOString(),
+    text: input.text.trim(),
+  };
+
+  await redis.lpush(LIST_KEY, JSON.stringify(review));
+  await redis.ltrim(LIST_KEY, 0, MAX_REVIEWS - 1);
+
+  return review;
+}
+
+// ── Základní anti-spam: 1 recenze / IP / 24h ────────────────────────────────
+const COOLDOWN_SECONDS = 24 * 60 * 60;
+
+export async function checkAndSetCooldown(ip: string): Promise<{ allowed: boolean; ttlSeconds: number }> {
+  const redis = getRedis();
+  const key = `reviews:cooldown:${ip}`;
+
+  // NX = zapiš jen pokud klíč neexistuje. Vrátí "OK" pokud se to povedlo.
+  const setResult = await redis.set(key, "1", { nx: true, ex: COOLDOWN_SECONDS });
+
+  if (setResult === "OK" || setResult === null) {
+    // set s nx vrací null pokud klíč nešel zapsat kvůli existenci (podle verze klienta),
+    // proto rozlišujeme přes samostatný get níže pro jistotu.
+  }
+
+  if (setResult === "OK") {
+    return { allowed: true, ttlSeconds: 0 };
+  }
+
+  const ttl = await redis.ttl(key);
+  return { allowed: false, ttlSeconds: ttl > 0 ? ttl : COOLDOWN_SECONDS };
+}
