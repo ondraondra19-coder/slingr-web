@@ -13,7 +13,7 @@ export default function InfoGrid() {
 
           {/* Levý — tým */}
           <div className="relative overflow-hidden rounded-2xl min-h-[320px] flex items-end p-8 bg-[#1a1a1a]">
-            <img src="/images/hero-product.jpg" alt="Náš tým" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/images/page/hero-product.jpg" alt="Náš tým" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
             <div className="relative z-10">
               <h3 className="text-white text-2xl font-extrabold leading-tight">
@@ -34,7 +34,7 @@ export default function InfoGrid() {
 
           {/* Pravý — kontakt */}
           <div className="relative overflow-hidden rounded-2xl min-h-[220px] flex items-end p-8 bg-[#1a1a1a]">
-            <img src="/images/setup.jpg" alt="Kontakt" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/images/page/setup.jpg" alt="Kontakt" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
             <div className="relative z-10">
               <h3 className="text-white text-2xl font-extrabold leading-tight">

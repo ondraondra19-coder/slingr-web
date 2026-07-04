@@ -14,7 +14,7 @@ export default function CategoryGrid() {
             <div className="absolute -right-8 -top-8 w-48 h-48 rounded-full bg-white/10" />
             <div className="absolute -right-4 -bottom-12 w-64 h-64 rounded-full bg-white/5" />
 
-            <img src="/images/panak.png" alt="" className="absolute right-0 bottom-0 h-60 object-contain object-bottom pointer-events-none" />
+            <img src="/images/page/panak.png" alt="" className="absolute right-0 bottom-0 h-60 object-contain object-bottom pointer-events-none" />
 
             <div className="relative z-10 max-w-[55%]">
               <h3 className="text-white text-2xl font-extrabold leading-tight">
@@ -36,7 +36,7 @@ export default function CategoryGrid() {
             <div className="absolute -left-8 -top-8 w-48 h-48 rounded-full bg-white/5" />
             <div className="absolute -left-4 -bottom-12 w-64 h-64 rounded-full bg-white/[0.03]" />
 
-            <img src="/images/panak.png" alt="" className="absolute left-0 bottom-0 h-60 object-contain object-bottom pointer-events-none scale-x-[-1]" />
+            <img src="/images/page/panak.png" alt="" className="absolute left-0 bottom-0 h-60 object-contain object-bottom pointer-events-none scale-x-[-1]" />
 
             <div className="relative z-10 ml-auto text-right max-w-[55%]">
               <h3 className="text-white text-2xl font-extrabold leading-tight">

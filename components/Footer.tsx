@@ -157,7 +157,7 @@ export default function Footer() {
               className="inline-block"
             >
               <Image
-                src="/images/logo-white.png"
+                src="/images/main/logo-white.png"
                 alt="TechGadgets"
                 width={1024}
                 height={559}

@@ -25,7 +25,7 @@ export default function ONasPage() {
 
         {/* Hero — fotka týmu přes celou šířku */}
         <div className="relative w-full h-screen overflow-hidden rounded-2xl bg-secondary">
-          <Image src="/images/hero-product.jpg" alt="Náš tým" fill className="object-cover" priority />
+          <Image src="/images/page/hero-product.jpg" alt="Náš tým" fill className="object-cover" priority />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
           {/* Breadcrumb — nahoře přes obrázek */}
@@ -62,7 +62,7 @@ export default function ONasPage() {
               </p>
             </div>
             <div className="relative h-80 rounded-2xl overflow-hidden bg-secondary">
-              <Image src="/images/setup.jpg" alt="Naše prodejna" fill className="object-cover" />
+              <Image src="/images/page/setup.jpg" alt="Naše prodejna" fill className="object-cover" />
             </div>
           </div>
 
