@@ -505,11 +505,22 @@ export default function ProduktClient({
     }));
   }
 
+  // Kolik kusů přesně této vybrané varianty už mám v košíku (může to být jedna
+  // řádka, sečteme pro jistotu, kdyby jich bylo víc).
+  function ownCartQtyForCurrentSelection(): number {
+    return cartItems.reduce((sum, item) => {
+      if (item.slug !== product.slug || !item.stockKey) return sum;
+      return stockKeysEqual(item.stockKey, stockKeys) ? sum + item.quantity : sum;
+    }, 0);
+  }
+
   // Polling skladu ze Sheets — jednoduchý, bez Redis, bez rezervací
   const { stockData: liveStockData, loading: stockLoading } = useStockPolling(product.slug);
 
-  // Aktuální sklad pro tuto variantu — po prvním pollu z live dat, jinak server prop
-  const currentStock = (() => {
+  // Skutečný celkový strop pro tuto variantu = reálný sklad minus to, co si
+  // "zabírají" jiné varianty téhož produktu v košíku. Tohle je horní hranice,
+  // na kterou se nikdy nemá dostat celkové množství této varianty v košíku.
+  const stockCeiling = (() => {
     if (!stockLoading && Object.keys(liveStockData).length > 0) {
       return resolveStock(liveStockData, stockKeys);
     }
@@ -519,6 +530,11 @@ export default function ProduktClient({
     }
     return product.inStock ? product.stock : 0;
   })();
+
+  // To, co se zobrazuje jako "skladem" a co lze ještě přidat = strop minus to,
+  // co už mám z téhle přesné varianty v košíku.
+  const ownQtyInCart = ownCartQtyForCurrentSelection();
+  const currentStock = Math.max(0, stockCeiling - ownQtyInCart);
 
   const availableQty = currentStock;
   const canAddMoreQty = currentStock;
@@ -602,7 +618,9 @@ export default function ProduktClient({
         ? legacyImgSrc
         : mainImgSrc;
 
-    // Přidáme qty kusů do košíku, maxQuantity = currentStock jako ochrana
+    // Přidáme qty kusů do košíku, maxQuantity = stockCeiling (skutečný celkový
+    // strop pro tuto variantu) jako ochrana — addItem si sám sečte s tím, co
+    // už v košíku je.
     for (let i = 0; i < qty; i++) {
       addItem({
         slug: product.slug,
@@ -612,7 +630,7 @@ export default function ProduktClient({
         img: imgForCart,
         variants: Object.keys(variantInfo).length > 0 ? variantInfo : undefined,
         stockKey: stockKeys, // přesný klíč (nebo dva u vrstvených barev) pro lookup skladu v košíku
-      }, currentStock);
+      }, stockCeiling);
     }
     setAdded(true);
   }
