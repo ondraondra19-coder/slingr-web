@@ -1,11 +1,17 @@
 // app/api/reviews/route.ts
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { getAllReviews, addReview, deleteReview, checkAndSetCooldown, toPublicReview } from "@/lib/reviews";
 
 const MAX_TEXT_LENGTH = 600;
 const MAX_NAME_LENGTH = 80;
 const MAX_EMAIL_LENGTH = 150;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Cookie identifikující konkrétní prohlížeč/zařízení — cooldown se váže na tohle,
+// ne na IP adresu, aby lidi na stejné Wi-Fi nesdíleli limit.
+const DEVICE_COOKIE_NAME = "review_device_id";
+const DEVICE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365; // 1 rok
 
 // GET /api/reviews — vrátí všechny recenze (veřejné, jen bezpečná pole)
 export async function GET() {
@@ -96,13 +102,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Ověření captcha se nezdařilo." }, { status: 400 });
     }
 
-    // ── Anti-spam: 1 recenze / IP / 24h ────────────────────────────────────
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      "unknown";
+    // ── Identifikace zařízení (cookie, ne IP) ──────────────────────────────
+    const cookieStore = await cookies();
+    let deviceId = cookieStore.get(DEVICE_COOKIE_NAME)?.value;
+    if (!deviceId) {
+      deviceId = crypto.randomUUID();
+    }
+    cookieStore.set(DEVICE_COOKIE_NAME, deviceId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: DEVICE_COOKIE_MAX_AGE_SECONDS,
+    });
 
-    const { allowed, ttlSeconds } = await checkAndSetCooldown(ip);
+    // ── Anti-spam: 1 recenze / zařízení / 24h ──────────────────────────────
+    const { allowed, ttlSeconds } = await checkAndSetCooldown(deviceId);
     if (!allowed) {
       const hours = Math.floor(ttlSeconds / 3600);
       const minutes = Math.floor((ttlSeconds % 3600) / 60);
@@ -112,7 +127,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // ── Metadata pro admin (Vercel geo headery — lokálně budou prázdné) ────
+    // ── Metadata pro admin (IP jen jako informace, ne pro cooldown) ────────
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip") ||
+      "unknown";
     const userAgent = req.headers.get("user-agent") ?? undefined;
     const country = req.headers.get("x-vercel-ip-country") ?? undefined;
     const region = req.headers.get("x-vercel-ip-country-region") ?? undefined;
