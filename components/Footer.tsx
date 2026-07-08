@@ -161,7 +161,7 @@ export default function Footer() {
                 alt="TechGadgets"
                 width={1024}
                 height={559}
-                className="h-10 w-auto object-contain"
+                className="h-20 w-auto object-contain"
               />
             </a>
 

@@ -151,9 +151,16 @@ export default function Header() {
               window.scrollTo({ top: 0, behavior: "smooth" });
             }
           }}
-          className="shrink-0"
+          className="shrink-0 flex items-center"
         >
-          <Logo className="h-8 lg:h-12 w-auto object-contain" />
+          <Image
+            src="/images/main/logo-white.png"
+            alt="Logo"
+            width={1000} // Nastav šířku podle potřeby
+            height={300}  // Nastav výšku podle potřeby (odpovídá h-12)
+            className="h-25 w-auto object-contain"
+            priority // Zajistí rychlé načtení loga jako LCP elementu
+          />
         </a>
 
         {/* SearchBar — pouze desktop */}
