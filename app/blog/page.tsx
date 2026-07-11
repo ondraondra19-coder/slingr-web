@@ -2,21 +2,15 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import { ChevronRight, ArrowUpRight } from "lucide-react";
-import { blogPosts } from "@/lib/blog";
+import { getAllPosts } from "@/lib/blog";
 
-export default function BlogPage() {
-  // Funkce, která převede "29. 3. 2026" na něco, co jde porovnat
-  const parseCzechDate = (dateStr: string) => {
-    const [day, month, year] = dateStr.split(". ").map(Number);
-    return new Date(year, month - 1, day).getTime();
-  };
+export const dynamic = "force-dynamic";
 
-  // 1. Seřadíme články podle upraveného data
-  const sortedPosts = [...blogPosts].sort((a, b) => 
-    parseCzechDate(b.date) - parseCzechDate(a.date)
-  );
+export default async function BlogPage() {
+  // getAllPosts() už vrací seřazeno od nejnovějšího.
+  const sortedPosts = await getAllPosts();
 
-  // 2. Vytáhneme data ze sortedPosts
+  // Vytáhneme data ze sortedPosts
   const [first, second, ...rest] = sortedPosts;
 
   return (
@@ -43,6 +37,7 @@ export default function BlogPage() {
                   alt={post.title} 
                   fill 
                   className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" 
+                  unoptimized={post.img.startsWith("http")}
                 />
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                   <div className="bg-white/85 backdrop-blur-sm rounded-xl p-4 flex items-end justify-between gap-3">
@@ -69,6 +64,7 @@ export default function BlogPage() {
                     alt={post.title} 
                     fill 
                     className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" 
+                    unoptimized={post.img.startsWith("http")}
                   />
                   <div className="absolute bottom-0 left-0 right-0 p-4">
                     <div className="bg-white/85 backdrop-blur-sm rounded-xl p-4 flex items-end justify-between gap-3">

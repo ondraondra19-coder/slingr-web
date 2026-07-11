@@ -14,6 +14,7 @@ import ProductsAdminList from './ProductsAdminList';
 import MessagesAdminList from './MessagesAdminList';
 import AnalyticsPanel from './AnalyticsPanel';
 import OrdersAdminList from './OrdersAdminList';
+import MagazinAdminList from './MagazinAdminList';
 
 type Tab = 'dashboard' | 'reservations' | 'products' | 'reviews' | 'messages' | 'settings' | 'analytics' | 'accounts';
 
@@ -132,10 +133,10 @@ export default function AdminDashboard({
     },
     {
       id: 'settings',
-      label: 'Nastavení',
+      label: 'Magazín',
       visible: hasPermission('settings'),
       icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
       ),
     },
     {
@@ -331,9 +332,9 @@ export default function AdminDashboard({
                 )}
 
                 {activeTab === 'settings' && (
-                  <div className="space-y-2">
-                    <h3 className="text-base font-bold text-[#0f0f10]">Globální nastavení</h3>
-                    <p className="text-zinc-500 text-xs leading-relaxed max-w-md">Nastavení cen dopravy, přepínání Stripe platebního prostředí a úprava kontaktních informací.</p>
+                  <div className="space-y-4">
+                    <h3 className="text-base font-bold text-[#0f0f10]">Magazín</h3>
+                    <MagazinAdminList />
                   </div>
                 )}
 

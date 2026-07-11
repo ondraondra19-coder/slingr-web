@@ -9,7 +9,7 @@ const PERMISSION_LABELS: Record<Permission, string> = {
   products: "Produkty",
   reviews: "Recenze",
   messages: "Zprávy",
-  settings: "Nastavení",
+  settings: "Magazín",
   analytics: "Analytika",
 };
 

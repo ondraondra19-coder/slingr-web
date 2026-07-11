@@ -1,9 +1,10 @@
 "use client";
 
 // app/admin/OrdersAdminList.tsx
-// Přehled objednávek (karta, dobírka, bankovní převod) s možností
-// jedním kliknutím měnit stav zpracování.
-import { useEffect, useState } from "react";
+// Přehled objednávek (karta, dobírka, bankovní převod) roztříděný podle
+// stavu zpracování — ať se doručené objednávky neztrácí v davu a jde se
+// jimi proklikat zvlášť.
+import { useEffect, useMemo, useState } from "react";
 import type { Order, OrderStatus, PaymentStatus } from "@/lib/orders";
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/orders";
 
@@ -13,6 +14,17 @@ const STATUS_STYLES: Record<OrderStatus, string> = {
   odeslana: "bg-blue-50 text-blue-700 border-blue-200",
   na_ceste: "bg-indigo-50 text-indigo-700 border-indigo-200",
   dorucena: "bg-emerald-50 text-emerald-700 border-emerald-200",
+};
+
+// Barvy zvýrazněné i na tlačítku záložky, ať jde stav poznat na první pohled.
+const TAB_ACTIVE_STYLES: Record<string, string> = {
+  aktivni: "bg-[#0f0f10] text-white",
+  nova: "bg-slate-700 text-white",
+  zabalena: "bg-amber-600 text-white",
+  odeslana: "bg-blue-600 text-white",
+  na_ceste: "bg-indigo-600 text-white",
+  dorucena: "bg-emerald-600 text-white",
+  vse: "bg-zinc-700 text-white",
 };
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
@@ -32,33 +44,51 @@ function formatDate(ts: number): string {
   return new Date(ts).toLocaleString("cs-CZ", { day: "numeric", month: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+type TabId = "aktivni" | OrderStatus | "vse";
+
+const ACTIVE_STATUSES: OrderStatus[] = ["nova", "zabalena", "odeslana", "na_ceste"];
+
+const TABS: { id: TabId; label: string }[] = [
+  { id: "aktivni", label: "Aktivní" },
+  { id: "nova", label: "Nová" },
+  { id: "zabalena", label: "Zabalená" },
+  { id: "odeslana", label: "Odeslaná" },
+  { id: "na_ceste", label: "Na cestě" },
+  { id: "dorucena", label: "Doručené" },
+  { id: "vse", label: "Vše" },
+];
+
 export default function OrdersAdminList() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const LIMIT = 50;
+  const [tab, setTab] = useState<TabId>("aktivni");
+  const PAGE = 100;
 
-  async function load() {
-    setLoading(true);
+  async function load(offset: number, append: boolean) {
+    if (append) setLoadingMore(true);
+    else setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/orders?limit=${LIMIT}&offset=0`, { cache: "no-store" });
+      const res = await fetch(`/api/admin/orders?limit=${PAGE}&offset=${offset}`, { cache: "no-store" });
       if (!res.ok) throw new Error("Nepodařilo se načíst objednávky.");
       const data = await res.json();
-      setOrders(data.orders);
+      setOrders((prev) => (append ? [...prev, ...data.orders] : data.orders));
       setTotal(data.total);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Chyba při načítání.");
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }
 
   useEffect(() => {
-    load();
+    load(0, false);
   }, []);
 
   async function handleStatusChange(order: Order, status: OrderStatus) {
@@ -95,6 +125,21 @@ export default function OrdersAdminList() {
     }
   }
 
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { aktivni: 0, vse: orders.length, nova: 0, zabalena: 0, odeslana: 0, na_ceste: 0, dorucena: 0 };
+    for (const o of orders) {
+      c[o.status] = (c[o.status] ?? 0) + 1;
+      if (ACTIVE_STATUSES.includes(o.status)) c.aktivni += 1;
+    }
+    return c;
+  }, [orders]);
+
+  const filteredOrders = useMemo(() => {
+    if (tab === "vse") return orders;
+    if (tab === "aktivni") return orders.filter((o) => ACTIVE_STATUSES.includes(o.status));
+    return orders.filter((o) => o.status === tab);
+  }, [orders, tab]);
+
   if (loading) return <p className="text-xs text-zinc-400">Načítám objednávky…</p>;
   if (error) return <p className="text-xs text-red-500">{error}</p>;
 
@@ -108,98 +153,135 @@ export default function OrdersAdminList() {
 
   return (
     <div className="space-y-3">
-      <p className="text-[11px] text-zinc-400">Zobrazeno {orders.length} z {total} objednávek, nejnovější první.</p>
-
-      {orders.map((order) => {
-        const isExpanded = expandedId === order.id;
-        return (
-          <div key={order.id} className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
+      {/* Záložky podle stavu */}
+      <div className="flex gap-1.5 flex-wrap">
+        {TABS.map((t) => {
+          const isActive = tab === t.id;
+          const count = counts[t.id] ?? 0;
+          return (
             <button
-              onClick={() => setExpandedId(isExpanded ? null : order.id)}
-              className="w-full flex items-center justify-between gap-3 p-4 text-left hover:bg-zinc-50 transition-colors"
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
+                isActive
+                  ? `${TAB_ACTIVE_STYLES[t.id]} border-transparent`
+                  : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300"
+              }`}
             >
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-bold text-[#0f0f10]">{order.customer.jmeno || "Bez jména"}</span>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${STATUS_STYLES[order.status]}`}>
-                    {ORDER_STATUS_LABELS[order.status]}
-                  </span>
-                  {order.paymentStatus === "ceka_na_platbu" && (
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md border bg-red-50 text-red-700 border-red-200">
-                      {PAYMENT_STATUS_LABELS[order.paymentStatus]}
-                    </span>
-                  )}
-                </div>
-                <p className="text-[11px] text-zinc-500 mt-0.5">
-                  {formatDate(order.createdAt)} · {PAYMENT_METHOD_LABELS[order.paymentMethod]} · {order.items.length} položek
-                </p>
-              </div>
-              <div className="text-sm font-bold text-[#0f0f10] shrink-0">{formatMoney(order.total, order.currency)}</div>
+              {t.label} <span className={isActive ? "opacity-80" : "text-zinc-400"}>({count})</span>
             </button>
+          );
+        })}
+      </div>
 
-            {isExpanded && (
-              <div className="border-t border-zinc-100 p-4 space-y-4 bg-zinc-50/50">
-                {/* Kontakt a doručení */}
-                <div className="grid sm:grid-cols-2 gap-4 text-xs">
-                  <div>
-                    <p className="font-semibold text-[#0f0f10] mb-1">Kontakt</p>
-                    <p className="text-zinc-600">{order.customer.email}</p>
-                    <p className="text-zinc-600">{order.customer.telefon}</p>
-                    {order.customer.firma && <p className="text-zinc-600">{order.customer.firma} {order.customer.ic ? `· IČO ${order.customer.ic}` : ""}</p>}
+      <p className="text-[11px] text-zinc-400">
+        Zobrazeno {filteredOrders.length} z {orders.length} načtených ({total} celkem), nejnovější první.
+      </p>
+
+      {filteredOrders.length === 0 ? (
+        <p className="text-xs text-zinc-400 py-6 text-center">V téhle záložce zatím nic není.</p>
+      ) : (
+        filteredOrders.map((order) => {
+          const isExpanded = expandedId === order.id;
+          return (
+            <div key={order.id} className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
+              <button
+                onClick={() => setExpandedId(isExpanded ? null : order.id)}
+                className="w-full flex items-center justify-between gap-3 p-4 text-left hover:bg-zinc-50 transition-colors"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-bold text-[#0f0f10]">{order.customer.jmeno || "Bez jména"}</span>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${STATUS_STYLES[order.status]}`}>
+                      {ORDER_STATUS_LABELS[order.status]}
+                    </span>
+                    {order.paymentStatus === "ceka_na_platbu" && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md border bg-red-50 text-red-700 border-red-200">
+                        {PAYMENT_STATUS_LABELS[order.paymentStatus]}
+                      </span>
+                    )}
                   </div>
-                  <div>
-                    <p className="font-semibold text-[#0f0f10] mb-1">Doručovací adresa</p>
-                    <p className="text-zinc-600">
-                      {(order.deliveryAddress ?? order.address).uliceCp}, {(order.deliveryAddress ?? order.address).mesto} {(order.deliveryAddress ?? order.address).psc}
-                    </p>
-                    <p className="text-zinc-500">{order.shippingName}{order.zboxId ? ` — výdejní místo ${order.zboxId}` : ""}</p>
-                  </div>
+                  <p className="text-[11px] text-zinc-500 mt-0.5">
+                    {formatDate(order.createdAt)} · {PAYMENT_METHOD_LABELS[order.paymentMethod]} · {order.items.length} položek
+                  </p>
                 </div>
+                <div className="text-sm font-bold text-[#0f0f10] shrink-0">{formatMoney(order.total, order.currency)}</div>
+              </button>
 
-                {/* Položky */}
-                <div>
-                  <p className="font-semibold text-[#0f0f10] mb-1 text-xs">Položky</p>
-                  <div className="space-y-1">
-                    {order.items.map((item, i) => (
-                      <div key={i} className="flex justify-between text-xs text-zinc-600">
-                        <span>{item.quantity}× {item.name}{item.variants ? ` (${Object.values(item.variants).join(" | ")})` : ""}</span>
-                        <span className="tabular-nums">{formatMoney(item.unitPrice * item.quantity, order.currency)}</span>
-                      </div>
-                    ))}
+              {isExpanded && (
+                <div className="border-t border-zinc-100 p-4 space-y-4 bg-zinc-50/50">
+                  {/* Kontakt a doručení */}
+                  <div className="grid sm:grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <p className="font-semibold text-[#0f0f10] mb-1">Kontakt</p>
+                      <p className="text-zinc-600">{order.customer.email}</p>
+                      <p className="text-zinc-600">{order.customer.telefon}</p>
+                      {order.customer.firma && <p className="text-zinc-600">{order.customer.firma} {order.customer.ic ? `· IČO ${order.customer.ic}` : ""}</p>}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-[#0f0f10] mb-1">Doručovací adresa</p>
+                      <p className="text-zinc-600">
+                        {(order.deliveryAddress ?? order.address).uliceCp}, {(order.deliveryAddress ?? order.address).mesto} {(order.deliveryAddress ?? order.address).psc}
+                      </p>
+                      <p className="text-zinc-500">{order.shippingName}{order.zboxId ? ` — výdejní místo ${order.zboxId}` : ""}</p>
+                    </div>
                   </div>
-                  {order.poznamka && (
-                    <p className="text-[11px] text-zinc-500 mt-2 italic">Poznámka: {order.poznamka}</p>
-                  )}
-                </div>
 
-                {/* Akce */}
-                <div className="flex items-center gap-2 flex-wrap pt-1">
-                  <select
-                    value={order.status}
-                    disabled={busyId === order.id}
-                    onChange={(e) => handleStatusChange(order, e.target.value as OrderStatus)}
-                    className="text-xs border border-zinc-300 rounded-lg px-2 py-1.5 bg-white disabled:opacity-50"
-                  >
-                    {(Object.keys(ORDER_STATUS_LABELS) as OrderStatus[]).map((s) => (
-                      <option key={s} value={s}>{ORDER_STATUS_LABELS[s]}</option>
-                    ))}
-                  </select>
+                  {/* Položky */}
+                  <div>
+                    <p className="font-semibold text-[#0f0f10] mb-1 text-xs">Položky</p>
+                    <div className="space-y-1">
+                      {order.items.map((item, i) => (
+                        <div key={i} className="flex justify-between text-xs text-zinc-600">
+                          <span>{item.quantity}× {item.name}{item.variants ? ` (${Object.values(item.variants).join(" | ")})` : ""}</span>
+                          <span className="tabular-nums">{formatMoney(item.unitPrice * item.quantity, order.currency)}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {order.poznamka && (
+                      <p className="text-[11px] text-zinc-500 mt-2 italic">Poznámka: {order.poznamka}</p>
+                    )}
+                  </div>
 
-                  {order.paymentMethod === "prevod" && order.paymentStatus === "ceka_na_platbu" && (
-                    <button
-                      onClick={() => handleMarkPaid(order)}
+                  {/* Akce */}
+                  <div className="flex items-center gap-2 flex-wrap pt-1">
+                    <select
+                      value={order.status}
                       disabled={busyId === order.id}
-                      className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                      onChange={(e) => handleStatusChange(order, e.target.value as OrderStatus)}
+                      className="text-xs border border-zinc-300 rounded-lg px-2 py-1.5 bg-white disabled:opacity-50"
                     >
-                      Označit jako zaplaceno
-                    </button>
-                  )}
+                      {(Object.keys(ORDER_STATUS_LABELS) as OrderStatus[]).map((s) => (
+                        <option key={s} value={s}>{ORDER_STATUS_LABELS[s]}</option>
+                      ))}
+                    </select>
+
+                    {order.paymentMethod === "prevod" && order.paymentStatus === "ceka_na_platbu" && (
+                      <button
+                        onClick={() => handleMarkPaid(order)}
+                        disabled={busyId === order.id}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                      >
+                        Označit jako zaplaceno
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        );
-      })}
+              )}
+            </div>
+          );
+        })
+      )}
+
+      {orders.length < total && (
+        <button
+          onClick={() => load(orders.length, true)}
+          disabled={loadingMore}
+          className="w-full text-xs font-semibold py-2.5 rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 disabled:opacity-50 transition-colors"
+        >
+          {loadingMore ? "Načítám…" : `Načíst dalších ${Math.min(PAGE, total - orders.length)}`}
+        </button>
+      )}
     </div>
   );
 }

@@ -1,20 +1,12 @@
-"use client";
-
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
-import { blogPosts } from "@/lib/blog";
+import { getAllPosts } from "@/lib/blog";
 
-export default function BlogPreview() {
-  const sortedPosts = [...blogPosts].sort((a, b) => {
-    const parseCzechDate = (dateStr: string) => {
-      const [day, month, year] = dateStr.split(". ").map(Number);
-      return new Date(year, month - 1, day).getTime();
-    };
+export default async function BlogPreview() {
+  // getAllPosts() vrací už seřazeno od nejnovějšího.
+  const shown = (await getAllPosts()).slice(0, 3);
 
-    return parseCzechDate(b.date) - parseCzechDate(a.date);
-  });
-
-  const shown = sortedPosts.slice(0, 3);
+  if (shown.length === 0) return null;
 
   return (
     <section className="py-16">
@@ -33,6 +25,7 @@ export default function BlogPreview() {
                 alt={post.title}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                unoptimized={post.img.startsWith("http")}
               />
 
               <div className="absolute bottom-0 left-0 right-0 p-5">
