@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, Fragment } from "react";
-import type { Product, PriceValue } from "@/lib/products";
+import { getProductCombinations, type Product, type PriceValue } from "@/lib/products";
 
 function formatPrice(price: Product["price"]): string {
   if (typeof price === "number") {
@@ -25,55 +25,6 @@ type ProductsAdminListProps = {
   products: Product[];
   stock: Record<string, number>;
 };
-
-type Combination = {
-  color?: string;
-  size?: string;
-};
-
-function getProductCombinations(product: Product): Combination[] {
-  const combos: Combination[] = [];
-
-  if (product.models && product.models.length > 0) {
-    product.models.forEach((model) => {
-      if (model.colors && model.colors.length > 0) {
-        model.colors.forEach((color) => {
-          if (model.layered) {
-            combos.push({ color: `${color.value}__body`, size: model.id });
-            combos.push({ color: `${color.value}__cap`, size: model.id });
-          } else {
-            combos.push({ color: color.value, size: model.id });
-          }
-        });
-      } else {
-        combos.push({ size: model.id });
-      }
-    });
-  } else {
-    const hasColors = product.colors && product.colors.length > 0;
-    const hasSizes = product.sizes && product.sizes.length > 0;
-
-    if (hasColors && hasSizes) {
-      product.colors!.forEach((color) => {
-        product.sizes!.forEach((size) => {
-          combos.push({ color: color.value, size: size.value });
-        });
-      });
-    } else if (hasColors) {
-      product.colors!.forEach((color) => {
-        combos.push({ color: color.value });
-      });
-    } else if (hasSizes) {
-      product.sizes!.forEach((size) => {
-        combos.push({ size: size.value });
-      });
-    } else {
-      combos.push({});
-    }
-  }
-
-  return combos;
-}
 
 export default function ProductsAdminList({ products, stock }: ProductsAdminListProps) {
   const buildInitialStock = () => {

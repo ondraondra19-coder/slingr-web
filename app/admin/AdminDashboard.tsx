@@ -16,8 +16,9 @@ import MessagesAdminList from './MessagesAdminList';
 import AnalyticsPanel from './AnalyticsPanel';
 import OrdersAdminList from './OrdersAdminList';
 import MagazinAdminList from './MagazinAdminList';
+import DashboardHome from './DashboardHome';
 
-type Tab = 'dashboard' | 'reservations' | 'products' | 'reviews' | 'messages' | 'settings' | 'analytics' | 'accounts';
+export type Tab = 'dashboard' | 'reservations' | 'products' | 'reviews' | 'messages' | 'settings' | 'analytics' | 'accounts';
 
 function getInitials(name: string): string {
   return name
@@ -315,10 +316,14 @@ export default function AdminDashboard({
 
               <div className={activeTab === 'reviews' || activeTab === 'accounts' || activeTab === 'messages' ? 'w-full' : undefined}>
                 {activeTab === 'dashboard' && (
-                  <div className="space-y-2">
-                    <h3 className="text-base font-bold text-[#0f0f10]">Vítej na administraci HackPack</h3>
-                    <p className="text-zinc-500 text-xs leading-relaxed max-w-md">Zde brzy uvidíš grafy prodejů, rychlé přehledy a upozornění na nízké zásoby doplňků na skladě.</p>
-                  </div>
+                  <DashboardHome
+                    products={products}
+                    stock={initialStock}
+                    canSeeOrders={hasPermission('reservations')}
+                    canSeeAnalytics={hasPermission('analytics')}
+                    canSeeProducts={hasPermission('products')}
+                    onNavigate={setActiveTab}
+                  />
                 )}
 
                 {activeTab === 'reservations' && (

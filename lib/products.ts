@@ -642,6 +642,60 @@ export function getCategoryBySlug(slug: string) {
   return categories.find((c) => c.slug === slug);
 }
 
+// Vyjmenuje všechny prodejné varianty produktu (barva/velikost/model,
+// včetně vrstvených barev tělo+hlavička) — používá se pro editaci skladu
+// v adminu (ProductsAdminList) i pro přehled nízkého skladu na dashboardu.
+// Stock klíč pro danou kombinaci je `${product.slug}|${c.color ?? "-"}|${c.size ?? "-"}`
+// (stejný formát jako lib/stock.ts:makeKey).
+export type ProductCombination = {
+  color?: string;
+  size?: string;
+};
+
+export function getProductCombinations(product: Product): ProductCombination[] {
+  const combos: ProductCombination[] = [];
+
+  if (product.models && product.models.length > 0) {
+    product.models.forEach((model) => {
+      if (model.colors && model.colors.length > 0) {
+        model.colors.forEach((color) => {
+          if (model.layered) {
+            combos.push({ color: `${color.value}__body`, size: model.id });
+            combos.push({ color: `${color.value}__cap`, size: model.id });
+          } else {
+            combos.push({ color: color.value, size: model.id });
+          }
+        });
+      } else {
+        combos.push({ size: model.id });
+      }
+    });
+  } else {
+    const hasColors = product.colors && product.colors.length > 0;
+    const hasSizes = product.sizes && product.sizes.length > 0;
+
+    if (hasColors && hasSizes) {
+      product.colors!.forEach((color) => {
+        product.sizes!.forEach((size) => {
+          combos.push({ color: color.value, size: size.value });
+        });
+      });
+    } else if (hasColors) {
+      product.colors!.forEach((color) => {
+        combos.push({ color: color.value });
+      });
+    } else if (hasSizes) {
+      product.sizes!.forEach((size) => {
+        combos.push({ size: size.value });
+      });
+    } else {
+      combos.push({});
+    }
+  }
+
+  return combos;
+}
+
 export function getProductBySlug(slug: string): Product | undefined {
   return products.find((p) => p.slug === slug);
 }
