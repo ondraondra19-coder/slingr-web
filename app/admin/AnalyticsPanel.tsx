@@ -33,12 +33,19 @@ function formatDateShort(iso: string): string {
 }
 
 // ── Jednoduchý sloupcový graf bez externí knihovny ─────────────────────────
+// Tooltip se ukazuje na hover (myš) i na tap (dotyk) — na mobilu hover neexistuje,
+// proto potřebuje aktivní sloupec i vlastní state.
 function BarChart({ data, color = "#2563eb" }: { data: { date: string; count: number }[]; color?: string }) {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const max = Math.max(1, ...data.map((d) => d.count));
   return (
     <div className="flex items-end gap-[2px] h-32 w-full">
       {data.map((d, i) => (
-        <div key={i} className="flex-1 flex flex-col items-center justify-end h-full group relative">
+        <div
+          key={i}
+          className="flex-1 flex flex-col items-center justify-end h-full group relative"
+          onClick={() => setActiveIndex((prev) => (prev === i ? null : i))}
+        >
           <div
             className="w-full rounded-t-sm transition-colors"
             style={{
@@ -47,7 +54,11 @@ function BarChart({ data, color = "#2563eb" }: { data: { date: string; count: nu
               opacity: 0.85,
             }}
           />
-          <div className="absolute -top-6 hidden group-hover:block bg-[#0f0f10] text-white text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap z-10">
+          <div
+            className={`absolute -top-6 bg-[#0f0f10] text-white text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap z-10 group-hover:block ${
+              activeIndex === i ? "block" : "hidden"
+            }`}
+          >
             {formatDateShort(d.date)}: {d.count}
           </div>
         </div>

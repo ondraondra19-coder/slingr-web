@@ -353,12 +353,12 @@ export default function KosikPage() {
                       {items.map((item) => {
                         const itemPrice = getItemPrice(item, currency);
                         return (
-                          <div key={item.slug + JSON.stringify(item.variants)} className="flex gap-5 p-5 bg-secondary border border-border rounded-2xl">
+                          <div key={item.slug + JSON.stringify(item.variants)} className="flex gap-3 sm:gap-5 p-3 sm:p-5 bg-secondary border border-border rounded-2xl">
                             <a href={`/produkt/${item.slug}`} className="shrink-0">
                               {(() => {
                                 const layered = getProductImgs(item.slug, item.variants);
                                 return (
-                                  <div className="relative w-32 h-32 rounded-xl overflow-hidden bg-surface">
+                                  <div className="relative w-20 h-20 sm:w-32 sm:h-32 rounded-xl overflow-hidden bg-surface">
                                     <Image src={layered?.img ?? item.img} alt={item.name} fill className="object-contain p-3" />
                                     {layered?.img2 && <Image src={layered.img2} alt="" fill className="object-contain p-3" />}
                                   </div>
@@ -379,7 +379,7 @@ export default function KosikPage() {
                                   <button
                                     onClick={() => updateQuantity(item.slug, item.quantity - 1, item.variants)}
                                     disabled={item.quantity <= 1}
-                                    className={`w-9 h-9 flex items-center justify-center transition-colors ${
+                                    className={`w-10 h-10 flex items-center justify-center transition-colors ${
                                       item.quantity <= 1
                                         ? "text-border cursor-not-allowed"
                                         : "text-text-muted hover:text-text-base hover:bg-border"
@@ -391,7 +391,7 @@ export default function KosikPage() {
                                   <button
                                     onClick={() => updateQuantity(item.slug, item.quantity + 1, item.variants)}
                                     disabled={item.quantity >= getMaxQty(item)}
-                                    className={`w-9 h-9 flex items-center justify-center transition-colors ${
+                                    className={`w-10 h-10 flex items-center justify-center transition-colors ${
                                       item.quantity >= getMaxQty(item)
                                         ? "text-border cursor-not-allowed"
                                         : "text-text-muted hover:text-text-base hover:bg-border"

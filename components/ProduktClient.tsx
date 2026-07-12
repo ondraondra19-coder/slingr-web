@@ -73,7 +73,7 @@ function ColorSwatch({
             key={c.value}
             onClick={() => onChange(c.value)}
             title={c.label}
-            className={`relative w-8 h-8 rounded-full transition-all duration-150 focus:outline-none ring-offset-2 ring-offset-white ${
+            className={`relative w-10 h-10 rounded-full transition-all duration-150 focus:outline-none ring-offset-2 ring-offset-white ${
               selected === c.value
                 ? "ring-2 ring-primary scale-110 shadow-md"
                 : "ring-1 ring-border-strong hover:scale-105"
@@ -201,13 +201,13 @@ function Gallery({
           <>
             <button
               onClick={prev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm border border-border shadow flex items-center justify-center text-text-muted hover:text-text-base transition-all z-10"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-border shadow flex items-center justify-center text-text-muted hover:text-text-base transition-all z-10"
             >
               <ChevronLeft size={16} />
             </button>
             <button
               onClick={next}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm border border-border shadow flex items-center justify-center text-text-muted hover:text-text-base transition-all z-10"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-border shadow flex items-center justify-center text-text-muted hover:text-text-base transition-all z-10"
             >
               <ChevronRight size={16} />
             </button>
@@ -256,7 +256,7 @@ function AddedModal({ productName, productImg, onClose }: {
         {/* Zavřít */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-text-subtle hover:text-text-base hover:bg-surface transition-all"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-text-subtle hover:text-text-base hover:bg-surface transition-all"
         >
           <X size={18} />
         </button>

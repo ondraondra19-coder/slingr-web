@@ -205,7 +205,7 @@ export default function ObjednavkaPage() {
                         <div className="w-10 h-10 rounded-xl bg-border flex items-center justify-center shrink-0">
                           <Package size={16} className="text-text-subtle" />
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <p className="text-text-base font-medium text-sm">{opt.name}</p>
                           <p className="text-text-subtle text-xs mt-0.5">{opt.desc}</p>
                         </div>
@@ -266,7 +266,7 @@ export default function ObjednavkaPage() {
                       <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
                         <opt.icon size={18} className="text-primary" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <p className="text-text-base font-medium text-sm">{opt.name}</p>
                         <p className="text-text-subtle text-xs mt-0.5">{opt.desc}</p>
                       </div>

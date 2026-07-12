@@ -181,7 +181,7 @@ export default function Header() {
           </a>
 
           <button
-            className="lg:hidden p-2 text-white/60 hover:text-white transition-colors"
+            className="lg:hidden p-2.5 text-white/60 hover:text-white transition-colors"
             onClick={() => setMobileOpen(v => !v)}
             aria-label="Menu"
           >
@@ -313,6 +313,45 @@ export default function Header() {
               </li>
             ))}
           </ul>
+
+          {/* Přepínač měny a jazyka — na desktopu je v horní liště (hidden lg:block),
+              která je na mobilu skrytá celá, takže sem patří jediná mobilní varianta. */}
+          <div className="border-t border-white/10 px-5 py-4 space-y-3">
+            <div>
+              <p className="text-white/30 text-[11px] font-medium uppercase tracking-wide mb-2">Měna</p>
+              <div className="flex gap-2">
+                {(["CZK", "EUR", "USD"] as CurrencyCode[]).map(code => (
+                  <button
+                    key={code}
+                    translate="no"
+                    onClick={() => setCurrency(code)}
+                    className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${code === currency.code ? "bg-primary text-dark" : "bg-white/5 text-white/50 hover:text-white"}`}
+                  >
+                    <span className="notranslate">{code}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-white/30 text-[11px] font-medium uppercase tracking-wide mb-2">Jazyk</p>
+              <div className="flex gap-2">
+                {languages.map(l => (
+                  <button
+                    key={l.code}
+                    translate="no"
+                    onClick={() => {
+                      setLanguage(l);
+                      setLocale(l.gtCode as "cs" | "sk" | "en");
+                      switchGoogleTranslate(l.gtCode);
+                    }}
+                    className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${l.code === language.code ? "bg-primary text-dark" : "bg-white/5 text-white/50 hover:text-white"}`}
+                  >
+                    <span className="notranslate">{l.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </nav>
       )}
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Menu, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { Review } from '@/lib/reviews';
 import type { PublicAccount } from '@/lib/accounts';
@@ -44,6 +45,7 @@ export default function AdminDashboard({
 }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [reviews, setReviews] = useState(initialReviews);
   const [accounts, setAccounts] = useState(initialAccounts);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -154,10 +156,19 @@ export default function AdminDashboard({
   return (
     <div className="flex h-screen bg-[#f7f6f4] text-[#0f0f10] font-sans antialiased overflow-hidden selection:bg-primary/10 selection:text-primary">
 
-      {/* 1. LEVÁ LIŠTA (SIDEBAR) */}
-      <aside className="w-64 bg-[#1c1c1c] text-[#fafafa] flex flex-col justify-between z-20 shadow-xl">
+      {/* Overlay pro zavření sidebaru na mobilu kliknutím mimo — stejný vzor jako profil dropdown níže */}
+      {isSidebarOpen && (
+        <div className="fixed inset-0 z-20 bg-black/40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
+      )}
+
+      {/* 1. LEVÁ LIŠTA (SIDEBAR) — na mobilu výsuvný panel, na desktopu napevno vlevo */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-30 w-64 bg-[#1c1c1c] text-[#fafafa] flex flex-col justify-between shadow-xl transition-transform duration-200 lg:static lg:translate-x-0 ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <div>
-          <div className="h-16 flex items-center px-6 border-b border-white/[0.05]">
+          <div className="h-16 flex items-center justify-between px-6 border-b border-white/[0.05]">
             <div className="flex items-baseline font-bold tracking-tight text-lg">
               <span>Hack</span>
               <span className="text-primary">Pack</span>
@@ -165,6 +176,13 @@ export default function AdminDashboard({
                 Admin
               </span>
             </div>
+            <button
+              className="lg:hidden p-2 -mr-2 text-zinc-400 hover:text-white transition-colors"
+              onClick={() => setIsSidebarOpen(false)}
+              aria-label="Zavřít menu"
+            >
+              <X size={20} />
+            </button>
           </div>
 
           <nav className="p-4 space-y-1">
@@ -173,7 +191,10 @@ export default function AdminDashboard({
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setIsSidebarOpen(false);
+                  }}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-150 text-left ${
                     isActive
                       ? 'bg-primary text-white shadow-lg shadow-primary/20'
@@ -226,9 +247,17 @@ export default function AdminDashboard({
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* 2. HORNÍ LIŠTA (HEADER) */}
-        <header className="h-16 bg-white border-b border-[#e5e7eb] flex items-center justify-between px-8 z-10 shadow-sm">
+        <header className="h-16 bg-white border-b border-[#e5e7eb] flex items-center justify-between gap-3 px-4 sm:px-8 z-10 shadow-sm">
 
-          <div className="relative w-72">
+          <button
+            className="lg:hidden p-2 -ml-2 text-zinc-500 hover:text-[#0f0f10] transition-colors shrink-0"
+            onClick={() => setIsSidebarOpen(true)}
+            aria-label="Otevřít menu"
+          >
+            <Menu size={22} />
+          </button>
+
+          <div className="relative hidden sm:block sm:w-48 lg:w-72">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             </span>
@@ -273,7 +302,7 @@ export default function AdminDashboard({
         </header>
 
         {/* 3. HLAVNÍ PLOCHA (OBSAH PODLE SEKCE) */}
-        <main className="flex-1 overflow-y-auto p-8 bg-[#f7f6f4]">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[#f7f6f4]">
           <div className="max-w-4xl mx-auto">
 
             <div className="mb-6">

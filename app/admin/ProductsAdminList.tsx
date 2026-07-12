@@ -287,11 +287,11 @@ export default function ProductsAdminList({ products, stock }: ProductsAdminList
           a její objevení/zmizení nezpůsobí posun zbytku obsahu. Zůstává viditelná a klikatelná
           i po scrollu, protože je ukotvená k viewportu, ne ke kontejneru seznamu. */}
       {changedCount > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-[#1c1c1c] text-white rounded-full pl-5 pr-2 py-2 shadow-2xl">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-wrap items-center justify-center gap-3 sm:gap-4 max-w-[calc(100vw-2rem)] bg-[#1c1c1c] text-white rounded-3xl sm:rounded-full pl-5 pr-2 py-2 shadow-2xl">
           <span className="text-xs font-semibold whitespace-nowrap">
             {changedCount} {changedCount === 1 ? "neuložená změna" : changedCount >= 2 && changedCount <= 4 ? "neuložené změny" : "neuložených změn"}
           </span>
-          {saveError && <span className="text-[11px] text-rose-300 whitespace-nowrap">{saveError}</span>}
+          {saveError && <span className="text-[11px] text-rose-300">{saveError}</span>}
           <button
             type="button"
             disabled={savingAll}
@@ -468,14 +468,14 @@ export default function ProductsAdminList({ products, stock }: ProductsAdminList
 
                                             {isSubExpanded && (
                                               <div className="bg-[#fcfbf9]/60 border-t border-[#e5e7eb]/40 divide-y divide-[#e5e7eb]/40 pl-8 pr-3 py-0.5">
-                                                <div className="flex items-center justify-between py-2.5">
+                                                <div className="flex flex-wrap items-center justify-between gap-2 py-2.5">
                                                   <div className="space-y-0.5">
                                                     <div className="text-xs font-semibold text-zinc-700">{color.label} — Tělo</div>
                                                     <div className="text-[9px] font-mono text-zinc-400">{bodyKey}</div>
                                                   </div>
                                                   {renderVariantControls(bodyKey)}
                                                 </div>
-                                                <div className="flex items-center justify-between py-2.5">
+                                                <div className="flex flex-wrap items-center justify-between gap-2 py-2.5">
                                                   <div className="space-y-0.5">
                                                     <div className="text-xs font-semibold text-zinc-700">{color.label} — Hlava</div>
                                                     <div className="text-[9px] font-mono text-zinc-400">{capKey}</div>
@@ -489,7 +489,7 @@ export default function ProductsAdminList({ products, stock }: ProductsAdminList
                                       } else {
                                         const comboKey = `${product.slug}|${color.value}|${model.id}`;
                                         return (
-                                          <div key={color.value} className="flex items-center justify-between p-3 hover:bg-[#faf9f6]/30 transition-colors">
+                                          <div key={color.value} className="flex flex-wrap items-center justify-between gap-2 p-3 hover:bg-[#faf9f6]/30 transition-colors">
                                             <div className="flex items-center space-x-2.5">
                                               {color.hex && <span className="w-3 h-3 rounded-full border border-zinc-200" style={{ backgroundColor: color.hex }} />}
                                               <div>
@@ -520,7 +520,7 @@ export default function ProductsAdminList({ products, stock }: ProductsAdminList
                                         {product.colors!.map((color) => {
                                           const comboKey = `${product.slug}|${color.value}|${size.value}`;
                                           return (
-                                            <div key={color.value} className="flex items-center justify-between p-3 hover:bg-[#faf9f6]/30 transition-colors">
+                                            <div key={color.value} className="flex flex-wrap items-center justify-between gap-2 p-3 hover:bg-[#faf9f6]/30 transition-colors">
                                               <div className="flex items-center space-x-2.5">
                                                 {color.hex && <span className="w-3 h-3 rounded-full border border-zinc-200" style={{ backgroundColor: color.hex }} />}
                                                 <div>
@@ -541,7 +541,7 @@ export default function ProductsAdminList({ products, stock }: ProductsAdminList
                                       {product.colors!.map((color) => {
                                         const comboKey = `${product.slug}|${color.value}|-`;
                                         return (
-                                          <div key={color.value} className="flex items-center justify-between p-3 hover:bg-[#faf9f6]/30 transition-colors">
+                                          <div key={color.value} className="flex flex-wrap items-center justify-between gap-2 p-3 hover:bg-[#faf9f6]/30 transition-colors">
                                             <div className="flex items-center space-x-2.5">
                                               {color.hex && <span className="w-3 h-3 rounded-full border border-zinc-200" style={{ backgroundColor: color.hex }} />}
                                               <div>
@@ -561,7 +561,7 @@ export default function ProductsAdminList({ products, stock }: ProductsAdminList
                                       {product.sizes!.map((size) => {
                                         const comboKey = `${product.slug}|-|${size.value}`;
                                         return (
-                                          <div key={size.value} className="flex items-center justify-between p-3 hover:bg-[#faf9f6]/30 transition-colors">
+                                          <div key={size.value} className="flex flex-wrap items-center justify-between gap-2 p-3 hover:bg-[#faf9f6]/30 transition-colors">
                                             <div>
                                               <span className="text-xs font-bold text-[#0f0f10]">{size.label}</span>
                                               <span className="text-[9px] font-mono text-zinc-400 block">{comboKey}</span>
@@ -575,7 +575,7 @@ export default function ProductsAdminList({ products, stock }: ProductsAdminList
                                 } else {
                                   const comboKey = `${product.slug}|-|-`;
                                   return (
-                                    <div className="border border-[#e5e7eb] rounded-xl bg-white overflow-hidden shadow-sm p-3 flex items-center justify-between">
+                                    <div className="border border-[#e5e7eb] rounded-xl bg-white overflow-hidden shadow-sm p-3 flex flex-wrap items-center justify-between gap-2">
                                       <div>
                                         <span className="text-xs font-bold text-[#0f0f10]">Základní varianta</span>
                                         <span className="text-[9px] font-mono text-zinc-400 block">{comboKey}</span>
