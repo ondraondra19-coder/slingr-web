@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { products } from '@/lib/products';
+import { getProductsWithPriceOverrides, resolveItemUnitPrice } from '@/lib/priceOverrides';
 import { createPendingOrder, type OrderInput } from '@/lib/orders';
 
 export async function POST(req: Request) {
@@ -19,7 +19,14 @@ export async function POST(req: Request) {
 
     const currencyCode: string = typeof currency === 'object' ? currency.code : currency;
 
-    // ── Helper: cena produktu v dané měně ────────────────────────────────────
+    // Katalog SE ZAPSANÝMI přepisy cen z admina — od teď se v celé funkci
+    // používá TOHLE pole, ne přímý import z lib/products.ts, aby se vždy
+    // strhla aktuální cena (i těsně po úpravě v adminu, bez redeploye).
+    const products = await getProductsWithPriceOverrides();
+
+    // ── Helper: cena produktu v dané měně (jen pro produkty BEZ modelů —
+    // pro modely a vrstvené barvy se používá resolveItemUnitPrice, který
+    // zohlední i výběr modelu a příplatek za namíchané barvy) ──────────────
     function getUnitAmount(price: number | Record<string, number>, code: string): number {
       if (typeof price === 'number') return price;
       // Zkusíme požadovanou měnu, fallback na CZK
@@ -32,7 +39,7 @@ export async function POST(req: Request) {
       const realProduct = products.find(p => p.slug === cartItem.slug);
       if (!realProduct) throw new Error(`Produkt ${cartItem.slug} nenalezen.`);
 
-      const unitAmount = getUnitAmount(realProduct.price as any, currencyCode);
+      const unitAmount = resolveItemUnitPrice(realProduct, cartItem.variants, currencyCode);
       if (!unitAmount || unitAmount <= 0) {
         throw new Error(`Neplatná cena pro produkt ${cartItem.slug} v měně ${currencyCode}`);
       }
@@ -104,7 +111,7 @@ export async function POST(req: Request) {
       const subtotalCZK: number = items.reduce((sum: number, cartItem: any) => {
         const realProduct = products.find(p => p.slug === cartItem.slug);
         if (!realProduct) return sum;
-        const priceCZK = getUnitAmount(realProduct.price as any, 'CZK');
+        const priceCZK = resolveItemUnitPrice(realProduct, cartItem.variants, 'CZK');
         return sum + priceCZK * cartItem.quantity;
       }, 0);
 
@@ -163,7 +170,7 @@ export async function POST(req: Request) {
           slug: i.slug,
           name: realProduct?.name ?? i.slug,
           quantity: i.quantity,
-          unitPrice: realProduct ? getUnitAmount(realProduct.price as any, currencyCode) : 0,
+          unitPrice: realProduct ? resolveItemUnitPrice(realProduct, i.variants, currencyCode) : 0,
           variants: i.variants,
           stockKey: i.stockKey,
         };

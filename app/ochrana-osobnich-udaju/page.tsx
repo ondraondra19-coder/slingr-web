@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import { ChevronRight } from "lucide-react";
 
 export const metadata = {
-  title: "Ochrana osobních údajů | TechGadgets",
+  title: "Ochrana osobních údajů | HackPack",
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

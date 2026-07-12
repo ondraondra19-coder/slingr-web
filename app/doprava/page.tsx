@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "Doprava a platba | TechGadgets",
+  title: "Doprava a platba | HackPack",
   description: "Přehled způsobů dopravy, platby a informace o expedici objednávek.",
 };
 

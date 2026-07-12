@@ -43,8 +43,8 @@ function LoginForm() {
       >
         {/* Logo ve stejném stylu jako v sidebaru dashboardu */}
         <div className="flex items-baseline font-bold tracking-tight text-lg mb-1 text-[#0f0f10]">
-          <span>Tech</span>
-          <span className="text-primary">Gadgets</span>
+          <span>Hack</span>
+          <span className="text-primary">Pack</span>
           <span className="ml-1.5 text-[9px] font-mono font-medium bg-primary/5 text-zinc-500 px-1 py-0.5 rounded uppercase tracking-wider">
             Admin
           </span>

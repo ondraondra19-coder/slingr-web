@@ -159,8 +159,8 @@ export default function AdminDashboard({
         <div>
           <div className="h-16 flex items-center px-6 border-b border-white/[0.05]">
             <div className="flex items-baseline font-bold tracking-tight text-lg">
-              <span>Tech</span>
-              <span className="text-primary">Gadgets</span>
+              <span>Hack</span>
+              <span className="text-primary">Pack</span>
               <span className="ml-1.5 text-[9px] font-mono font-medium bg-white/10 text-zinc-400 px-1 py-0.5 rounded uppercase tracking-wider">
                 Admin
               </span>
@@ -287,7 +287,7 @@ export default function AdminDashboard({
               <div className={activeTab === 'reviews' || activeTab === 'accounts' || activeTab === 'messages' ? 'w-full' : undefined}>
                 {activeTab === 'dashboard' && (
                   <div className="space-y-2">
-                    <h3 className="text-base font-bold text-[#0f0f10]">Vítej na administraci Tech Gadgets</h3>
+                    <h3 className="text-base font-bold text-[#0f0f10]">Vítej na administraci HackPack</h3>
                     <p className="text-zinc-500 text-xs leading-relaxed max-w-md">Zde brzy uvidíš grafy prodejů, rychlé přehledy a upozornění na nízké zásoby doplňků na skladě.</p>
                   </div>
                 )}

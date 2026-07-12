@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { ChevronRight, X } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
-const STORAGE_KEY = "techgadgets-cookie-consent";
-const SESSION_KEY = "techgadgets-cookie-visited-details";
+const STORAGE_KEY = "hackpack-cookie-consent";
+const SESSION_KEY = "hackpack-cookie-visited-details";
 
 export function getConsent(): "accepted" | null {
   if (typeof window === "undefined") return null;
@@ -16,7 +16,7 @@ export function getConsent(): "accepted" | null {
   }
 }
 
-export const CONSENT_CHANGED_EVENT = "techgadgets-consent-changed";
+export const CONSENT_CHANGED_EVENT = "hackpack-consent-changed";
 
 /** True, pokud uživatel povolil analytické cookies (buď "Povolit vše", nebo vlastní výběr). */
 export function hasAnalyticsConsent(): boolean {

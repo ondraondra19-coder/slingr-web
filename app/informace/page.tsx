@@ -14,8 +14,8 @@ import DiscountWidget from "@/components/DiscountWidget";
 import { approxConvert } from "@/lib/discounts";
 import { CURRENCIES } from "@/lib/currency";
 
-const ORDER_KEY = "techgadgets-order";
-const INFO_KEY = "techgadgets-info";
+const ORDER_KEY = "hackpack-order";
+const INFO_KEY = "hackpack-info";
 
 // ── Typy ──────────────────────────────────────────────────────────────────────
 
@@ -620,7 +620,7 @@ export default function InformacePage() {
 
       // Snapshot košíku a info uložíme PŘED clearCart — success page ho přečte
       try {
-        localStorage.setItem("techgadgets-order-snapshot", JSON.stringify({
+        localStorage.setItem("hackpack-order-snapshot", JSON.stringify({
           items,
           info: dataToSave,
           orderData: parsedOrder,

@@ -4,7 +4,7 @@ import { Shield } from "lucide-react";
 
 export default function ResetConsentButton() {
   function handleReset() {
-    try { localStorage.removeItem("techgadgets-cookie-consent"); } catch {}
+    try { localStorage.removeItem("hackpack-cookie-consent"); } catch {}
     window.location.reload();
   }
 

@@ -2,14 +2,9 @@
 // Zakládá objednávku PŘÍMO (bez Stripe) — pro platbu na dobírku a bankovním
 // převodem. Platba kartou jde přes /api/checkout → Stripe → webhook.
 import { NextResponse } from "next/server";
-import { products } from "@/lib/products";
+import { getProductsWithPriceOverrides, resolveItemUnitPrice } from "@/lib/priceOverrides";
 import { createOrderDirect, type OrderInput, type PaymentMethod } from "@/lib/orders";
 import { deductStockForItems } from "@/lib/stock";
-
-function getUnitAmount(price: number | Record<string, number>, code: string): number {
-  if (typeof price === "number") return price;
-  return price[code] ?? price["CZK"] ?? 0;
-}
 
 export async function POST(req: Request) {
   try {
@@ -25,10 +20,14 @@ export async function POST(req: Request) {
 
     const currencyCode: string = typeof currency === "object" ? currency.code : currency;
 
+    // Katalog s aplikovanými přepisy cen z admina — viz stejná poznámka
+    // v /api/checkout/route.ts.
+    const effectiveProducts = await getProductsWithPriceOverrides();
+
     let subtotal = 0;
     const resolvedItems = items.map((i: any) => {
-      const realProduct = products.find((p) => p.slug === i.slug);
-      const unitPrice = realProduct ? getUnitAmount(realProduct.price as any, currencyCode) : 0;
+      const realProduct = effectiveProducts.find((p) => p.slug === i.slug);
+      const unitPrice = realProduct ? resolveItemUnitPrice(realProduct, i.variants, currencyCode) : 0;
       subtotal += unitPrice * i.quantity;
       return {
         slug: i.slug,
@@ -54,8 +53,8 @@ export async function POST(req: Request) {
     let discountInCurrency = 0;
     if (discountAmountCZK > 0) {
       const subtotalCZK = items.reduce((sum: number, i: any) => {
-        const p = products.find((pr) => pr.slug === i.slug);
-        return sum + (p ? getUnitAmount(p.price as any, "CZK") : 0) * i.quantity;
+        const p = effectiveProducts.find((pr) => pr.slug === i.slug);
+        return sum + (p ? resolveItemUnitPrice(p, i.variants, "CZK") : 0) * i.quantity;
       }, 0);
       discountInCurrency =
         currencyCode === "CZK" || subtotalCZK === 0

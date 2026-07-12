@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Obchodní podmínky | TechGadgets",
+  title: "Obchodní podmínky | HackPack",
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -35,7 +35,7 @@ export default function ObchodniPodminkyPage() {
           <p className="text-text-subtle text-sm mb-12">Platné od 1. 1. 2024</p>
 
           <Section title="1. Základní ustanovení">
-            <p>Tyto obchodní podmínky (dále jen „podmínky") upravují vzájemná práva a povinnosti mezi prodávajícím a kupujícím při prodeji zboží prostřednictvím internetového obchodu <strong>TechGadgets</strong> provozovaného na adrese <strong>techgadgets.cz</strong>.</p>
+            <p>Tyto obchodní podmínky (dále jen „podmínky") upravují vzájemná práva a povinnosti mezi prodávajícím a kupujícím při prodeji zboží prostřednictvím internetového obchodu <strong>HackPack</strong> provozovaného na adrese <strong>hackpack.cz</strong>.</p>
             <p>Prodávající: <strong>[NÁZEV FIRMY]</strong>, IČO: <strong>[IČO]</strong>, se sídlem <strong>[ADRESA SÍDLA]</strong>, zapsaná v obchodním rejstříku vedeném <strong>[SOUD A ODDÍL]</strong>.</p>
             <p>Kontaktní e-mail: <strong>[EMAIL]</strong><br />Telefon: <strong>[TELEFON]</strong></p>
           </Section>

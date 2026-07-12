@@ -6,8 +6,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ChevronRight, Shield, Eye, BarChart3, Check } from "lucide-react";
 
-const STORAGE_KEY = "techgadgets-cookie-consent";
-const SESSION_KEY = "techgadgets-cookie-visited-details";
+const STORAGE_KEY = "hackpack-cookie-consent";
+const SESSION_KEY = "hackpack-cookie-visited-details";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -66,8 +66,8 @@ export default function CookiesPage() {
   }
 
   const cookieList = [
-    { name: "techgadgets-cookie-consent", provider: "E-shop", purpose: "Zvolení souhlasů s ukládáním cookies.", expiry: "2 roky", type: "Nezbytné" },
-    { name: "techgadgets-cookie-visited-details", provider: "E-shop", purpose: "Nastavuje přepnutí vzhledu lišty po návštěvě detailů.", expiry: "Do zavření prohlížeče", type: "Nezbytné" },
+    { name: "hackpack-cookie-consent", provider: "E-shop", purpose: "Zvolení souhlasů s ukládáním cookies.", expiry: "2 roky", type: "Nezbytné" },
+    { name: "hackpack-cookie-visited-details", provider: "E-shop", purpose: "Nastavuje přepnutí vzhledu lišty po návštěvě detailů.", expiry: "Do zavření prohlížeče", type: "Nezbytné" },
     { name: "cat_show", provider: "E-shop", purpose: "Nastavuje styl zobrazení produktů v sekci.", expiry: "30 dnů", type: "Nezbytné" },
     { name: "filter_onpage", provider: "E-shop", purpose: "Nastavuje počet produktů na stránce.", expiry: "30 dnů", type: "Nezbytné" },
     { name: "web_version", provider: "E-shop", purpose: "Nastavuje preferenci pro desktopovou verzi na mobilu.", expiry: "Do zavření prohlížeče", type: "Nezbytné" },
@@ -79,7 +79,7 @@ export default function CookiesPage() {
 
   return (
     <>
-      <title>Používání souborů cookies | TechGadgets</title>
+      <title>Používání souborů cookies | HackPack</title>
       
       <Header />
       <main className="min-h-screen bg-dark">

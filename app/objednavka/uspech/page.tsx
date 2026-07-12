@@ -13,7 +13,7 @@ import {
 import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice } from "@/lib/currency";
 
-const SNAPSHOT_KEY = "techgadgets-order-snapshot";
+const SNAPSHOT_KEY = "hackpack-order-snapshot";
 
 type SnapshotItem = {
     slug: string;

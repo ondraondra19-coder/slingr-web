@@ -39,7 +39,7 @@ const categories = [
       },
       {
         q: "Co dělat, když zásilka nedorazí?",
-        a: "Pokud zásilka nedorazí do 5 pracovních dní od odeslání, kontaktujte nás na info@techgadgets.cz nebo telefonicky. Vše okamžitě prověříme u dopravce a situaci vyřešíme.",
+        a: "Pokud zásilka nedorazí do 5 pracovních dní od odeslání, kontaktujte nás na info@dodelat.cz nebo telefonicky. Vše okamžitě prověříme u dopravce a situaci vyřešíme.",
       },
     ],
   },
@@ -60,7 +60,7 @@ const categories = [
       },
       {
         q: "Jak probíhá reklamace?",
-        a: "Reklamaci nám nahlaste e-mailem na info@techgadgets.cz s číslem objednávky, popisem závady a fotografií. Reklamaci vyřídíme do 30 dní. Na veškeré zboží se vztahuje zákonná záruka 24 měsíců.",
+        a: "Reklamaci nám nahlaste e-mailem na info@dodelat.cz s číslem objednávky, popisem závady a fotografií. Reklamaci vyřídíme do 30 dní. Na veškeré zboží se vztahuje zákonná záruka 24 měsíců.",
       },
       {
         q: "Kdy dostanu peníze zpět?",
@@ -123,7 +123,7 @@ const categories = [
     questions: [
       {
         q: "Jak mohu kontaktovat zákaznickou podporu?",
-        a: "Jsme k dispozici na e-mailu info@techgadgets.cz, telefonicky na +420 737 565 577 (Po–Pá 9–17 h, So 10–14 h) nebo přes chat přímo na webu. Odpovídáme zpravidla do několika hodin.",
+        a: "Jsme k dispozici na e-mailu info@dodelat.cz, telefonicky na +420 737 565 577 (Po–Pá 9–17 h, So 10–14 h) nebo přes chat přímo na webu. Odpovídáme zpravidla do několika hodin.",
       },
       {
         q: "Jak dlouho trvá odpověď na e-mail?",

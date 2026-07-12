@@ -40,7 +40,7 @@ export default function ONasPage() {
           {/* Text dole */}
           <div className="absolute bottom-0 left-0 w-full px-8 md:px-16 lg:px-24 pb-12">
             <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight tracking-tight">
-              Jsme TechGadgets
+              Jsme HackPack
             </h1>
             <p className="text-white/70 text-lg mt-3 max-w-xl">
               Český e-shop s prémiovým příslušenstvím pro Apple. Fungujeme od roku 2023.
@@ -55,7 +55,7 @@ export default function ONasPage() {
               <p className="text-text-subtle text-xs font-semibold uppercase tracking-widest mb-3">Náš příběh</p>
               <h2 className="text-3xl font-extrabold text-text-base mb-6 leading-tight">Začalo to frustrací z nekvalitního příslušenství</h2>
               <p className="text-text-muted text-base leading-relaxed mb-4">
-                Unaveni z levných náhražek které se rozpadaly po týdnu, rozhodli jsme se vytvořit obchod kde kvalita není kompromis. TechGadgets vznikl s jedním cílem — nabídnout prémiové Apple příslušenství za férové ceny.
+                Unaveni z levných náhražek které se rozpadaly po týdnu, rozhodli jsme se vytvořit obchod kde kvalita není kompromis. HackPack vznikl s jedním cílem — nabídnout prémiové Apple příslušenství za férové ceny.
               </p>
               <p className="text-text-muted text-base leading-relaxed">
                 Dnes zásobujeme stovky spokojených zákazníků po celé České republice a Slovensku. Každý produkt v našem katalogu jsme osobně otestovali.

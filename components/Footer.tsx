@@ -34,7 +34,7 @@ const footerNav = [
   {
     heading: "O nás",
     links: [
-      { label: "O TechGadgets", href: "/o-nas"    },
+      { label: "O HackPack", href: "/o-nas"    },
       { label: "Blog",          href: "/blog"     },
       { label: "Kontakt",       href: "/kontakt"  },
     ],
@@ -42,9 +42,9 @@ const footerNav = [
 ];
 
 const socialLinks = [
-  { icon: Instagram, label: "Instagram", href: "https://instagram.com/techgadgets.cz" },
-  { icon: Facebook,  label: "Facebook",  href: "https://facebook.com/techgadgets.cz"  },
-  { icon: Youtube,   label: "YouTube",   href: "https://youtube.com/@techgadgets"     },
+  { icon: Instagram, label: "Instagram", href: "https://instagram.com/hackpack.cz" },
+  { icon: Facebook,  label: "Facebook",  href: "https://facebook.com/hackpack.cz"  },
+  { icon: Youtube,   label: "YouTube",   href: "https://youtube.com/@hackpack"     },
 ];
 
 const trustItems = [
@@ -158,7 +158,7 @@ export default function Footer() {
             >
               <Image
                 src="/images/main/logo-white.png"
-                alt="TechGadgets"
+                alt="HackPack"
                 width={1024}
                 height={559}
                 className="h-20 w-auto object-contain"
@@ -190,11 +190,11 @@ export default function Footer() {
                 <span>+420 737 565 577</span>
               </a>
               <a
-                href="mailto:info@techgadgets.cz"
+                href="mailto:info@dodelat.cz"
                 className="inline-flex items-center gap-2.5 text-white/40 text-sm hover:text-white/70 transition-colors"
               >
                 <Mail size={13} className="text-primary shrink-0" />
-                <span>info@techgadgets.cz</span>
+                <span>info@dodelat.cz</span>
               </a>
               <div className="inline-flex items-start gap-2.5 text-white/40 text-sm">
                 <MapPin size={13} className="text-primary shrink-0 mt-0.5" />
@@ -254,7 +254,7 @@ export default function Footer() {
       <div className="border-t border-white/8">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-white/25 text-xs">
-            © {new Date().getFullYear()} TechGadgets s.r.o. — Všechna práva vyhrazena.
+            © {new Date().getFullYear()} HackPack s.r.o. — Všechna práva vyhrazena.
           </p>
           <div className="flex items-center gap-1">
             {[

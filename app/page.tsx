@@ -7,8 +7,13 @@ import InfoGrid from "@/components/InfoGrid";
 import BlogPreview from "@/components/BlogPreview";
 import Footer from "@/components/Footer";
 import FeaturedProducts from "@/components/FeaturedProducts";
+import { getProductsWithPriceOverrides } from "@/lib/priceOverrides";
 
-export default function Home() {
+export const revalidate = 180;
+
+export default async function Home() {
+  const products = await getProductsWithPriceOverrides();
+
   return (
     <main className="min-h-screen bg-dark">
       <Header />
@@ -16,7 +21,7 @@ export default function Home() {
       <TrustBar />
       <Reviews />
       <CategoryGrid />
-      <FeaturedProducts />
+      <FeaturedProducts products={products} />
       <InfoGrid />
       <BlogPreview />
       <Footer />

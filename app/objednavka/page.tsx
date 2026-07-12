@@ -27,8 +27,8 @@ type PacketaPoint = {
   zip: string;
 };
 
-const ZBOX_KEY = "techgadgets-zbox";
-export const ORDER_KEY = "techgadgets-order";
+const ZBOX_KEY = "hackpack-zbox";
+export const ORDER_KEY = "hackpack-order";
 
 const dopravyOptions = [
   { id: "ppl",        name: "PPL",        desc: "Doručení do 1–2 pracovních dní", price: { CZK: 129, EUR: 4.99, USD: 5.49 }, hasPickup: false },

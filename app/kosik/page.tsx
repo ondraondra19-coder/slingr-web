@@ -5,7 +5,7 @@ import { useCart } from "@/lib/cart";
 import Header from "@/components/Header";
 import Image from "next/image";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronRight, Tag } from "lucide-react";
-import { products, getRelatedProducts } from "@/lib/products";
+import { products as staticProducts } from "@/lib/products";
 import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice } from "@/lib/currency";
 import type { Currency } from "@/lib/currency";
@@ -28,7 +28,7 @@ function translateValue(val: string): string {
 }
 
 function getProductImgs(slug: string, variants?: Record<string, string>): { img: string; img2?: string } | null {
-  const product = products.find(p => p.slug === slug);
+  const product = staticProducts.find(p => p.slug === slug);
   if (!product?.models || !variants) return null;
   const modelId = Object.values(variants)[0];
   const model = product.models.find(m => m.label === modelId || m.id === modelId);
@@ -47,9 +47,6 @@ const BESTSELLER_SLUGS = [
   "silikonovy-reminek", "pouzdro-airpods", "cistic-displeje",
   "hroty-apple-pencil", "organizer-kabely",
 ];
-const bestsellers = BESTSELLER_SLUGS
-  .map(slug => products.find(p => p.slug === slug))
-  .filter(Boolean) as typeof products;
 
 function Stepper({ step }: { step: 1 | 2 | 3 }) {
   const steps = [
@@ -92,7 +89,7 @@ function Stepper({ step }: { step: 1 | 2 | 3 }) {
   );
 }
 
-function ProductCard({ product, currency }: { product: typeof products[0]; currency: Currency }) {
+function ProductCard({ product, currency }: { product: typeof staticProducts[0]; currency: Currency }) {
   return (
     <a
       href={`/produkt/${product.slug}`}
@@ -111,7 +108,7 @@ function ProductCard({ product, currency }: { product: typeof products[0]; curre
 }
 
 function ProductRow({ title, subtitle, items, currency }: {
-  title: string; subtitle?: string; items: typeof products; currency: Currency;
+  title: string; subtitle?: string; items: typeof staticProducts; currency: Currency;
 }) {
   return (
     <div className="mt-12 pb-4">
@@ -134,6 +131,17 @@ export default function KosikPage() {
   const { currency } = useCurrency();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Ceny doporučených produktů (bestsellery / "hodí se k tomu") mají být
+  // aktuální — stejný fallback vzor jako v SearchBar: hned funguje se
+  // statickým katalogem, na pozadí se tiše přepne na ceny z /api/products.
+  const [products, setProducts] = useState(staticProducts);
+  useEffect(() => {
+    fetch("/api/products")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data?.products) setProducts(data.products); })
+      .catch(() => {});
+  }, []);
 
   // Sklad pro každý produkt v košíku — omezí + tlačítko
   const [stockMap, setStockMap] = useState<Record<string, Record<string, number>>>({});
@@ -197,8 +205,20 @@ export default function KosikPage() {
   const discountAmount = getDiscountAmount(currency);
   const finalPrice = getFinalPrice(currency);
 
+  const bestsellers = BESTSELLER_SLUGS
+    .map(slug => products.find(p => p.slug === slug))
+    .filter(Boolean) as typeof products;
+
   const singleProduct = items.length === 1 ? products.find(p => p.slug === items[0].slug) : null;
-  const recommendedProducts = singleProduct ? getRelatedProducts(singleProduct, 6) : bestsellers;
+
+  // Stejná logika jako lib/products.ts getRelatedProducts, ale nad `products`
+  // (živá data s aktuálními cenami), ne nad staticky importovaným katalogem.
+  const recommendedProducts = singleProduct
+    ? (singleProduct.related && singleProduct.related.length > 0
+        ? singleProduct.related.map(slug => products.find(p => p.slug === slug)).filter(Boolean).slice(0, 6)
+        : products.filter(p => p.slug !== singleProduct.slug && p.categories.some(c => singleProduct.categories.includes(c))).slice(0, 6)
+      ) as typeof products
+    : bestsellers;
   const recommendedTitle = singleProduct ? "Hodí se k tomu" : "Naše bestsellery";
   const recommendedSubtitle = singleProduct ? `K produktu ${singleProduct.name}` : "Výběr pro vás";
 

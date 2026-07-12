@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getAllReviews } from "@/lib/reviews";
 import { getAllAccounts, toPublicAccount } from "@/lib/accounts";
 import { getCurrentSession } from "@/lib/session";
-import { products } from "@/lib/products";
+import { getProductsWithPriceOverrides } from "@/lib/priceOverrides";
 import { getStockMap } from "@/lib/stock";
 import AdminDashboard from "./AdminDashboard";
 
@@ -17,6 +17,10 @@ export default async function AdminPage() {
   const canSeeReviews = session.isMain || session.permissions.includes("reviews");
   const reviews = canSeeReviews ? await getAllReviews() : [];
   const accounts = session.isMain ? (await getAllAccounts()).map(toPublicAccount) : [];
+
+  // Katalog s aplikovanými přepisy cen z admina — ProductsAdminList tak
+  // rovnou vidí aktuální (ne jen katalogovou) cenu.
+  const products = await getProductsWithPriceOverrides();
 
   // Načtení real-time skladu z Google Sheets a konverze Mapy na čistý JSON objekt
   const stockMap = await getStockMap();

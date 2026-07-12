@@ -87,9 +87,9 @@ export default function Header() {
               <Phone size={11} />
               <span>+420 737 565 577</span>
             </a>
-            <a href="mailto:info@techgadgets.cz" className="inline-flex items-center gap-1.5 hover:text-white transition-colors">
+            <a href="mailto:info@dodelat.cz" className="inline-flex items-center gap-1.5 hover:text-white transition-colors">
               <Mail size={11} />
-              <span>info@techgadgets.cz</span>
+              <span>info@dodelat.cz</span>
             </a>
           </div>
           <div className="flex items-center gap-3">

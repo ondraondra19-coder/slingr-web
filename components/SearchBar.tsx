@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Search, X, ArrowUpRight } from "lucide-react";
-import { products } from "@/lib/products";
+import { products as staticProducts } from "@/lib/products";
 import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice } from "@/lib/currency";
 import Image from "next/image";
@@ -10,7 +10,7 @@ import { useT } from "@/lib/useT";
 import { useLang } from "@/lib/LangContext";
 import { getProductName } from "@/lib/products";
 
-type SearchResult = typeof products[0] & { score: number };
+type SearchResult = typeof staticProducts[0] & { score: number };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -108,7 +108,7 @@ function expandQuery(q: string): string {
   return Array.from(expanded).join(" ");
 }
 
-function scoreProduct(product: typeof products[0], q: string): number {
+function scoreProduct(product: typeof staticProducts[0], q: string): number {
   const expandedQ = expandQuery(q);
   const words = normalize(expandedQ).split(/\s+/).filter(Boolean);
 
@@ -250,6 +250,22 @@ export default function SearchBar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const t = useT("search");
   const { locale } = useLang();
+
+  // Vyhledávání funguje hned se statickým katalogem (žádné čekání na síť),
+  // a jakmile dorazí odpověď z /api/products (s aktuálními cenami z admina),
+  // se tiše přepne na ni — beze změny v UI, uživatel to nepozná.
+  const [products, setProducts] = useState(staticProducts);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.products) setProducts(data.products);
+      })
+      .catch(() => {
+        // Fetch nevyšel — zůstaneme u staticProducts, vyhledávání dál funguje.
+      });
+  }, []);
 
   const trimmed = query.trim();
 

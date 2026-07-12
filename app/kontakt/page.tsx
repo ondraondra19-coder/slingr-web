@@ -51,13 +51,13 @@ export default function KontaktPage() {
                       <p className="text-text-base font-semibold group-hover:text-primary transition-colors">+420 737 565 577</p>
                     </div>
                   </a>
-                  <a href="mailto:info@techgadgets.cz" className="flex items-start gap-4 group">
+                  <a href="mailto:info@dodelat.cz" className="flex items-start gap-4 group">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                       <Mail size={18} className="text-primary" />
                     </div>
                     <div>
                       <p className="text-text-subtle text-xs mb-0.5">E-mail</p>
-                      <p className="text-text-base font-semibold group-hover:text-primary transition-colors">info@techgadgets.cz</p>
+                      <p className="text-text-base font-semibold group-hover:text-primary transition-colors">info@dodelat.cz</p>
                     </div>
                   </a>
                   <div className="flex items-start gap-4">

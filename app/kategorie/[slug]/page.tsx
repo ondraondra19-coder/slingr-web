@@ -1,5 +1,6 @@
 // app/kategorie/[slug]/page.tsx
-import { getProductsByCategory, getCategoryBySlug, categories } from "@/lib/products";
+import { getCategoryBySlug, categories } from "@/lib/products";
+import { getProductsWithPriceOverrides } from "@/lib/priceOverrides";
 import { getStockMap } from "@/lib/stock";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
@@ -21,7 +22,9 @@ export default async function KategoriePage({
   const category = getCategoryBySlug(slug);
   if (!category) notFound();
 
-  const products = getProductsByCategory(slug);
+  // Katalog s aplikovanými přepisy cen z admina.
+  const allProducts = await getProductsWithPriceOverrides();
+  const products = allProducts.filter((p) => p.categories.includes(slug));
 
   // Fetchni celou stock mapu jedním voláním (je cachovaná)
   // a sestav { [slug]: { "color|size": number } } pro produkty v kategorii

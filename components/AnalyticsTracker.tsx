@@ -9,7 +9,7 @@
 import { useEffect } from "react";
 import { CONSENT_CHANGED_EVENT, hasAnalyticsConsent } from "./CookieBanner";
 
-const SESSION_FLAG = "techgadgets-analytics-sent";
+const SESSION_FLAG = "hackpack-analytics-sent";
 
 function sendVisitBeacon() {
   try {

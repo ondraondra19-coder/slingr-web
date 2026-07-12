@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
-import { products } from "@/lib/products";
+import type { Product } from "@/lib/products";
 import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice } from "@/lib/currency";
 
@@ -18,10 +18,6 @@ const FEATURED_SLUGS = [
   "cistic-displeje",
 ];
 
-const featured = FEATURED_SLUGS
-  .map(slug => products.find(p => p.slug === slug))
-  .filter(Boolean) as typeof products;
-
 const GAP = 16;
 
 function getVisibleCount(): number {
@@ -32,7 +28,13 @@ function getVisibleCount(): number {
   return 4;
 }
 
-export default function FeaturedProducts() {
+// `products` přichází jako prop z app/page.tsx (server komponenta), která už
+// aplikovala případné přepisy cen z admina — tady se nic dalšího nedopočítává.
+export default function FeaturedProducts({ products }: { products: Product[] }) {
+  const featured = FEATURED_SLUGS
+    .map(slug => products.find(p => p.slug === slug))
+    .filter(Boolean) as Product[];
+
   const trackRef       = useRef<HTMLDivElement>(null);
   const { currency }   = useCurrency();
   const [index,        setIndex]        = useState(0);

@@ -25,6 +25,22 @@ function toForm(post: BlogPost): FormState {
   return { slug: post.slug, title: post.title, excerpt: post.excerpt, date: post.date, tag: post.tag, img: post.img, content: post.content };
 }
 
+// Datum se ukládá a zobrazuje na webu jako "22. 4. 2026" (kvůli zpětné
+// kompatibilitě se staršími články), ale v editoru je pohodlnější klasický
+// kalendář, kam se píšou jen čísla — tyhle dvě funkce mezi tvary převádí.
+function czechDateToInputValue(czech: string): string {
+  const m = czech.match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
+  if (!m) return "";
+  const [, d, mo, y] = m;
+  return `${y}-${mo.padStart(2, "0")}-${d.padStart(2, "0")}`;
+}
+
+function inputValueToCzechDate(value: string): string {
+  if (!value) return "";
+  const [y, mo, d] = value.split("-");
+  return `${Number(d)}. ${Number(mo)}. ${y}`;
+}
+
 // ── Živý náhled — stejná logika jako na webu (parseBlogContent + splitBold) ─
 function ContentPreview({ text }: { text: string }) {
   const blocks = useMemo(() => parseBlogContent(text || ""), [text]);
@@ -82,7 +98,8 @@ export default function MagazinAdminList() {
   }, []);
 
   function openNew() {
-    setForm(EMPTY_FORM);
+    const today = new Date();
+    setForm({ ...EMPTY_FORM, date: `${today.getDate()}. ${today.getMonth() + 1}. ${today.getFullYear()}` });
     setSlugTouched(false);
     setEditingSlug("new");
   }
@@ -195,9 +212,9 @@ export default function MagazinAdminList() {
               <div>
                 <label className="text-[11px] font-semibold text-zinc-500 block mb-1">Datum</label>
                 <input
-                  value={form.date}
-                  onChange={(e) => updateField("date", e.target.value)}
-                  placeholder="22. 4. 2026"
+                  type="date"
+                  value={czechDateToInputValue(form.date)}
+                  onChange={(e) => updateField("date", inputValueToCzechDate(e.target.value))}
                   className="w-full text-sm border border-zinc-300 rounded-lg px-3 py-2"
                 />
               </div>
