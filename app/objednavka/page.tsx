@@ -8,6 +8,7 @@ import { ChevronRight, Check, Package, CreditCard, Building2, Truck, MapPin, Ale
 import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice } from "@/lib/currency";
 import DiscountWidget from "@/components/DiscountWidget";
+import { SHIPPING_PRICES } from "@/lib/shipping/pricing";
 
 declare global {
   interface Window {
@@ -31,8 +32,8 @@ const ZBOX_KEY = "hackpack-zbox";
 export const ORDER_KEY = "hackpack-order";
 
 const dopravyOptions = [
-  { id: "zasilkovna_box",    name: "Zásilkovna — výdejní místo", desc: "Vyzvednutí na Z-BOXu nebo výdejním místě", price: { CZK: 89,  EUR: 3.49, USD: 3.79 }, hasPickup: true  },
-  { id: "zasilkovna_adresa", name: "Zásilkovna — na adresu",     desc: "Doručení kurýrem do 1–2 pracovních dní",   price: { CZK: 129, EUR: 4.99, USD: 5.49 }, hasPickup: false },
+  { id: "zasilkovna_box",    name: "Zásilkovna — výdejní místo", desc: "Vyzvednutí na Z-BOXu nebo výdejním místě", price: SHIPPING_PRICES.zasilkovna_box,    hasPickup: true  },
+  { id: "zasilkovna_adresa", name: "Zásilkovna — na adresu",     desc: "Doručení kurýrem do 1–2 pracovních dní",   price: SHIPPING_PRICES.zasilkovna_adresa, hasPickup: false },
 ];
 
 const platbyOptions = [

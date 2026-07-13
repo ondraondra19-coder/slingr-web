@@ -2,6 +2,23 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getProductsWithPriceOverrides, resolveItemUnitPrice } from '@/lib/priceOverrides';
 import { createPendingOrder, type OrderInput } from '@/lib/orders';
+import { resolveDiscountForOrder } from '@/lib/discounts';
+import { getShippingPrice } from '@/lib/shipping/pricing';
+import { checkRateLimit } from '@/lib/rateLimit';
+
+// Strop na množství jedné položky — brání zneužití (záporné/obří množství
+// rozbíjí cenu i odečet skladu).
+const MAX_ITEM_QUANTITY = 50;
+
+// Vytáhne klientskou IP z hlaviček (Vercel/proxy). x-forwarded-for může být
+// seznam oddělený čárkou — první je klient.
+function getClientIp(req: Request): string {
+  const forwardedFor = req.headers.get('x-forwarded-for');
+  if (forwardedFor) return forwardedFor.split(',')[0].trim();
+  const realIp = req.headers.get('x-real-ip');
+  if (realIp) return realIp.trim();
+  return 'unknown';
+}
 
 export async function POST(req: Request) {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -18,6 +35,24 @@ export async function POST(req: Request) {
     const stripe = new Stripe(key);
 
     const currencyCode: string = typeof currency === 'object' ? currency.code : currency;
+
+    // ── Validace vstupu ──────────────────────────────────────────────────────
+    if (!Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ error: "Košík je prázdný." }, { status: 400 });
+    }
+    // Množství musí být celé číslo 1..MAX (jinak jde manipulovat cenou i skladem).
+    for (const i of items) {
+      const q = i?.quantity;
+      if (!Number.isInteger(q) || q < 1 || q > MAX_ITEM_QUANTITY) {
+        return NextResponse.json({ error: "Neplatné množství u některé položky." }, { status: 400 });
+      }
+    }
+
+    // ── Rate limit (obrana do hloubky proti skriptovanému zneužití) ──────────
+    const ip = getClientIp(req);
+    if (!(await checkRateLimit(`checkout:${ip}`, 8, 600))) {
+      return NextResponse.json({ error: "Příliš mnoho pokusů. Zkuste to prosím za chvíli." }, { status: 429 });
+    }
 
     // Katalog SE ZAPSANÝMI přepisy cen z admina — od teď se v celé funkci
     // používá TOHLE pole, ne přímý import z lib/products.ts, aby se vždy
@@ -67,22 +102,18 @@ export async function POST(req: Request) {
     });
 
     // ── 2. Doprava ───────────────────────────────────────────────────────────
-    let shippingPrice = 0;
-    if (orderData?.dopravaPrice) {
-      shippingPrice = typeof orderData.dopravaPrice === 'number'
-        ? orderData.dopravaPrice
-        : (orderData.dopravaPrice as any)?.[currencyCode] || 0;
-
-      if (shippingPrice > 0) {
-        line_items.push({
-          price_data: {
-            currency: currencyCode.toLowerCase(),
-            product_data: { name: `Doprava: ${orderData.dopravaName}` },
-            unit_amount: Math.round(shippingPrice * 100),
-          },
-          quantity: 1,
-        });
-      }
+    // Cenu dopravy určuje SERVER podle zvoleného způsobu (orderData.doprava),
+    // ne podle částky poslané klientem.
+    const shippingPrice = getShippingPrice(orderData?.doprava, currencyCode);
+    if (shippingPrice > 0) {
+      line_items.push({
+        price_data: {
+          currency: currencyCode.toLowerCase(),
+          product_data: { name: `Doprava: ${orderData?.dopravaName ?? 'Doprava'}`, images: [] },
+          unit_amount: Math.round(shippingPrice * 100),
+        },
+        quantity: 1,
+      });
     }
 
     // ── 3. Dobírka ───────────────────────────────────────────────────────────
@@ -93,7 +124,7 @@ export async function POST(req: Request) {
       line_items.push({
         price_data: {
           currency: currencyCode.toLowerCase(),
-          product_data: { name: 'Příplatek za dobírku' },
+          product_data: { name: 'Příplatek za dobírku', images: [] },
           unit_amount: Math.round(dobirkaFee * 100),
         },
         quantity: 1,
@@ -101,43 +132,38 @@ export async function POST(req: Request) {
     }
 
     // ── 4. Sleva — Stripe coupon ─────────────────────────────────────────────
-    // Vytvoříme jednorázový coupon přímo v Stripe a použijeme ho na session.
-    // Stripe coupons podporují jak procenta tak pevnou částku.
+    // Slevu spočítá SERVER z KÓDU (orderData.discountCode) — klientova
+    // discountAmountCZK se pro cenu vůbec nečte, jinak by šlo poslat libovolnou
+    // částku. Z výsledku vytvoříme jednorázový Stripe coupon (amount_off v centech).
+    const resolvedDiscount = resolveDiscountForOrder(
+      orderData?.discountCode,
+      items,
+      (i) => {
+        const p = products.find(pr => pr.slug === i.slug);
+        return p ? resolveItemUnitPrice(p, i.variants, 'CZK') : 0;
+      },
+      (i) => {
+        const p = products.find(pr => pr.slug === i.slug);
+        return p ? resolveItemUnitPrice(p, i.variants, currencyCode) : 0;
+      },
+    );
+
     let stripeCouponId: string | undefined;
-    let discountInCurrency = 0;
+    let discountInCurrency = resolvedDiscount.discountInCurrency;
+    const discountCents = Math.round(discountInCurrency * 100);
 
-    if (orderData?.discountAmountCZK && orderData.discountAmountCZK > 0) {
-      // Přepočítáme slevu z CZK do aktuální měny poměrem košíku
-      const subtotalCZK: number = items.reduce((sum: number, cartItem: any) => {
-        const realProduct = products.find(p => p.slug === cartItem.slug);
-        if (!realProduct) return sum;
-        const priceCZK = resolveItemUnitPrice(realProduct, cartItem.variants, 'CZK');
-        return sum + priceCZK * cartItem.quantity;
-      }, 0);
-
-      if (currencyCode === 'CZK' || subtotalCZK === 0) {
-        discountInCurrency = orderData.discountAmountCZK;
-      } else {
-        const ratio = subtotal / subtotalCZK;
-        discountInCurrency = orderData.discountAmountCZK * ratio;
-      }
-
-      const discountCents = Math.round(discountInCurrency * 100);
-
-      if (discountCents > 0) {
-        // Vytvoříme jednorázový coupon (amount_off = pevná sleva v centech)
-        const coupon = await stripe.coupons.create({
-          amount_off: discountCents,
-          currency: currencyCode.toLowerCase(),
-          name: orderData.discountCode
-            ? `${orderData.discountCode} – ${orderData.discountLabel ?? 'Sleva'}`
-            : 'Slevový kód',
-          max_redemptions: 1, // jednorázový
-        });
-        stripeCouponId = coupon.id;
-      } else {
-        discountInCurrency = 0;
-      }
+    if (discountCents > 0) {
+      const coupon = await stripe.coupons.create({
+        amount_off: discountCents,
+        currency: currencyCode.toLowerCase(),
+        name: resolvedDiscount.discountCode
+          ? `${resolvedDiscount.discountCode} – ${resolvedDiscount.discountLabel ?? 'Sleva'}`
+          : 'Slevový kód',
+        max_redemptions: 1, // jednorázový
+      });
+      stripeCouponId = coupon.id;
+    } else {
+      discountInCurrency = 0;
     }
 
     // ── 5. Pending objednávka v Redisu ───────────────────────────────────────
@@ -162,9 +188,9 @@ export async function POST(req: Request) {
       shippingProviderId: ["zasilkovna_box", "zasilkovna_adresa"].includes(orderData?.doprava) ? "zasilkovna" : null,
       shippingPrice,
       isDobirka: false,
-      discountCode: orderData?.discountCode ?? null,
-      discountLabel: orderData?.discountLabel ?? null,
-      discountAmountCZK: orderData?.discountAmountCZK ?? 0,
+      discountCode: resolvedDiscount.discountCode,
+      discountLabel: resolvedDiscount.discountLabel,
+      discountAmountCZK: resolvedDiscount.discountAmountCZK,
       items: items.map((i: any) => {
         const realProduct = products.find(p => p.slug === i.slug);
         return {
@@ -194,7 +220,7 @@ export async function POST(req: Request) {
       cancel_url: `${origin}/kosik`,
       metadata: {
         order_items: JSON.stringify(items.map((i: any) => ({ slug: i.slug, qty: i.quantity }))),
-        discount_code: orderData?.discountCode ?? '',
+        discount_code: resolvedDiscount.discountCode ?? '',
         pending_order_id: pendingOrderId,
       },
     });

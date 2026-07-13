@@ -15,6 +15,7 @@
 // Žádný Stripe krok — objednávka se vytvoří rovnou (createOrderDirect) se
 // stavem "nova", protože se ke zpracování nemusí čekat na potvrzení platby.
 
+import { randomBytes } from "crypto";
 import { getRedis } from "./redis";
 
 export type OrderStatus = "nova" | "zabalena" | "odeslana" | "na_ceste" | "dorucena";
@@ -94,7 +95,7 @@ export type Order = OrderInput & {
 const PENDING_TTL_SECONDS = 24 * 60 * 60; // 24 h — kdyby zákazník platbu nedokončil
 
 function generateId(): string {
-  return `obj_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  return `obj_${Date.now().toString(36)}_${randomBytes(8).toString("hex")}`;
 }
 
 function initialPaymentStatus(method: PaymentMethod): PaymentStatus {

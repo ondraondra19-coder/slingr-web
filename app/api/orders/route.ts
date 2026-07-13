@@ -5,6 +5,23 @@ import { NextResponse } from "next/server";
 import { getProductsWithPriceOverrides, resolveItemUnitPrice } from "@/lib/priceOverrides";
 import { createOrderDirect, type OrderInput, type PaymentMethod } from "@/lib/orders";
 import { deductStockForItems } from "@/lib/stock";
+import { resolveDiscountForOrder } from "@/lib/discounts";
+import { getShippingPrice } from "@/lib/shipping/pricing";
+import { checkRateLimit } from "@/lib/rateLimit";
+
+// Strop na množství jedné položky — brání zneužití (záporné/obří množství
+// rozbíjí cenu i odečet skladu, viz deductStockForItems).
+const MAX_ITEM_QUANTITY = 50;
+
+// Vytáhne klientskou IP z hlaviček (Vercel/proxy). x-forwarded-for může být
+// seznam oddělený čárkou — první je klient.
+function getClientIp(req: Request): string {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) return forwardedFor.split(",")[0].trim();
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) return realIp.trim();
+  return "unknown";
+}
 
 export async function POST(req: Request) {
   try {
@@ -27,6 +44,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Bankovní převod není v USD dostupný." }, { status: 400 });
     }
 
+    // Množství musí být celé číslo 1..MAX (jinak jde manipulovat cenou i skladem).
+    for (const i of items) {
+      const q = i?.quantity;
+      if (!Number.isInteger(q) || q < 1 || q > MAX_ITEM_QUANTITY) {
+        return NextResponse.json({ error: "Neplatné množství u některé položky." }, { status: 400 });
+      }
+    }
+
+    // ── Rate limit (obrana do hloubky proti skriptovanému zneužití) ──────────
+    const ip = getClientIp(req);
+    if (!(await checkRateLimit(`checkout:${ip}`, 8, 600))) {
+      return NextResponse.json({ error: "Příliš mnoho pokusů. Zkuste to prosím za chvíli." }, { status: 429 });
+    }
+
     // Katalog s aplikovanými přepisy cen z admina — viz stejná poznámka
     // v /api/checkout/route.ts.
     const effectiveProducts = await getProductsWithPriceOverrides();
@@ -46,28 +77,29 @@ export async function POST(req: Request) {
       };
     });
 
-    const shippingPrice: number =
-      typeof orderData?.dopravaPrice === "number"
-        ? orderData.dopravaPrice
-        : orderData?.dopravaPrice?.[currencyCode] ?? 0;
+    // Cenu dopravy určuje SERVER podle zvoleného způsobu (orderData.doprava),
+    // ne podle částky poslané klientem.
+    const shippingPrice = getShippingPrice(orderData?.doprava, currencyCode);
 
     const dobirkaFees: Record<string, number> = { CZK: 39, EUR: 1.59, USD: 1.79 };
     const dobirkaFee = paymentMethod === "dobirka" ? dobirkaFees[currencyCode] ?? 39 : 0;
 
     // Sleva se u dobírky/převodu neřeší přes Stripe coupon — jen si ji
-    // zaznamenáme pro přehled v adminu (odečet z celkové částky).
-    const discountAmountCZK = orderData?.discountAmountCZK ?? 0;
-    let discountInCurrency = 0;
-    if (discountAmountCZK > 0) {
-      const subtotalCZK = items.reduce((sum: number, i: any) => {
+    // zaznamenáme pro přehled v adminu (odečet z celkové částky). Počítá ji
+    // SERVER z KÓDU (orderData.discountCode), klientovu částku nečteme.
+    const resolvedDiscount = resolveDiscountForOrder(
+      orderData?.discountCode,
+      items,
+      (i) => {
         const p = effectiveProducts.find((pr) => pr.slug === i.slug);
-        return sum + (p ? resolveItemUnitPrice(p, i.variants, "CZK") : 0) * i.quantity;
-      }, 0);
-      discountInCurrency =
-        currencyCode === "CZK" || subtotalCZK === 0
-          ? discountAmountCZK
-          : discountAmountCZK * (subtotal / subtotalCZK);
-    }
+        return p ? resolveItemUnitPrice(p, i.variants, "CZK") : 0;
+      },
+      (i) => {
+        const p = effectiveProducts.find((pr) => pr.slug === i.slug);
+        return p ? resolveItemUnitPrice(p, i.variants, currencyCode) : 0;
+      },
+    );
+    const discountInCurrency = resolvedDiscount.discountInCurrency;
 
     const orderInput: OrderInput = {
       currency: currencyCode,
@@ -88,9 +120,9 @@ export async function POST(req: Request) {
       shippingPrice,
       isDobirka: paymentMethod === "dobirka",
       dobirkaFee,
-      discountCode: orderData?.discountCode ?? null,
-      discountLabel: orderData?.discountLabel ?? null,
-      discountAmountCZK,
+      discountCode: resolvedDiscount.discountCode,
+      discountLabel: resolvedDiscount.discountLabel,
+      discountAmountCZK: resolvedDiscount.discountAmountCZK,
       items: resolvedItems,
       subtotal,
       total: subtotal + shippingPrice + dobirkaFee - discountInCurrency,

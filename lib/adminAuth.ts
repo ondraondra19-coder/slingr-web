@@ -1,8 +1,11 @@
 // lib/adminAuth.ts
 // Ochrana admin sekce — podepsané session cookie odvozené z ADMIN_SECRET.
-// Používá Web Crypto API (ne node:crypto), takže funguje jak v Node.js API routes,
-// tak v middleware, který běží v Edge runtime.
+// Token/session (createSessionToken/verifySessionToken) používá Web Crypto API
+// (ne node:crypto), takže funguje jak v Node.js API routes, tak v middleware
+// běžícím v Edge runtime. checkPassword běží jen v Node route (/api/admin/login),
+// proto smí použít node:crypto (timingSafeEqual).
 // Token nese identitu přihlášeného účtu (hlavní účet, nebo id dílčího účtu z lib/accounts.ts).
+import { timingSafeEqual } from "crypto";
 
 const COOKIE_NAME = "admin_session";
 // Nenese žádné oprávnění sama o sobě (autorizace je pořád jen COOKIE_NAME,
@@ -87,9 +90,14 @@ export async function verifySessionToken(token: string | undefined | null): Prom
   }
 }
 
-// Porovná zadané heslo s ADMIN_SECRET (heslo hlavního účtu)
+// Porovná zadané heslo s ADMIN_SECRET (heslo hlavního účtu) v konstantním čase.
+// timingSafeEqual vyhodí výjimku při rozdílné délce bufferů — rozdílná délka
+// stejně znamená neshodu, takže ji odchytíme dřív.
 export function checkPassword(password: string): boolean {
-  return password === getSecret();
+  const a = Buffer.from(password, "utf8");
+  const b = Buffer.from(getSecret(), "utf8");
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
 }
 
 export const ADMIN_COOKIE_NAME = COOKIE_NAME;
