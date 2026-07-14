@@ -139,6 +139,7 @@ export default function DiscountsAdminPanel({ discounts, onChange }: DiscountsAd
               value={minOrderCZK}
               onChange={(e) => setMinOrderCZK(e.target.value)}
               min={0}
+              step={10}
               className="w-full border border-[#e5e7eb] rounded-lg px-3 py-2 text-xs text-[#0f0f10] focus:outline-none focus:border-primary/50"
             />
           </div>

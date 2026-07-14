@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import type { Message } from "@/lib/messages";
 
 type MessagesAdminListProps = {
@@ -8,9 +9,65 @@ type MessagesAdminListProps = {
   onChange: (messages: Message[]) => void;
 };
 
+function MessageCard({
+  msg,
+  busy,
+  onToggleRead,
+  onDelete,
+}: {
+  msg: Message;
+  busy: boolean;
+  onToggleRead: (msg: Message) => void;
+  onDelete: (id: string) => void;
+}) {
+  return (
+    <div
+      className={`border rounded-xl p-4 flex justify-between gap-4 transition-colors ${
+        msg.read ? "border-[#e5e7eb] bg-white" : "border-zinc-300 bg-[#fafafa]"
+      }`}
+    >
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
+          {!msg.read && <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />}
+          <span className="text-sm font-semibold text-[#0f0f10]">{msg.name}</span>
+          <span className="text-[11px] text-zinc-400">
+            {new Date(msg.date).toLocaleString("cs-CZ")}
+          </span>
+        </div>
+
+        <p className="text-xs text-zinc-600 leading-relaxed whitespace-pre-wrap mb-2">
+          {msg.text}
+        </p>
+
+        <a href={`mailto:${msg.email}`} className="text-[11px] text-zinc-400 hover:text-[#0f0f10] hover:underline">
+          {msg.email}
+        </a>
+      </div>
+
+      <div className="flex flex-col items-end gap-2 shrink-0">
+        <button
+          onClick={() => onToggleRead(msg)}
+          disabled={busy}
+          className="text-xs font-semibold text-zinc-500 hover:text-[#0f0f10] disabled:opacity-50"
+        >
+          {msg.read ? "Označit jako nepřečtené" : "Označit jako přečtené"}
+        </button>
+        <button
+          onClick={() => onDelete(msg.id)}
+          disabled={busy}
+          className="text-xs font-semibold text-primary hover:text-primary/80 disabled:opacity-50"
+        >
+          {busy ? "Pracuji…" : "Smazat"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function MessagesAdminList({ messages, onChange }: MessagesAdminListProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showRead, setShowRead] = useState(false);
 
   async function handleToggleRead(msg: Message) {
     setBusyId(msg.id);
@@ -56,53 +113,54 @@ export default function MessagesAdminList({ messages, onChange }: MessagesAdminL
     return <p className="text-sm text-zinc-500">Zatím žádné zprávy.</p>;
   }
 
+  const unread = messages.filter((m) => !m.read);
+  const read = messages.filter((m) => m.read);
+
   return (
     <div className="space-y-3">
       {error && <p className="text-sm text-primary">{error}</p>}
 
-      {messages.map((msg) => (
-        <div
+      {unread.length === 0 && (
+        <p className="text-sm text-zinc-500">Žádné nové zprávy.</p>
+      )}
+
+      {unread.map((msg) => (
+        <MessageCard
           key={msg.id}
-          className={`border rounded-xl p-4 flex justify-between gap-4 transition-colors ${
-            msg.read ? "border-[#e5e7eb] bg-white" : "border-zinc-300 bg-[#fafafa]"
-          }`}
-        >
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              {!msg.read && <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />}
-              <span className="text-sm font-semibold text-[#0f0f10]">{msg.name}</span>
-              <span className="text-[11px] text-zinc-400">
-                {new Date(msg.date).toLocaleString("cs-CZ")}
-              </span>
-            </div>
-
-            <p className="text-xs text-zinc-600 leading-relaxed whitespace-pre-wrap mb-2">
-              {msg.text}
-            </p>
-
-            <a href={`mailto:${msg.email}`} className="text-[11px] text-zinc-400 hover:text-[#0f0f10] hover:underline">
-              {msg.email}
-            </a>
-          </div>
-
-          <div className="flex flex-col items-end gap-2 shrink-0">
-            <button
-              onClick={() => handleToggleRead(msg)}
-              disabled={busyId === msg.id}
-              className="text-xs font-semibold text-zinc-500 hover:text-[#0f0f10] disabled:opacity-50"
-            >
-              {msg.read ? "Označit jako nepřečtené" : "Označit jako přečtené"}
-            </button>
-            <button
-              onClick={() => handleDelete(msg.id)}
-              disabled={busyId === msg.id}
-              className="text-xs font-semibold text-primary hover:text-primary/80 disabled:opacity-50"
-            >
-              {busyId === msg.id ? "Pracuji…" : "Smazat"}
-            </button>
-          </div>
-        </div>
+          msg={msg}
+          busy={busyId === msg.id}
+          onToggleRead={handleToggleRead}
+          onDelete={handleDelete}
+        />
       ))}
+
+      {read.length > 0 && (
+        <div className="pt-2">
+          <button
+            onClick={() => setShowRead((v) => !v)}
+            className="w-full flex items-center justify-between gap-2 px-1 py-2 text-xs font-semibold text-zinc-500 hover:text-[#0f0f10] transition-colors"
+          >
+            <span>
+              Přečtené zprávy <span className="text-zinc-400 font-normal">({read.length})</span>
+            </span>
+            <ChevronDown size={15} className={`transition-transform duration-150 ${showRead ? "rotate-180" : ""}`} />
+          </button>
+
+          {showRead && (
+            <div className="space-y-3 mt-1">
+              {read.map((msg) => (
+                <MessageCard
+                  key={msg.id}
+                  msg={msg}
+                  busy={busyId === msg.id}
+                  onToggleRead={handleToggleRead}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

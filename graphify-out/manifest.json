@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "app/admin/MessagesAdminList.tsx": {
-    "mtime": 1783412165.0753744,
-    "ast_hash": "1495988f26d718b0d51ad802ba876e5f",
-    "semantic_hash": "1495988f26d718b0d51ad802ba876e5f"
+    "mtime": 1784038264.3443253,
+    "ast_hash": "7c296198fa39d8d3c3d97309587f424e",
+    "semantic_hash": ""
   },
   "app/admin/OrdersAdminList.tsx": {
     "mtime": 1783987331.091106,
@@ -1000,8 +1000,8 @@
     "semantic_hash": ""
   },
   "app/admin/DiscountsAdminPanel.tsx": {
-    "mtime": 1784036951.634157,
-    "ast_hash": "cac46a1b73ef59409edea64cbe460c3d",
+    "mtime": 1784038272.7023704,
+    "ast_hash": "78f4f810de3cb41e562ad95c260aeec5",
     "semantic_hash": ""
   },
   "app/api/admin/discounts/route.ts": {
