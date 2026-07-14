@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { SlidersHorizontal, ChevronDown, X, Check } from "lucide-react";
 import type { Product } from "@/lib/products";
@@ -75,56 +75,55 @@ function StockPill({ product, stockData }: { product: Product; stockData: Record
 // ── Price range slider ────────────────────────────────────────────────────────
 
 function DualRangeSlider({
-  min, max, valueMin, valueMax, onChangeMin, onChangeMax,
+  min, max, valueMin, valueMax, onChangeMin, onChangeMax, step = 10,
 }: {
   min: number; max: number;
   valueMin: number; valueMax: number;
   onChangeMin: (v: number) => void;
   onChangeMax: (v: number) => void;
+  step?: number;
 }) {
-  const [localMin, setLocalMin] = useState(String(valueMin));
-  const [localMax, setLocalMax] = useState(String(valueMax));
-
-  useEffect(() => { setLocalMin(String(valueMin)); }, [valueMin]);
-  useEffect(() => { setLocalMax(String(valueMax)); }, [valueMax]);
-
-  function commitMin() {
-    const v = parseInt(localMin);
-    if (!isNaN(v) && v < valueMax) {
-      onChangeMin(Math.min(Math.floor(Math.max(v, min) / 10) * 10, valueMax - 10));
-    } else setLocalMin(String(valueMin));
-  }
-
-  function commitMax() {
-    const v = parseInt(localMax);
-    if (!isNaN(v) && v > valueMin) {
-      onChangeMax(Math.max(Math.ceil(Math.min(v, max) / 10) * 10, valueMin + 10));
-    } else setLocalMax(String(valueMax));
-  }
+  const range = Math.max(max - min, 1);
+  const pctMin = ((valueMin - min) / range) * 100;
+  const pctMax = ((valueMax - min) / range) * 100;
+  // Když jsou úchyty blízko sebe, ať jde nahoru ten, co je dál od svého konce dráhy (jinak by se druhý nedal chytit).
+  const minOnTop = valueMin - min > max - valueMax;
 
   return (
-    <div className="flex items-center gap-2">
-      <input
-        type="number"
-        value={localMin}
-        onChange={e => setLocalMin(e.target.value)}
-        onBlur={commitMin}
-        onKeyDown={e => e.key === "Enter" && commitMin()}
-        className="w-full border border-border rounded-lg px-3 py-2 text-sm text-text-base bg-surface focus:outline-none focus:border-primary/50 text-center"
-        placeholder={String(min)}
-        step={10}
-      />
-      <span className="text-text-subtle text-xs shrink-0">–</span>
-      <input
-        type="number"
-        value={localMax}
-        onChange={e => setLocalMax(e.target.value)}
-        onBlur={commitMax}
-        onKeyDown={e => e.key === "Enter" && commitMax()}
-        className="w-full border border-border rounded-lg px-3 py-2 text-sm text-text-base bg-surface focus:outline-none focus:border-primary/50 text-center"
-        placeholder={String(max)}
-        step={10}
-      />
+    <div>
+      <div className="flex items-center justify-between mb-3 text-sm font-bold text-text-base">
+        <span>{valueMin} Kč</span>
+        <span>{valueMax} Kč</span>
+      </div>
+      <div className="relative h-4 flex items-center">
+        <div className="absolute inset-x-0 h-1.5 rounded-full bg-border" />
+        <div
+          className="absolute h-1.5 rounded-full bg-primary"
+          style={{ left: `${pctMin}%`, right: `${100 - pctMax}%` }}
+        />
+        <input
+          type="range"
+          className="range-slider absolute inset-x-0 w-full"
+          style={{ zIndex: minOnTop ? 4 : 3 }}
+          min={min}
+          max={max}
+          step={step}
+          value={valueMin}
+          onChange={e => onChangeMin(Math.min(Number(e.target.value), valueMax - step))}
+          aria-label="Minimální cena"
+        />
+        <input
+          type="range"
+          className="range-slider absolute inset-x-0 w-full"
+          style={{ zIndex: minOnTop ? 3 : 4 }}
+          min={min}
+          max={max}
+          step={step}
+          value={valueMax}
+          onChange={e => onChangeMax(Math.max(Number(e.target.value), valueMin + step))}
+          aria-label="Maximální cena"
+        />
+      </div>
     </div>
   );
 }
