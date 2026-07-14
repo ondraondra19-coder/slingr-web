@@ -170,9 +170,14 @@ export default function KosikPage() {
   // Vrátí max dostupné množství pro konkrétní variantu — používá stockKey uložený při addItem.
   // Pokud stejný podzdroj (např. "šedé tělo") používá i jiná položka v košíku, odečte se
   // jí už rezervované množství, ať se dvě varianty nepřebijí přes společný sklad.
+  // Strop 50 ks/položku musí odpovídat MAX_ITEM_QUANTITY na serveru
+  // (app/api/orders/route.ts, app/api/checkout/route.ts) — jinak zákazník
+  // dojde až na poslední krok checkoutu a tam dostane nejasnou chybu.
+  const MAX_ITEM_QUANTITY = 50;
+
   function getMaxQty(item: (typeof items)[0]): number {
     const slugStock = stockMap[item.slug];
-    if (!slugStock || Object.keys(slugStock).length === 0) return 999; // fallback dokud nenačte
+    if (!slugStock || Object.keys(slugStock).length === 0) return MAX_ITEM_QUANTITY; // fallback dokud nenačte / bez sledování skladu
 
     if (item.stockKey) {
       const keys = Array.isArray(item.stockKey) ? item.stockKey : [item.stockKey];
@@ -192,12 +197,12 @@ export default function KosikPage() {
         minRemaining = minRemaining === undefined ? remaining : Math.min(minRemaining, remaining);
       }
 
-      if (minRemaining !== undefined) return Math.max(0, minRemaining);
+      if (minRemaining !== undefined) return Math.min(MAX_ITEM_QUANTITY, Math.max(0, minRemaining));
     }
 
     // Fallback pro starší položky bez stockKey — vezmi součet přes všechny varianty
     const vals = Object.values(slugStock);
-    return vals.length > 0 ? Math.max(...vals) : 999;
+    return vals.length > 0 ? Math.min(MAX_ITEM_QUANTITY, Math.max(...vals)) : MAX_ITEM_QUANTITY;
   }
 
   const isEmpty = items.length === 0;
@@ -247,7 +252,7 @@ export default function KosikPage() {
 
     for (const item of items) {
       const slugStock = freshStock[item.slug] ?? {};
-      let max = 999;
+      let max = MAX_ITEM_QUANTITY;
 
       if (Object.keys(slugStock).length > 0) {
         const keys = item.stockKey
@@ -264,10 +269,10 @@ export default function KosikPage() {
             const remaining = remainingBySlugKey[poolKey];
             minRemaining = minRemaining === undefined ? remaining : Math.min(minRemaining, remaining);
           }
-          max = minRemaining ?? 999;
+          max = Math.min(MAX_ITEM_QUANTITY, minRemaining ?? MAX_ITEM_QUANTITY);
         } else {
           const vals = Object.values(slugStock);
-          max = vals.length > 0 ? Math.max(...vals) : 0;
+          max = vals.length > 0 ? Math.min(MAX_ITEM_QUANTITY, Math.max(...vals)) : 0;
         }
       }
 

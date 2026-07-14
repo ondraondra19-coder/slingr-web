@@ -35,8 +35,8 @@
     "semantic_hash": "1495988f26d718b0d51ad802ba876e5f"
   },
   "app/admin/OrdersAdminList.tsx": {
-    "mtime": 1783963935.8553238,
-    "ast_hash": "de5c631a754b56de8446beab15553bc0",
+    "mtime": 1783987331.091106,
+    "ast_hash": "23e4a7656ddddb63c29ced4bc0e07266",
     "semantic_hash": ""
   },
   "app/admin/ProductsAdminList.tsx": {
@@ -130,8 +130,8 @@
     "semantic_hash": "c61e6b398cfe654dbbac945193a7a039"
   },
   "app/api/checkout/route.ts": {
-    "mtime": 1783983739.2633684,
-    "ast_hash": "3fd92621744d8a9976c84321e2fca54e",
+    "mtime": 1783985371.0350118,
+    "ast_hash": "e54b4e5a6285a1b81bb1213828f31acb",
     "semantic_hash": ""
   },
   "app/api/checkout/session/route.ts": {
@@ -145,8 +145,8 @@
     "semantic_hash": "fec1507e99c84777589fdb606d15303c"
   },
   "app/api/orders/route.ts": {
-    "mtime": 1783983742.5748875,
-    "ast_hash": "07985e5e12cdb849429f9269ecc05263",
+    "mtime": 1783987309.11773,
+    "ast_hash": "eef8a3f1c580276412c734c15f62b7a5",
     "semantic_hash": ""
   },
   "app/api/products/route.ts": {
@@ -165,9 +165,9 @@
     "semantic_hash": "836458ca2e47a86ed313d2a299940c1d"
   },
   "app/api/webhooks/stripe/route.ts": {
-    "mtime": 1783850908.948957,
-    "ast_hash": "8478c7a05313b0c30fcbe53a5933c394",
-    "semantic_hash": "8478c7a05313b0c30fcbe53a5933c394"
+    "mtime": 1783987322.8035007,
+    "ast_hash": "313841935516f4af3593bed973196814",
+    "semantic_hash": ""
   },
   "app/blog/[slug]/page.tsx": {
     "mtime": 1783581428.4837613,
@@ -190,8 +190,8 @@
     "semantic_hash": "7749c7264c0f53625b1e831e691558a5"
   },
   "app/doprava/page.tsx": {
-    "mtime": 1783964891.4255283,
-    "ast_hash": "57d90db633ae3ad672ee8694616dcb83",
+    "mtime": 1783985495.2930152,
+    "ast_hash": "53b68516a48270b4691614f1e778b2ab",
     "semantic_hash": ""
   },
   "app/faq/page.tsx": {
@@ -200,8 +200,8 @@
     "semantic_hash": "13027186e2c94cab16a1e10690089289"
   },
   "app/informace/page.tsx": {
-    "mtime": 1783979836.4589894,
-    "ast_hash": "9661478145fb6f03377b7254cd7a5dec",
+    "mtime": 1783985416.0743797,
+    "ast_hash": "ca3011d9fcfc716b8f36f4fefb885555",
     "semantic_hash": ""
   },
   "app/kategorie/[slug]/page.tsx": {
@@ -215,8 +215,8 @@
     "semantic_hash": "293a8cf61e31e4bdf8f5fd06902a787d"
   },
   "app/kosik/page.tsx": {
-    "mtime": 1783858986.6209238,
-    "ast_hash": "248edeb3b64ae81d0ffd3d18e14260b2",
+    "mtime": 1783985600.566642,
+    "ast_hash": "1c68877745ee3282b3a5ef11b3ac9a75",
     "semantic_hash": ""
   },
   "app/layout.tsx": {
@@ -240,13 +240,13 @@
     "semantic_hash": "72fdeaf31adc53a10508e48d8fd99e99"
   },
   "app/objednavka/page.tsx": {
-    "mtime": 1783983465.661291,
-    "ast_hash": "11ec841ff1e20e77fc2986e4739923d5",
+    "mtime": 1783985387.0737555,
+    "ast_hash": "af2b923913c1978f11530bfb01295535",
     "semantic_hash": ""
   },
   "app/objednavka/uspech/page.tsx": {
-    "mtime": 1783980036.0357287,
-    "ast_hash": "84130bafa4a618a2ebad27758ca4f49f",
+    "mtime": 1783985434.824726,
+    "ast_hash": "a1725714a37919f0dbb81592f560b6cc",
     "semantic_hash": ""
   },
   "app/ochrana-osobnich-udaju/page.tsx": {
@@ -430,8 +430,8 @@
     "semantic_hash": "272f0e8b1427a0a5ac7c12429d2f5928"
   },
   "lib/orders.ts": {
-    "mtime": 1783983413.9823601,
-    "ast_hash": "7f3c99797612f6fc8671604640623e7b",
+    "mtime": 1783987294.25955,
+    "ast_hash": "610e20c4aa2c7aecfdf6ce3cc897577d",
     "semantic_hash": ""
   },
   "lib/parseUserAgent.ts": {
@@ -480,9 +480,9 @@
     "semantic_hash": "a34859c2bc932e3753c6011374ea6c6e"
   },
   "lib/stock.ts": {
-    "mtime": 1783547155.5389397,
-    "ast_hash": "22eb18d96b0e3166fa258e31ce89b69b",
-    "semantic_hash": "22eb18d96b0e3166fa258e31ce89b69b"
+    "mtime": 1783987270.3725917,
+    "ast_hash": "d54e4ee932f5ed7f9ee996ae1fcffaae",
+    "semantic_hash": ""
   },
   "lib/useManualTranslations.ts": {
     "mtime": 1776416520.678175,
@@ -992,6 +992,11 @@
   "lib/shipping/pricing.ts": {
     "mtime": 1783983455.8030133,
     "ast_hash": "5947aba7b8ee2ac9c2210853451f5434",
+    "semantic_hash": ""
+  },
+  "lib/fees.ts": {
+    "mtime": 1783985347.2258716,
+    "ast_hash": "b3280d740c28b57aa9954a3fe571799e",
     "semantic_hash": ""
   }
 }

@@ -255,6 +255,13 @@ export default function OrdersAdminList({ initialQuery, initialExpandId }: Order
 
               {isExpanded && (
                 <div className="border-t border-zinc-100 p-4 space-y-4 bg-zinc-50/50">
+                  {order.stockIssue && (
+                    <div className="text-xs rounded-lg border border-red-300 bg-red-50 text-red-800 px-3 py-2">
+                      <span className="font-semibold">⚠ Při vytvoření objednávky nebyl dostatek skladu u:</span>{" "}
+                      {order.stockIssue.insufficientFields.join(", ")}. Zkontrolujte prosím ručně.
+                    </div>
+                  )}
+
                   {/* Kontakt a doručení */}
                   <div className="grid sm:grid-cols-2 gap-4 text-xs">
                     <div>

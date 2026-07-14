@@ -16,7 +16,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { products } from "@/lib/products";
 import { createPostHogServerClient } from "@/lib/posthog-server";
-import { confirmPendingOrder } from "@/lib/orders";
+import { confirmPendingOrder, markStockIssue } from "@/lib/orders";
 import { deductStockForItems } from "@/lib/stock";
 
 export async function POST(req: Request) {
@@ -109,7 +109,15 @@ export async function POST(req: Request) {
         } else {
           // Odečteme sklad AŽ TEĎ — po skutečném potvrzení platby, ne při
           // pouhém zahájení checkoutu (kdyby zákazník platbu nedokončil).
-          await deductStockForItems(confirmed.items);
+          // Zákazník už zaplatil, takže objednávku odmítnout nelze — když
+          // sklad nestačí, jen ji označíme, ať to admin ručně vyřeší.
+          const deduction = await deductStockForItems(confirmed.items);
+          if (!deduction.ok) {
+            await markStockIssue(confirmed.id, deduction.insufficientFields);
+            console.error(
+              `Objednávka ${confirmed.id}: nedostatek skladu u ${deduction.insufficientFields.join(", ")} — zaplaceno, nutná ruční kontrola.`,
+            );
+          }
         }
       }
     } catch (err) {

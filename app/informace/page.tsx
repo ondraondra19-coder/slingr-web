@@ -13,6 +13,7 @@ import { formatPrice, getPrice } from "@/lib/currency";
 import DiscountWidget from "@/components/DiscountWidget";
 import { approxConvert } from "@/lib/discounts";
 import { CURRENCIES } from "@/lib/currency";
+import { DOBIRKA_FEE } from "@/lib/fees";
 
 const ORDER_KEY = "hackpack-order";
 const INFO_KEY = "hackpack-info";
@@ -708,7 +709,7 @@ export default function InformacePage() {
   const currentTotalPrice = getTotalPrice(currency);
   const discountAmount = getDiscountAmount(currency);
   const currentDopravaPrice = orderData?.dopravaPrices ? getPrice(orderData.dopravaPrices, currency) : 0;
-  const currentDobirkaExtra = orderData?.isDobirka ? getPrice({ CZK: 39, EUR: 1.59, USD: 1.79 }, currency) : 0;
+  const currentDobirkaExtra = orderData?.isDobirka ? getPrice(DOBIRKA_FEE, currency) : 0;
   const celkem = getFinalPrice(currency) + currentDopravaPrice + currentDobirkaExtra;
   const isZasilkovna = orderData?.doprava === "zasilkovna_box";
 

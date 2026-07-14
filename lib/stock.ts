@@ -109,15 +109,45 @@ export async function setStockBulk(
 
 // ── Automatický odečet při dokončené objednávce ─────────────────────────────
 // Vstup: slug produktu, jeho stockKey ("color|size", nebo dvojice u vrstvených
-// barev tělo+hlavička) a objednané množství. Používá ATOMICKÝ HINCRBY (ne
-// read-modify-write), takže je to bezpečné i při dvou objednávkách naráz.
+// barev tělo+hlavička) a objednané množství. Odečet je ATOMICKÝ a "všechno nebo
+// nic": Lua skript nejdřív ověří, že KAŽDÁ položka má dost skladu, a teprve pak
+// odečte — takže při dvou objednávkách naráz o poslední kus nemůže sklad spadnout
+// pod nulu (přeprodání). Když nestačí, nic se neodečte a vrátí se seznam
+// nedostatkových polí, aby volající mohl objednávku odmítnout / označit.
 export type StockDeductionItem = {
   slug: string;
   quantity: number;
   stockKey?: string | string[]; // "color|size" — stejný formát jako CartItem.stockKey
 };
 
-export async function deductStockForItems(items: StockDeductionItem[]): Promise<void> {
+// Atomický check-and-decrement: buď mají všechna pole dost skladu a všechna se
+// odečtou, nebo se nesáhne na nic a vrátí se seznam nedostatkových polí.
+const DEDUCT_SCRIPT = `
+local hashKey = KEYS[1]
+local numPairs = #ARGV / 2
+local insufficient = {}
+for i = 1, numPairs do
+  local field = ARGV[(i - 1) * 2 + 1]
+  local amount = tonumber(ARGV[(i - 1) * 2 + 2])
+  local current = tonumber(redis.call('HGET', hashKey, field) or '0')
+  if current < amount then
+    table.insert(insufficient, field)
+  end
+end
+if #insufficient > 0 then
+  return insufficient
+end
+for i = 1, numPairs do
+  local field = ARGV[(i - 1) * 2 + 1]
+  local amount = tonumber(ARGV[(i - 1) * 2 + 2])
+  redis.call('HINCRBY', hashKey, field, -amount)
+end
+return {}
+`;
+
+export async function deductStockForItems(
+  items: StockDeductionItem[],
+): Promise<{ ok: true } | { ok: false; insufficientFields: string[] }> {
   const redis = getRedis();
 
   // Sečteme všechny odečty do jednoho pole (klíč se může u vrstvených barev
@@ -134,32 +164,24 @@ export async function deductStockForItems(items: StockDeductionItem[]): Promise<
     }
   }
 
-  if (totals.size === 0) return;
+  if (totals.size === 0) return { ok: true };
 
-  const pipeline = redis.pipeline();
-  const fields = Array.from(totals.keys());
-  for (const field of fields) {
-    pipeline.hincrby(HASH_KEY, field, -(totals.get(field) as number));
+  // Ploché pole [field1, amount1, field2, amount2, ...] pro ARGV skriptu.
+  const args: string[] = [];
+  for (const [field, amount] of totals.entries()) {
+    args.push(field, String(amount));
   }
 
-  const results = (await pipeline.exec()) as number[];
+  const insufficientFields = await redis.eval<string[], string[]>(DEDUCT_SCRIPT, [HASH_KEY], args);
 
-  // Pojistka: kdyby odečet spadl pod 0 (přeprodáno), vrátíme na 0 místo
-  // záporného čísla — a zalogujeme, ať o tom Ondřej ví.
-  const corrections: Record<string, number> = {};
-  fields.forEach((field, i) => {
-    const newValue = results[i];
-    if (typeof newValue === "number" && newValue < 0) {
-      corrections[field] = 0;
-      console.warn(`Sklad "${field}" šel do mínusu (${newValue}) — opraveno na 0. Zkontroluj skladovost.`);
-    }
-  });
-
-  if (Object.keys(corrections).length > 0) {
-    await redis.hset(HASH_KEY, corrections);
+  if (insufficientFields.length > 0) {
+    // Nic se neodečetlo — sklad je nedotčený, cache může zůstat.
+    return { ok: false, insufficientFields };
   }
 
-  // Cache invalidujeme celá (jednodušší a bezpečnější než dopočítávat nové
-  // hodnoty ručně) — příští čtení si ji znovu natáhne z Redisu.
+  // Odečet už atomicky proběhl. Cache invalidujeme celá (jednodušší a
+  // bezpečnější než dopočítávat nové hodnoty ručně) — příští čtení si ji
+  // znovu natáhne z Redisu.
   cache = null;
+  return { ok: true };
 }

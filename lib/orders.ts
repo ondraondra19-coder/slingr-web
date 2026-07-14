@@ -90,6 +90,10 @@ export type Order = OrderInput & {
   paymentStatus: PaymentStatus;
   stripeSessionId?: string;
   shipment?: ShipmentInfo;
+  // Nastaveno, když se při potvrzení (zaplacené) objednávky nepodařilo odečíst
+  // sklad, protože nestačil — platba proběhla, takže objednávku nelze odmítnout,
+  // ale admin to musí ručně vyřešit. Viz Stripe webhook.
+  stockIssue?: { insufficientFields: string[]; notedAt: number };
 };
 
 const PENDING_TTL_SECONDS = 24 * 60 * 60; // 24 h — kdyby zákazník platbu nedokončil
@@ -211,6 +215,14 @@ export async function updatePaymentStatus(id: string, paymentStatus: PaymentStat
   const order = await getOrder(id);
   if (!order) return null;
   const updated: Order = { ...order, paymentStatus };
+  await getRedis().set(`orders:data:${id}`, JSON.stringify(updated));
+  return updated;
+}
+
+export async function markStockIssue(id: string, insufficientFields: string[]): Promise<Order | null> {
+  const order = await getOrder(id);
+  if (!order) return null;
+  const updated: Order = { ...order, stockIssue: { insufficientFields, notedAt: Date.now() } };
   await getRedis().set(`orders:data:${id}`, JSON.stringify(updated));
   return updated;
 }

@@ -14,6 +14,7 @@ import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice } from "@/lib/currency";
 import { buildSpdString } from "@/lib/qrPlatba";
 import QRCode from "qrcode";
+import { DOBIRKA_FEE } from "@/lib/fees";
 
 const SNAPSHOT_KEY = "hackpack-order-snapshot";
 
@@ -480,7 +481,7 @@ function SuccessContent() {
 
     const subtotal = items.reduce((s, i) => s + getPrice(i.priceRaw as any, currency) * i.quantity, 0);
     const dopravaPrice = orderData?.dopravaPrices ? getPrice(orderData.dopravaPrices, currency) : 0;
-    const dobirkaExtra = orderData?.isDobirka ? getPrice({ CZK: 39, EUR: 1.59, USD: 1.79 }, currency) : 0;
+    const dobirkaExtra = orderData?.isDobirka ? getPrice(DOBIRKA_FEE, currency) : 0;
     const celkem = apiTotal ?? (subtotal + dopravaPrice + dobirkaExtra);
     const celkemStr = hydrated ? formatPrice(celkem, currency) : "—";
 

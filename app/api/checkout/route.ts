@@ -4,6 +4,7 @@ import { getProductsWithPriceOverrides, resolveItemUnitPrice } from '@/lib/price
 import { createPendingOrder, type OrderInput } from '@/lib/orders';
 import { resolveDiscountForOrder } from '@/lib/discounts';
 import { getShippingPrice } from '@/lib/shipping/pricing';
+import { getDobirkaFee } from '@/lib/fees';
 import { checkRateLimit } from '@/lib/rateLimit';
 
 // Strop na množství jedné položky — brání zneužití (záporné/obří množství
@@ -119,8 +120,7 @@ export async function POST(req: Request) {
     // ── 3. Dobírka ───────────────────────────────────────────────────────────
     let dobirkaFee = 0;
     if (orderData?.isDobirka) {
-      const dobirkaFees: Record<string, number> = { CZK: 39, EUR: 1.59, USD: 1.79 };
-      dobirkaFee = dobirkaFees[currencyCode] ?? 39;
+      dobirkaFee = getDobirkaFee(currencyCode);
       line_items.push({
         price_data: {
           currency: currencyCode.toLowerCase(),

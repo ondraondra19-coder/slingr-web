@@ -9,6 +9,7 @@ import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice } from "@/lib/currency";
 import DiscountWidget from "@/components/DiscountWidget";
 import { SHIPPING_PRICES } from "@/lib/shipping/pricing";
+import { DOBIRKA_FEE } from "@/lib/fees";
 
 declare global {
   interface Window {
@@ -141,7 +142,7 @@ export default function ObjednavkaPage() {
   }
 
   const selectedDoprava = dopravyOptions.find(d => d.id === doprava);
-  const dobirkaExtra = platba === "dobirka" ? getPrice({ CZK: 39, EUR: 1.59, USD: 1.79 }, currency) : 0;
+  const dobirkaExtra = platba === "dobirka" ? getPrice(DOBIRKA_FEE, currency) : 0;
   const dopravaPrice = selectedDoprava ? getPrice(selectedDoprava.price, currency) : 0;
   const subtotal = getTotalPrice(currency);
   const discountAmount = getDiscountAmount(currency);

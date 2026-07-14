@@ -7,6 +7,7 @@ import { createOrderDirect, type OrderInput, type PaymentMethod } from "@/lib/or
 import { deductStockForItems } from "@/lib/stock";
 import { resolveDiscountForOrder } from "@/lib/discounts";
 import { getShippingPrice } from "@/lib/shipping/pricing";
+import { getDobirkaFee } from "@/lib/fees";
 import { checkRateLimit } from "@/lib/rateLimit";
 
 // Strop na množství jedné položky — brání zneužití (záporné/obří množství
@@ -81,8 +82,7 @@ export async function POST(req: Request) {
     // ne podle částky poslané klientem.
     const shippingPrice = getShippingPrice(orderData?.doprava, currencyCode);
 
-    const dobirkaFees: Record<string, number> = { CZK: 39, EUR: 1.59, USD: 1.79 };
-    const dobirkaFee = paymentMethod === "dobirka" ? dobirkaFees[currencyCode] ?? 39 : 0;
+    const dobirkaFee = paymentMethod === "dobirka" ? getDobirkaFee(currencyCode) : 0;
 
     // Sleva se u dobírky/převodu neřeší přes Stripe coupon — jen si ji
     // zaznamenáme pro přehled v adminu (odečet z celkové částky). Počítá ji
@@ -129,12 +129,26 @@ export async function POST(req: Request) {
       zboxId: orderData?.zbox?.id ?? null,
     };
 
-    const order = await createOrderDirect(orderInput);
-
     // Dobírka/převod nemá platební potvrzení jako karta — sklad si
-    // "rezervujeme" hned při vytvoření objednávky, stejně jako by to
-    // udělal kamenný obchod při přijetí objednávky k vyřízení.
-    await deductStockForItems(order.items);
+    // "rezervujeme" hned. Odečet děláme PŘED založením objednávky: když
+    // mezitím došlo skladem, objednávku vůbec nevytvoříme a čistě ji
+    // odmítneme (žádná platba zatím neproběhla, takže je to v pořádku).
+    const deduction = await deductStockForItems(resolvedItems);
+    if (!deduction.ok) {
+      const names = deduction.insufficientFields
+        .map((field) => {
+          const slug = field.split("|")[0];
+          return effectiveProducts.find((p) => p.slug === slug)?.name ?? slug;
+        })
+        .filter((name, i, arr) => arr.indexOf(name) === i) // deduplikace názvů
+        .join(", ");
+      return NextResponse.json(
+        { error: `Bohužel mezitím došlo skladem: ${names}. Upravte prosím množství v košíku.` },
+        { status: 409 },
+      );
+    }
+
+    const order = await createOrderDirect(orderInput);
 
     return NextResponse.json({ ok: true, orderId: order.id });
   } catch (err: any) {

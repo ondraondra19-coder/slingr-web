@@ -5,6 +5,9 @@ import {
   Banknote, ShieldCheck, Clock, Package, ArrowRight,
   CheckCircle2, Zap, HelpCircle, Building2,
 } from "lucide-react";
+import { SHIPPING_PRICES } from "@/lib/shipping/pricing";
+import { DOBIRKA_FEE } from "@/lib/fees";
+import { formatPrice, CURRENCIES } from "@/lib/currency";
 
 export const metadata = {
   title: "Doprava a platba | HackPack",
@@ -22,7 +25,7 @@ const shippingMethods = [
     tag: "Nejoblíbenější",
     tagColor: "text-primary bg-primary/10",
     desc: "Vyzvedněte si balíček na jednom z tisíců Z-Boxů a výdejních míst po celé ČR a SR. Čekací e-mail zašleme obratem.",
-    price: "89 Kč",
+    price: formatPrice(SHIPPING_PRICES.zasilkovna_box.CZK, CURRENCIES.CZK),
     freeOver: 0,
     detail: "Více než 7 000 výdejních míst",
   },
@@ -32,7 +35,7 @@ const shippingMethods = [
     tag: "Komfortní",
     tagColor: "text-text-base bg-secondary",
     desc: "Kurýr Zásilkovny přiveze zásilku přímo ke dveřím. Doručení 1–2 pracovní dny.",
-    price: "129 Kč",
+    price: formatPrice(SHIPPING_PRICES.zasilkovna_adresa.CZK, CURRENCIES.CZK),
     freeOver: 0,
     detail: "Doručení 1–2 pracovní dny",
   },
@@ -64,7 +67,7 @@ const paymentMethods = [
     icon: Banknote,
     title: "Dobírka",
     desc: "Při doručení na adresu platíte hotově nebo kartou kurýrovi. U výdejního Z-BOXu se dobírka platí předem v aplikaci Zásilkovna nebo přes odkaz z e-mailu.",
-    price: "+ 39 Kč",
+    price: `+ ${formatPrice(DOBIRKA_FEE.CZK, CURRENCIES.CZK)}`,
     isFree: false,
   },
 ];
