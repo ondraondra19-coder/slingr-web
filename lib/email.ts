@@ -160,6 +160,28 @@ function orderNumber(order: Order): string {
   return orderIdToVariableSymbol(order.id);
 }
 
+// Identifikace prodejce (jméno/firma, IČO, sídlo) — dokud nejsou vyplněné
+// env proměnné, blok se prostě vůbec nezobrazí (žádné vymyšlené placeholdery
+// v e-mailu skutečnému zákazníkovi). Neplátce DPH je teď natvrdo — až bude
+// prodejce plátcem DPH, bude potřeba i DIČ a rozpis DPH u položek/souhrnu,
+// to je oprava kódu, ne jen doplnění proměnné.
+function sellerBlock(): string {
+  const name = process.env.NEXT_PUBLIC_SELLER_NAME;
+  const ico = process.env.NEXT_PUBLIC_SELLER_ICO;
+  if (!name || !ico) return "";
+  const address = process.env.NEXT_PUBLIC_SELLER_ADDRESS;
+  return `
+    <div style="background:#f7f6f4;border-radius:12px;padding:16px 20px;margin:0 0 20px;">
+      <p style="margin:0 0 10px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">Prodejce</p>
+      <p style="margin:0;font-size:13px;line-height:1.6;color:#3f3f46;">
+        <strong style="color:#0f0f10;">${name}</strong><br />
+        ${address ? `${address}<br />` : ""}
+        IČO: ${ico}<br />
+        Neplátce DPH
+      </p>
+    </div>`;
+}
+
 // ── 1) Potvrzení objednávky ─────────────────────────────────────────────────
 
 async function bankTransferBlock(order: Order): Promise<{ html: string; attachment?: Attachment }> {
@@ -271,7 +293,7 @@ export function renderPaymentReceivedEmail(order: Order): { subject: string; htm
     `
     ${h1("Platbu jsme přijali")}
     ${p(`Ahoj ${order.customer.jmeno}, potvrzujeme, že platba za objednávku <strong>#${vs}</strong> ve výši <strong>${formatPrice(order.total, currency)}</strong> nám přišla na účet. Teď ji zabalíme a pošleme.`)}
-    <div style="display:inline-block;background:#ecfdf5;border:1px solid #a7f3d0;color:#047857;font-size:12px;font-weight:700;letter-spacing:0.02em;padding:6px 14px;border-radius:999px;margin:0 0 20px;">Zaplaceno</div>
+    ${sellerBlock()}
     <p style="margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">Přehled objednávky</p>
     ${itemsTable(order.items, currency)}
     ${priceSummary(order)}

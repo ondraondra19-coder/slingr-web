@@ -1,16 +1,16 @@
 # Graph Report - hackpack-web  (2026-07-15)
 
 ## Corpus Check
-- 134 files · ~312,360 words
+- 134 files · ~312,912 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 803 nodes · 1661 edges · 78 communities (40 shown, 38 thin omitted)
+- 806 nodes · 1681 edges · 70 communities (35 shown, 35 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 13 edges (avg confidence: 0.78)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8833e9bf`
+- Built from commit: `02d48ce3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -35,17 +35,12 @@
 - Address Lookup API (RUIAN)
 - Static Info Pages & Footer
 - Core NPM Dependencies
-- Cart State & Discounts
 - Order Form (Objednavka)
 - Product Search Bar
 - dependencies
 - Privacy Policy, Header & Logo
 - priceOverrides.ts
 - package.json
-- ProductsAdminList.tsx
-- Reviews.tsx
-- page.tsx
-- LangContext.tsx
 - Product Export Script
 - Product Update Script
 - react
@@ -55,13 +50,10 @@
 - i18n Request/Routing Config
 - Next.js Config
 - ESLint Config
-- page.tsx
 - next-intl Dependency
 - @stripe/stripe-js
 - Stripe.js Dependency
-- page.tsx
 - PostCSS Config
-- page.tsx
 - DiscountWidget.tsx
 - posthog-node
 - app/page.tsx (entry page)
@@ -89,14 +81,14 @@
 - stripe
 
 ## God Nodes (most connected - your core abstractions)
-1. `getRedis()` - 48 edges
+1. `getRedis()` - 49 edges
 2. `getCurrentSession()` - 31 edges
-3. `formatPrice()` - 27 edges
+3. `formatPrice()` - 28 edges
 4. `useCurrency()` - 21 edges
 5. `getPrice()` - 20 edges
 6. `getProductsWithPriceOverrides()` - 17 edges
-7. `compilerOptions` - 16 edges
-8. `p()` - 15 edges
+7. `p()` - 16 edges
+8. `compilerOptions` - 16 edges
 9. `getAllPosts()` - 14 edges
 10. `useCart()` - 13 edges
 
@@ -120,23 +112,23 @@
 - **Alternative Google Sheets authentication strategies** — readme_stock_google_sheets_api, readme_stock_service_account, readme_stock_google_auth_library [INFERRED 0.85]
 - **Environment variables required for stock integration** — readme_stock_env_local, readme_stock_google_sheet_id, readme_stock_google_sheets_api_key [EXTRACTED 1.00]
 
-## Communities (78 total, 38 thin omitted)
+## Communities (70 total, 35 thin omitted)
 
 ### Community 0 - "Orders & Checkout Pipeline"
-Cohesion: 0.08
-Nodes (40): ACTIVE_STATUSES, CURRENCY_SYMBOLS, formatDate(), formatMoney(), OrdersAdminList(), OrdersAdminListProps, PAYMENT_METHOD_LABELS, SHIPPING_PROVIDER_LABELS (+32 more)
+Cohesion: 0.07
+Nodes (50): ACTIVE_STATUSES, CURRENCY_SYMBOLS, formatDate(), formatMoney(), OrdersAdminList(), OrdersAdminListProps, PAYMENT_METHOD_LABELS, SHIPPING_PROVIDER_LABELS (+42 more)
 
 ### Community 1 - "Admin Accounts & Permissions"
 Cohesion: 0.07
-Nodes (60): AccountsAdminPanelProps, PERMISSION_LABELS, AdminDashboard(), AdminDashboardProps, getInitials(), AdminPage(), ReviewsAdminList(), ReviewsAdminListProps (+52 more)
+Nodes (49): AccountsAdminPanelProps, PERMISSION_LABELS, AdminDashboard(), AdminDashboardProps, getInitials(), AdminPage(), DELETE(), GET() (+41 more)
 
 ### Community 2 - "Blog / Magazine CMS"
-Cohesion: 0.10
-Nodes (32): AdminSearch(), AdminSearchProps, CURRENCY_SYMBOLS, formatMoney(), ContentPreview(), czechDateToInputValue(), EMPTY_FORM, FormState (+24 more)
+Cohesion: 0.09
+Nodes (35): AdminSearch(), AdminSearchProps, CURRENCY_SYMBOLS, formatMoney(), ContentPreview(), czechDateToInputValue(), EMPTY_FORM, FormState (+27 more)
 
 ### Community 3 - "Products, Categories & Stock"
-Cohesion: 0.09
-Nodes (41): DiscountsAdminPanel(), DiscountsAdminPanelProps, isExpired(), POST(), PriceEntry, getClientIp(), POST(), GET() (+33 more)
+Cohesion: 0.10
+Nodes (41): DELETE(), GET(), POST(), requirePermission(), getClientIp(), POST(), GET(), getClientIp() (+33 more)
 
 ### Community 4 - "TypeScript Config & Refs"
 Cohesion: 0.06
@@ -156,15 +148,15 @@ Nodes (21): geistMono, geistSans, metadata, viewport, CookieBanner(), getConsent
 
 ### Community 8 - "Admin Analytics Dashboard"
 Cohesion: 0.10
-Nodes (30): Tab, BarChart(), CURRENCY_LABELS, formatDateShort(), formatMoney(), RankedTable(), SectionCard(), StatCard() (+22 more)
+Nodes (28): Tab, BarChart(), CURRENCY_LABELS, formatDateShort(), formatMoney(), RankedTable(), SectionCard(), StatCard() (+20 more)
 
 ### Community 9 - "Reviews System"
 Cohesion: 0.14
 Nodes (18): MessagesAdminListProps, POST(), requireAccess(), DELETE(), GET(), PATCH(), requireAccess(), getClientIp() (+10 more)
 
 ### Community 10 - "Cart Page (Kosik)"
-Cohesion: 0.43
-Nodes (5): CURRENCIES, Currency, CurrencyCode, CurrencyContext, CurrencyContextType
+Cohesion: 0.20
+Nodes (14): ReviewsAdminList(), ReviewsAdminListProps, GET(), POST(), sendReviewThankYouEmail(), parseUserAgent(), addReview(), checkAndSetCooldown() (+6 more)
 
 ### Community 11 - "Admin Authentication"
 Cohesion: 0.32
@@ -174,41 +166,33 @@ Nodes (7): CartContext, CartCtx, CartItem, CartProvider(), fetchDiscount(), item
 Cohesion: 0.13
 Nodes (12): Home(), CategoryGrid(), HomeSlider(), slides, slidesData, calcAvg(), formatDate(), Review (+4 more)
 
-### Community 13 - "Category Listing & Featured Products"
-Cohesion: 0.23
-Nodes (8): anyInStock(), Category, KategorieClient(), maxStock(), sortOptions, StockPill(), StoredReview, Product
-
 ### Community 14 - "Dev Tooling Dependencies"
 Cohesion: 0.11
 Nodes (19): eslint, eslint-config-next, devDependencies, eslint, eslint-config-next, tailwindcss, @tailwindcss/postcss, @types/node (+11 more)
 
 ### Community 15 - "Product Detail Client"
-Cohesion: 0.16
-Nodes (7): COLOR_MAP, isLayeredColor(), MediaItem, ProduktClient(), trackEvent(), StockData, useStockPolling()
+Cohesion: 0.05
+Nodes (35): formatPrice(), normalizePrice(), priceEquals(), ProductsAdminList(), ProductsAdminListProps, POST(), PriceEntry, KategoriePage() (+27 more)
 
 ### Community 16 - "Contact Messages"
-Cohesion: 0.07
-Nodes (33): GET(), POST(), KategoriePage(), ProduktPage(), SITE_URL, sitemap(), STATIC_PAGES, sendOrderConfirmationEmail() (+25 more)
+Cohesion: 0.16
+Nodes (15): POST(), StockEntryInput, GET(), ProduktPage(), products, fetchFromRedis(), getProductStock(), getStock() (+7 more)
 
 ### Community 17 - "Address Lookup API (RUIAN)"
 Cohesion: 0.29
 Nodes (14): AdresaResult, callRuian(), capitalize(), formatPsc(), GET(), isJunkLokalita(), isMultiPsc(), isSilnaUlice() (+6 more)
 
 ### Community 18 - "Static Info Pages & Footer"
-Cohesion: 0.12
-Nodes (4): categories, footerNav, socialLinks, trustItems
+Cohesion: 0.05
+Nodes (18): categories, calcStats(), formatDate(), RecenzePage(), Review, ReviewCard(), Window, team (+10 more)
 
 ### Community 19 - "Core NPM Dependencies"
-Cohesion: 0.11
-Nodes (30): BankovniPrevod(), Snapshot, SnapshotInfo, SnapshotItem, SuccessContent(), formatPrice(), addressBlock(), bankTransferBlock() (+22 more)
-
-### Community 20 - "Cart State & Discounts"
-Cohesion: 0.20
-Nodes (14): normalizeName(), POST(), ADMIN_COOKIE_NAME, ADMIN_HINT_COOKIE_NAME, bufToHex(), checkPassword(), createSessionToken(), getKey() (+6 more)
+Cohesion: 0.12
+Nodes (31): BankovniPrevod(), Snapshot, SnapshotInfo, SnapshotItem, SuccessContent(), formatPrice(), addressBlock(), bankTransferBlock() (+23 more)
 
 ### Community 21 - "Order Form (Objednavka)"
-Cohesion: 0.21
-Nodes (11): BESTSELLER_SLUGS, COLOR_LABELS, getProductImgs(), KosikPage(), ProductCard(), translateValue(), FEATURED_SLUGS, FeaturedProducts() (+3 more)
+Cohesion: 0.16
+Nodes (15): BESTSELLER_SLUGS, COLOR_LABELS, getProductImgs(), KosikPage(), ProductCard(), translateValue(), FEATURED_SLUGS, FeaturedProducts() (+7 more)
 
 ### Community 22 - "Product Search Bar"
 Cohesion: 0.26
@@ -216,31 +200,19 @@ Nodes (13): buildFuse(), CATEGORY_LABELS, ConfidentCard(), expandQuery(), getCat
 
 ### Community 23 - "dependencies"
 Cohesion: 0.12
-Nodes (17): lucide-react, next, next-intl, dependencies, lucide-react, next, next-intl, posthog-js (+9 more)
+Nodes (17): fuse.js, lucide-react, next, next-intl, dependencies, fuse.js, lucide-react, next (+9 more)
 
 ### Community 24 - "Privacy Policy, Header & Logo"
-Cohesion: 0.25
-Nodes (10): Header(), languages, navRight, readLangFromCookie(), switchGoogleTranslate(), InfoGrid(), Logo(), useLang() (+2 more)
+Cohesion: 0.18
+Nodes (14): Header(), languages, navRight, readLangFromCookie(), switchGoogleTranslate(), InfoGrid(), Logo(), LangContext (+6 more)
 
 ### Community 25 - "priceOverrides.ts"
-Cohesion: 0.13
-Nodes (12): benefits, metadata, paymentMethods, shippingMethods, dopravyOptions, ObjednavkaPage(), PacketaPoint, platbyOptions (+4 more)
+Cohesion: 0.22
+Nodes (6): benefits, metadata, paymentMethods, shippingMethods, DOBIRKA_FEE, SHIPPING_PRICES
 
 ### Community 26 - "package.json"
 Cohesion: 0.22
 Nodes (8): name, private, scripts, build, dev, lint, start, version
-
-### Community 27 - "ProductsAdminList.tsx"
-Cohesion: 0.22
-Nodes (4): defaultForm, FormState, returnMethods, steps
-
-### Community 29 - "page.tsx"
-Cohesion: 0.38
-Nodes (6): calcStats(), formatDate(), RecenzePage(), Review, ReviewCard(), Window
-
-### Community 30 - "LangContext.tsx"
-Cohesion: 0.50
-Nodes (4): LangContext, LangProvider(), Locale, readLocale()
 
 ### Community 31 - "Product Export Script"
 Cohesion: 0.29
@@ -255,28 +227,28 @@ Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
 ### Community 51 - "DiscountWidget.tsx"
-Cohesion: 0.83
-Nodes (3): DiscountWidget(), useCart(), approxConvert()
+Cohesion: 0.26
+Nodes (10): dopravyOptions, ObjednavkaPage(), PacketaPoint, platbyOptions, Window, DiscountWidget(), useCart(), useCurrency() (+2 more)
 
 ## Knowledge Gaps
 - **230 isolated node(s):** `PERMISSION_LABELS`, `AccountsAdminPanelProps`, `AdminDashboardProps`, `AdminSearchProps`, `CURRENCY_SYMBOLS` (+225 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **38 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **35 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `qrcode` connect `Core NPM Dependencies` to `dependencies`?**
-  _High betweenness centrality (0.114) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `dependencies` to `react`, `resend`, `stripe`, `@stripe/stripe-js`, `Core NPM Dependencies`, `posthog-node`, `package.json`, `Reviews.tsx`?**
-  _High betweenness centrality (0.114) - this node is a cross-community bridge._
+  _High betweenness centrality (0.113) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `dependencies` to `react`, `resend`, `Category Listing & Featured Products`, `stripe`, `@stripe/stripe-js`, `Core NPM Dependencies`, `posthog-node`, `package.json`?**
+  _High betweenness centrality (0.113) - this node is a cross-community bridge._
 - **What connects `PERMISSION_LABELS`, `AccountsAdminPanelProps`, `AdminDashboardProps` to the rest of the system?**
   _230 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Orders & Checkout Pipeline` be split into smaller, more focused modules?**
-  _Cohesion score 0.08244897959183674 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06775956284153005 - nodes in this community are weakly interconnected._
 - **Should `Admin Accounts & Permissions` be split into smaller, more focused modules?**
-  _Cohesion score 0.06527682843472317 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0744047619047619 - nodes in this community are weakly interconnected._
 - **Should `Blog / Magazine CMS` be split into smaller, more focused modules?**
-  _Cohesion score 0.10365853658536585 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09191919191919191 - nodes in this community are weakly interconnected._
 - **Should `Products, Categories & Stock` be split into smaller, more focused modules?**
-  _Cohesion score 0.08705882352941176 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09796806966618288 - nodes in this community are weakly interconnected._
