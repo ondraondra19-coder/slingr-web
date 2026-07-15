@@ -8,6 +8,7 @@ import type { Order, OrderItem } from "./orders";
 import { CURRENCIES, formatPrice, type Currency, type CurrencyCode } from "./currency";
 import { approxConvert } from "./discounts";
 import { buildSpdString, orderIdToVariableSymbol } from "./qrPlatba";
+import { generatePaymentReceiptPdf } from "./pdf";
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? "HackPack <info@hackpack.cz>";
 const SUPPORT_EMAIL = "info@hackpack.cz";
@@ -295,6 +296,7 @@ export function renderPaymentReceivedEmail(order: Order): { subject: string; htm
     `
     ${h1("Platbu jsme přijali")}
     ${p(`Ahoj ${order.customer.jmeno}, potvrzujeme, že platba za objednávku <strong>#${vs}</strong> ve výši <strong>${formatPrice(order.total, currency)}</strong> nám přišla na účet. Teď ji zabalíme a pošleme.`)}
+    ${p(`Přehled objednávky v příloze najdeš i jako PDF ke stažení.`)}
     ${sellerBlock()}
     <p style="margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">Přehled objednávky</p>
     ${itemsTable(order.items, currency)}
@@ -309,7 +311,18 @@ export function renderPaymentReceivedEmail(order: Order): { subject: string; htm
 export async function sendPaymentReceivedEmail(order: Order): Promise<boolean> {
   if (!order.customer.email) return false;
   const { subject, html } = renderPaymentReceivedEmail(order);
-  return send(order.customer.email, subject, html);
+
+  // PDF se generuje jako běžná (ne-inline) příloha — stejně jako QR platba,
+  // CID inline přílohy Resend v sandboxu spolehlivě nedoručí (viz git historie).
+  let attachments: Attachment[] | undefined;
+  try {
+    const pdf = await generatePaymentReceiptPdf(order);
+    attachments = [{ content: pdf.toString("base64"), filename: `objednavka-${orderNumber(order)}.pdf`, contentType: "application/pdf" }];
+  } catch (err) {
+    console.error("Generování PDF přehledu objednávky selhalo:", err);
+  }
+
+  return send(order.customer.email, subject, html, attachments);
 }
 
 // ── 2) Odeslání zásilky ──────────────────────────────────────────────────────

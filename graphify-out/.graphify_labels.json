@@ -28,9 +28,10 @@
   "26": "package.json",
   "27": "KategorieClient.tsx",
   "28": "currency.ts",
+  "29": "page.tsx",
+  "30": "sitemap.ts",
   "31": "Product Export Script",
   "32": "Product Update Script",
-  "33": "react",
   "34": "Terms & Conditions Page",
   "35": "Manual Translations Hook",
   "36": "Admin Login Page",
@@ -42,11 +43,9 @@
   "42": "Cookie Consent Reset Button",
   "43": "ESLint Config",
   "45": "next-intl Dependency",
-  "46": "@stripe/stripe-js",
   "47": "Stripe.js Dependency",
   "49": "PostCSS Config",
   "51": "DiscountWidget.tsx",
-  "52": "posthog-node",
   "53": "app/page.tsx (entry page)",
   "54": "create-next-app (bootstrap tool)",
   "55": "Geist (Vercel font family)",
@@ -69,7 +68,5 @@
   "72": "Service Account auth (private sheet alternative)",
   "73": "StockBadge (UI component)",
   "74": "Vercel (company/creator of Next.js)",
-  "75": "Vercel Platform (deployment target)",
-  "76": "resend",
-  "77": "stripe"
+  "75": "Vercel Platform (deployment target)"
 }

@@ -520,8 +520,8 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1784040068.3100371,
-    "ast_hash": "9f43a90339ce90facb49ab15a1e61904",
+    "mtime": 1784127625.9071963,
+    "ast_hash": "7181471e135e6d0e94ec24e11aa66b6b",
     "semantic_hash": ""
   },
   "postcss.config.mjs": {
@@ -1025,13 +1025,23 @@
     "semantic_hash": ""
   },
   "lib/email.ts": {
-    "mtime": 1784126875.0901527,
-    "ast_hash": "75aafba0990819a8f74fbe1699395d48",
+    "mtime": 1784128196.2644184,
+    "ast_hash": "95e7728344e9b067d816bd21967013c6",
     "semantic_hash": ""
   },
   "lib/analytics.ts": {
     "mtime": 1784069259.5192559,
     "ast_hash": "727df7c29c7a7c41136aa7d871cef2b6",
+    "semantic_hash": ""
+  },
+  "lib/pdf.ts": {
+    "mtime": 1784128314.076949,
+    "ast_hash": "21d29221480147fe6a6900e461834283",
+    "semantic_hash": ""
+  },
+  "assets/fonts/OFL.txt": {
+    "mtime": 1784128096.7106347,
+    "ast_hash": "ead60c8cdf357c455cf69725c35c3b2d",
     "semantic_hash": ""
   }
 }
