@@ -6,6 +6,7 @@ import { getProductsWithPriceOverrides, resolveItemUnitPrice } from "@/lib/price
 import { createOrderDirect, type OrderInput, type PaymentMethod } from "@/lib/orders";
 import { deductStockForItems } from "@/lib/stock";
 import { resolveDiscountForOrder } from "@/lib/discountsStore";
+import { sendOrderConfirmationEmail } from "@/lib/email";
 import { getShippingPrice } from "@/lib/shipping/pricing";
 import { getDobirkaFee } from "@/lib/fees";
 import { checkRateLimit } from "@/lib/rateLimit";
@@ -149,6 +150,10 @@ export async function POST(req: Request) {
     }
 
     const order = await createOrderDirect(orderInput);
+
+    // E-mail nesmí shodit vytvoření objednávky — sendOrderConfirmationEmail
+    // chyby jen loguje, nikdy nevyhazuje.
+    await sendOrderConfirmationEmail(order);
 
     return NextResponse.json({ ok: true, orderId: order.id });
   } catch (err: any) {

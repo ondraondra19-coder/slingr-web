@@ -38,6 +38,12 @@ export async function getAllMessages(): Promise<Message[]> {
   return messages;
 }
 
+// ── Jedna konkrétní zpráva podle id (pro odpověď emailem v adminu) ─────────
+export async function getMessageById(id: string): Promise<Message | null> {
+  const messages = await getAllMessages();
+  return messages.find((m) => m.id === id) ?? null;
+}
+
 // ── Vytvoření nové zprávy (validace probíhá v API route) ───────────────────
 export async function addMessage(input: NewMessageInput): Promise<Message> {
   const redis = getRedis();

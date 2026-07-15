@@ -1,7 +1,8 @@
 // app/api/admin/orders/[id]/route.ts
 import { NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/session";
-import { updateOrderStatus, updatePaymentStatus, type OrderStatus, type PaymentStatus } from "@/lib/orders";
+import { getOrder, updateOrderStatus, updatePaymentStatus, type OrderStatus, type PaymentStatus } from "@/lib/orders";
+import { sendOrderShippedEmail, sendOrderDeliveredEmail } from "@/lib/email";
 
 const VALID_STATUSES: OrderStatus[] = ["nova", "zabalena", "odeslana", "na_ceste", "dorucena"];
 const VALID_PAYMENT_STATUSES: PaymentStatus[] = ["zaplaceno", "ceka_na_platbu", "zaplatit_pri_prevzeti"];
@@ -24,8 +25,19 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       if (!VALID_STATUSES.includes(body.status)) {
         return NextResponse.json({ error: "Neplatný stav objednávky." }, { status: 400 });
       }
+
+      // Zjistíme předchozí stav PŘED přepisem — e-mail o odeslání/doručení
+      // chceme poslat jen při skutečném přechodu do stavu, ne při každém uložení.
+      const previous = await getOrder(id);
+
       const updated = await updateOrderStatus(id, body.status);
       if (!updated) return NextResponse.json({ error: "Objednávka nenalezena." }, { status: 404 });
+
+      if (previous && previous.status !== updated.status) {
+        if (updated.status === "odeslana") await sendOrderShippedEmail(updated);
+        if (updated.status === "dorucena") await sendOrderDeliveredEmail(updated);
+      }
+
       return NextResponse.json({ order: updated });
     }
 

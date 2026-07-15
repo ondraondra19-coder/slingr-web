@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getAllReviews, addReview, checkAndSetCooldown, toPublicReview } from "@/lib/reviews";
+import { sendReviewThankYouEmail } from "@/lib/email";
 
 const MAX_TEXT_LENGTH = 600;
 const MAX_NAME_LENGTH = 80;
@@ -107,6 +108,7 @@ export async function POST(req: Request) {
       email: emailValue,
       userAgent,
     });
+    if (emailValue) await sendReviewThankYouEmail(emailValue, name.trim());
     return NextResponse.json({ review: toPublicReview(review) });
   } catch (error) {
     console.error("Reviews POST error:", error);
