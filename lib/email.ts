@@ -179,7 +179,7 @@ function bankTransferBlock(order: Order): string {
     ? `
       <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid #e5e7eb;">
         <img
-          src="${SITE_URL}/api/qr?amount=${order.total}&currency=${order.currency}&vs=${encodeURIComponent(vs)}"
+          src="${SITE_URL}/api/qr?amount=${order.total}&amp;currency=${encodeURIComponent(order.currency)}&amp;vs=${encodeURIComponent(vs)}"
           width="160" height="160" alt="QR platba"
           style="display:block;margin:0 auto 6px;border-radius:8px;border:1px solid #e5e7eb;"
         />
