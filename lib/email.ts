@@ -63,7 +63,7 @@ function layout(previewText: string, bodyHtml: string): string {
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${previewText}</div>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f6f4;padding:32px 16px;">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;">
+      <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;">
         <tr><td style="background:${DARK};padding:24px 32px;">
           <span style="font-size:18px;font-weight:800;color:#ffffff;letter-spacing:-0.02em;">Hack<span style="color:${BRAND_COLOR};">Pack</span></span>
         </td></tr>
