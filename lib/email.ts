@@ -168,6 +168,25 @@ function bankTransferBlock(order: Order): string {
   }
   const vs = orderNumber(order);
   const currency = currencyOf(order.currency);
+
+  // QR Platba jen pro CZK/EUR (stejná podmínka jako na /objednavka/uspech —
+  // bankovní převod se pro USD vůbec nenabízí, viz /objednavka). Obrázek jde
+  // přes hostovanou URL (/api/qr), ne přes base64 data: URI — to Gmail a
+  // spousta dalších e-mailových klientů v HTML mailu prostě nezobrazí.
+  const iban = process.env.NEXT_PUBLIC_BANK_ACCOUNT_IBAN;
+  const showQr = Boolean(iban) && (order.currency === "CZK" || order.currency === "EUR");
+  const qrBlock = showQr
+    ? `
+      <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid #e5e7eb;">
+        <img
+          src="${SITE_URL}/api/qr?amount=${order.total}&currency=${order.currency}&vs=${encodeURIComponent(vs)}"
+          width="160" height="160" alt="QR platba"
+          style="display:block;margin:0 auto 6px;border-radius:8px;border:1px solid #e5e7eb;"
+        />
+        <p style="margin:0;font-size:11px;color:#9ca3af;">Naskenujte QR kód v bankovní aplikaci</p>
+      </div>`
+    : "";
+
   return `
     <div style="background:#f7f6f4;border-radius:12px;padding:16px 20px;margin:0 0 20px;">
       <p style="margin:0 0 10px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">Platební instrukce</p>
@@ -176,6 +195,7 @@ function bankTransferBlock(order: Order): string {
         ${summaryRow("Variabilní symbol", vs, { bold: true })}
         ${summaryRow("Částka", formatPrice(order.total, currency), { bold: true, color: BRAND_COLOR })}
       </table>
+      ${qrBlock}
     </div>
     ${p("Zásilku odešleme ihned po připsání platby na účet — obvykle do 1 pracovního dne.")}
   `;
