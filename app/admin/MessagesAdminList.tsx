@@ -38,7 +38,7 @@ function ReplyForm({ msg, onSent, onCancel }: { msg: Message; onSent: () => void
 
   return (
     <div className="mt-3 pt-3 border-t border-[#e5e7eb]">
-      {error && <p className="text-xs text-primary mb-2">{error}</p>}
+      {error && <p className="text-xs text-primary-ink mb-2">{error}</p>}
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -126,7 +126,7 @@ function MessageCard({
           <button
             onClick={() => onDelete(msg.id)}
             disabled={busy}
-            className="text-xs font-semibold text-primary hover:text-primary/80 disabled:opacity-50"
+            className="text-xs font-semibold text-primary-ink hover:text-primary-ink/80 disabled:opacity-50"
           >
             {busy ? "Pracuji…" : "Smazat"}
           </button>
@@ -212,7 +212,7 @@ export default function MessagesAdminList({ messages, onChange }: MessagesAdminL
 
   return (
     <div className="space-y-3">
-      {error && <p className="text-sm text-primary">{error}</p>}
+      {error && <p className="text-sm text-primary-ink">{error}</p>}
 
       {unread.length === 0 && (
         <p className="text-sm text-zinc-500">Žádné nové zprávy.</p>

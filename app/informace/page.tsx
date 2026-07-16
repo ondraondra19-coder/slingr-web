@@ -111,7 +111,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="bg-primary/20 text-primary rounded-sm px-0.5 not-italic font-semibold">
+      <mark className="bg-primary/20 text-primary-ink rounded-sm px-0.5 not-italic font-semibold">
         {text.slice(idx, idx + query.length)}
       </mark>
       {text.slice(idx + query.length)}
@@ -336,7 +336,7 @@ function SmartAddressBlock({
                   aria-selected={activeIndex === i}
                   onMouseDown={e => { e.preventDefault(); handleMestoSelect(r); }}
                   className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-3 ${activeIndex === i ? "bg-primary/10" : "hover:bg-primary/5"}`}>
-                  <MapPin size={12} className="text-primary shrink-0" />
+                  <MapPin size={12} className="text-primary-ink shrink-0" />
                   <span className="flex-1 min-w-0">
                     <span className="text-text-base font-medium">
                       <Highlight text={r.label} query={value.mesto} />
@@ -396,7 +396,7 @@ function SmartAddressBlock({
                   aria-selected={activeIndex === i}
                   onMouseDown={e => { e.preventDefault(); handleAdresaSelect(r); }}
                   className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-3 ${activeIndex === i ? "bg-primary/10" : "hover:bg-primary/5"}`}>
-                  <MapPin size={12} className="text-primary shrink-0" />
+                  <MapPin size={12} className="text-primary-ink shrink-0" />
                   <span className="flex-1 min-w-0">
                     <span className="text-text-base font-medium">
                       <Highlight text={r.uliceCp} query={value.uliceCp} />
@@ -459,9 +459,9 @@ function Stepper({ step }: { step: 1 | 2 | 3 }) {
           <div key={s.n} className="flex items-center flex-1 last:flex-none">
             <div className="flex flex-col items-center gap-1.5">
               {done && s.href ? (
-                <a href={s.href}><span className="w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center bg-primary text-white hover:brightness-110 transition-all"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></span></a>
+                <a href={s.href}><span className="w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center bg-primary text-on-primary hover:brightness-110 transition-all"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></span></a>
               ) : (
-                <span className={`w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center ${active ? "bg-primary text-dark" : "bg-border text-text-subtle"}`}>{s.n}</span>
+                <span className={`w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center ${active ? "bg-primary text-on-primary" : "bg-border text-text-subtle"}`}>{s.n}</span>
               )}
               <span className={`text-xs font-medium whitespace-nowrap ${active ? "text-text-base" : done ? "text-text-muted" : "text-text-subtle"}`}>{s.label}</span>
             </div>
@@ -500,7 +500,7 @@ function NameField({ value, onChange, error }: { value: string; onChange: (v: st
           placeholder="Jan Novák" autoComplete="name"
           className="flex-1 bg-surface px-4 py-2.5 text-sm text-text-base placeholder-text-subtle focus:outline-none" />
       </div>
-      {suggestion && <button type="button" onClick={() => { onChange(suggestion); setSuggestion(null); }} className="mt-1.5 flex items-center gap-1.5 text-xs text-primary hover:underline"><AlertCircle size={11} /> Měli jste na mysli: <span className="font-semibold">{suggestion}</span>?</button>}
+      {suggestion && <button type="button" onClick={() => { onChange(suggestion); setSuggestion(null); }} className="mt-1.5 flex items-center gap-1.5 text-xs text-primary-ink hover:underline"><AlertCircle size={11} /> Měli jste na mysli: <span className="font-semibold">{suggestion}</span>?</button>}
       {!suggestion && error && <p className="flex items-center gap-1 text-red-500 text-xs mt-1"><AlertCircle size={11} /> {error}</p>}
     </div>
   );
@@ -545,13 +545,19 @@ function SelectField({ label, name, value, onChange, options }: {
 
 function CheckRow({ checked, onChange, children }: { checked: boolean; onChange: () => void; children: React.ReactNode }) {
   return (
+    /* Zaškrtávátko samo je 18px — dotykový cíl by byl pod 24×24. Obalové
+       tlačítko je proto 44×44 a průhledné, kroužek kreslí vnitřní <span>.
+       Fajfka je tmavá: bílá na růžové #ff8ad0 má jen 2.14:1. */
     <label className="flex items-start gap-3 cursor-pointer group">
-      <button type="button" onClick={onChange}
-        className={`mt-0.5 rounded border-2 flex items-center justify-center shrink-0 transition-all ${checked ? "bg-primary border-primary" : "border-border-strong group-hover:border-primary/50"}`}
-        style={{ width: 18, height: 18 }}>
-        {checked && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5L8.5 2.5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+      <button type="button" onClick={onChange} role="checkbox" aria-checked={checked}
+        className="-ml-3 -mt-3 w-11 h-11 flex items-center justify-center shrink-0">
+        <span aria-hidden="true"
+          className={`rounded border-2 flex items-center justify-center transition-all ${checked ? "bg-primary border-primary" : "border-border-strong group-hover:border-primary/50"}`}
+          style={{ width: 18, height: 18 }}>
+          {checked && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5L8.5 2.5" stroke="#0f0f10" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+        </span>
       </button>
-      <span className="text-sm text-text-muted leading-snug">{children}</span>
+      <span className="text-sm text-text-muted leading-snug pt-0.5">{children}</span>
     </label>
   );
 }
@@ -783,7 +789,7 @@ export default function InformacePage() {
               <div className="bg-secondary border border-border rounded-2xl p-6 flex flex-col gap-4">
                 {isZasilkovna && orderData?.zbox && (
                   <div className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/20">
-                    <MapPin size={16} className="text-primary mt-0.5" />
+                    <MapPin size={16} className="text-primary-ink mt-0.5" />
                     <div>
                       <p className="text-text-base text-xs font-semibold">Vyzvednutí na výdejním místě</p>
                       <p className="text-text-muted text-xs mt-0.5">{orderData.zbox.nameStreet}, {orderData.zbox.city}</p>
@@ -833,7 +839,7 @@ export default function InformacePage() {
               <div className="bg-secondary border border-border rounded-2xl overflow-hidden">
                 <div className="px-5 py-4 border-b border-border flex items-center justify-between">
                   <h2 className="text-text-base font-semibold text-sm">Položky</h2>
-                  <a href="/kosik" className="text-primary text-xs hover:underline">Upravit</a>
+                  <a href="/kosik" className="text-primary-ink text-xs hover:underline">Upravit</a>
                 </div>
                 <div className="px-5 py-3 flex flex-col gap-3 max-h-48 overflow-y-auto">
                   {items.map((item) => (
@@ -889,13 +895,13 @@ export default function InformacePage() {
                   <div className="h-px bg-border my-1" />
                   <div className="flex items-center justify-between">
                     <span className="text-text-base font-bold">Celkem</span>
-                    <span className="text-primary font-extrabold text-xl">{formatPrice(celkem, currency)}</span>
+                    <span className="text-primary-ink font-extrabold text-xl">{formatPrice(celkem, currency)}</span>
                   </div>
                 </div>
                 <div className="px-5 pb-4"><DiscountWidget /></div>
                 <div className="px-5 pb-5 flex flex-col gap-3">
                   <button onClick={handleSubmit} disabled={loading || items.length === 0}
-                    className="w-full py-4 rounded-2xl bg-primary text-dark font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                    className="w-full py-4 rounded-2xl bg-primary text-on-primary font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                     {loading ? <Loader2 className="animate-spin" size={18} /> : <><Check size={16} /> Dokončit objednávku</>}
                   </button>
                   <p className="text-text-subtle text-xs text-center">Zabezpečená platba · SSL šifrování</p>

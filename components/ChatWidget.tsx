@@ -60,12 +60,17 @@ export default function ChatWidget() {
       {open && (
         <div className="bg-white rounded-2xl shadow-xl border border-border w-80 overflow-hidden">
           {/* Header */}
+          {/* Hlavička sedí na růžové — bílý text by měl 2.14:1, tmavý má 8.94:1. */}
           <div className="bg-primary px-5 py-4 flex items-center justify-between">
             <div>
-              <p className="text-white font-semibold text-sm">Máš dotaz?</p>
-              <p className="text-white/70 text-xs mt-0.5">Odpovíme co nejdříve</p>
+              <p className="text-on-primary font-semibold text-sm">Máš dotaz?</p>
+              <p className="text-on-primary/80 text-xs mt-0.5">Odpovíme co nejdříve</p>
             </div>
-            <button onClick={() => setOpen(false)} className="text-white/70 hover:text-white transition-colors">
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Zavřít formulář dotazu"
+              className="w-11 h-11 -mr-2 flex items-center justify-center rounded-full text-on-primary/80 hover:text-on-primary hover:bg-on-primary/10 transition-colors"
+            >
               <X size={18} />
             </button>
           </div>
@@ -87,22 +92,30 @@ export default function ChatWidget() {
                     {error}
                   </p>
                 )}
+                {/* Placeholder sám o sobě není spolehlivý přístupný název —
+                    po vyplnění zmizí a čtečka pak pole nepojmenuje. */}
                 <input
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="Tvoje jméno"
+                  aria-label="Tvoje jméno"
+                  autoComplete="name"
                   className="w-full border border-border rounded-xl px-4 py-2.5 text-sm text-text-base placeholder-text-subtle focus:outline-none focus:border-primary/50 transition-colors bg-surface"
                 />
                 <input
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="Tvůj e-mail"
+                  type="email"
+                  aria-label="Tvůj e-mail"
+                  autoComplete="email"
                   className="w-full border border-border rounded-xl px-4 py-2.5 text-sm text-text-base placeholder-text-subtle focus:outline-none focus:border-primary/50 transition-colors bg-surface"
                 />
                 <textarea
                   value={message}
                   onChange={e => setMessage(e.target.value)}
                   placeholder="Napiš svůj dotaz..."
+                  aria-label="Text dotazu"
                   rows={4}
                   className="w-full border border-border rounded-xl px-4 py-3 text-sm text-text-base placeholder-text-subtle focus:outline-none focus:border-primary/50 transition-colors resize-none bg-surface"
                 />
@@ -112,7 +125,7 @@ export default function ChatWidget() {
                   className={`w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm transition-all ${
                     !canSubmit
                       ? "bg-border text-text-subtle cursor-not-allowed"
-                      : "bg-primary text-dark hover:brightness-105"
+                      : "bg-primary text-on-primary hover:brightness-105"
                   }`}
                 >
                   <Send size={14} />
@@ -127,8 +140,10 @@ export default function ChatWidget() {
       {/* Tlačítko */}
       <button
         onClick={() => setOpen(v => !v)}
+        aria-label={open ? "Zavřít chat" : "Otevřít chat — napsat dotaz"}
+        aria-expanded={open}
         className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 ${
-          open ? "bg-text-base text-white" : "bg-primary text-dark hover:brightness-105 hover:scale-105"
+          open ? "bg-text-base text-white" : "bg-primary text-on-primary hover:brightness-105 hover:scale-105"
         }`}
       >
         {open ? <X size={22} /> : <MessageCircle size={24} />}

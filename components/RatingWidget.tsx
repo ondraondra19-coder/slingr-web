@@ -73,7 +73,7 @@ export default function RatingWidget() {
               </div>
               <div className="bg-surface rounded-xl px-4 py-4">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-extrabold text-primary">{recommend}%</span>
+                  <span className="text-3xl font-extrabold text-primary-ink">{recommend}%</span>
                 </div>
                 <p className="text-text-muted text-sm mt-1 leading-relaxed">zákazníků by doporučilo náš obchod</p>
                 <div className="mt-2 h-1.5 bg-border rounded-full overflow-hidden">
@@ -82,7 +82,7 @@ export default function RatingWidget() {
               </div>
             </>
           )}
-          <a href="/napsat-recenzi" className="inline-flex items-center gap-2 w-full justify-center px-4 py-2.5 rounded-xl bg-primary text-dark font-semibold text-sm hover:brightness-105 transition-all">
+          <a href="/napsat-recenzi" className="inline-flex items-center gap-2 w-full justify-center px-4 py-2.5 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:brightness-105 transition-all">
             Napsat recenzi
             <ArrowRight size={14} />
           </a>

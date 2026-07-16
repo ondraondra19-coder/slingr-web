@@ -314,7 +314,7 @@ export default function ProductsAdminList({ products, stock, initialQuery }: Pro
                           <img src={product.img} alt={product.name} className="w-full h-full object-cover" />
                         </div>
                         <div>
-                          <h4 className="text-xs font-bold text-[#0f0f10] leading-tight group-hover:text-primary transition-colors">
+                          <h4 className="text-xs font-bold text-[#0f0f10] leading-tight group-hover:text-primary-ink transition-colors">
                             {product.name}
                           </h4>
                           <span className="text-[10px] font-mono text-zinc-400 block mt-0.5">{product.slug}</span>

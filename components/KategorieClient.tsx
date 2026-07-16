@@ -128,6 +128,9 @@ function DualRangeSlider({
           className="absolute h-1.5 rounded-full bg-primary"
           style={{ left: `${pctMin}%`, right: `${100 - pctMax}%` }}
         />
+        {/* Úchyt: viditelný kroužek zůstává 16px (vnitřní <span>), ale samotný
+            div je 32×32 a průhledný — dotykový cíl tak splní 24×24 minimum.
+            aria-valuetext říká čtečce "1290 Kč", ne holé číslo. */}
         <div
           role="slider"
           tabIndex={0}
@@ -135,7 +138,8 @@ function DualRangeSlider({
           aria-valuemin={min}
           aria-valuemax={max}
           aria-valuenow={valueMin}
-          className="absolute top-1/2 w-4 h-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary border-2 border-white shadow cursor-grab active:cursor-grabbing touch-none"
+          aria-valuetext={`${valueMin} Kč`}
+          className="absolute top-1/2 w-8 h-8 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none"
           style={{ left: `${pctMin}%` }}
           onPointerDown={startDrag(onChangeMin, clampMin)}
           onPointerMove={handleDrag(onChangeMin, clampMin)}
@@ -143,7 +147,9 @@ function DualRangeSlider({
             if (e.key === "ArrowRight") onChangeMin(clampMin(valueMin + step));
             if (e.key === "ArrowLeft") onChangeMin(Math.max(valueMin - step, min));
           }}
-        />
+        >
+          <span aria-hidden="true" className="w-4 h-4 rounded-full bg-primary border-2 border-white shadow" />
+        </div>
         <div
           role="slider"
           tabIndex={0}
@@ -151,7 +157,8 @@ function DualRangeSlider({
           aria-valuemin={min}
           aria-valuemax={max}
           aria-valuenow={valueMax}
-          className="absolute top-1/2 w-4 h-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary border-2 border-white shadow cursor-grab active:cursor-grabbing touch-none"
+          aria-valuetext={`${valueMax} Kč`}
+          className="absolute top-1/2 w-8 h-8 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none"
           style={{ left: `${pctMax}%` }}
           onPointerDown={startDrag(onChangeMax, clampMax)}
           onPointerMove={handleDrag(onChangeMax, clampMax)}
@@ -159,7 +166,9 @@ function DualRangeSlider({
             if (e.key === "ArrowLeft") onChangeMax(clampMax(valueMax - step));
             if (e.key === "ArrowRight") onChangeMax(Math.min(valueMax + step, max));
           }}
-        />
+        >
+          <span aria-hidden="true" className="w-4 h-4 rounded-full bg-primary border-2 border-white shadow" />
+        </div>
       </div>
     </div>
   );
@@ -221,10 +230,11 @@ export default function KategorieClient({
         <div>
           <button
             onClick={() => setPriceOpen(v => !v)}
-            className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-text-base hover:text-primary transition-colors"
+            aria-expanded={priceOpen}
+            className="w-full flex items-center justify-between px-5 py-4 min-h-11 text-sm font-semibold text-text-base hover:text-primary-ink transition-colors"
           >
             Cena
-            <ChevronDown size={14} className={`transition-transform duration-200 ${priceOpen ? "rotate-180" : ""}`} />
+            <ChevronDown size={14} aria-hidden="true" className={`transition-transform duration-200 ${priceOpen ? "rotate-180" : ""}`} />
           </button>
           {priceOpen && (
             <div className="px-5 pb-5">
@@ -241,22 +251,27 @@ export default function KategorieClient({
         <div>
           <button
             onClick={() => setAvailOpen(v => !v)}
-            className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-text-base hover:text-primary transition-colors"
+            aria-expanded={availOpen}
+            className="w-full flex items-center justify-between px-5 py-4 min-h-11 text-sm font-semibold text-text-base hover:text-primary-ink transition-colors"
           >
             Dostupnost
-            <ChevronDown size={14} className={`transition-transform duration-200 ${availOpen ? "rotate-180" : ""}`} />
+            <ChevronDown size={14} aria-hidden="true" className={`transition-transform duration-200 ${availOpen ? "rotate-180" : ""}`} />
           </button>
           {availOpen && (
             <div className="px-5 pb-5">
+              {/* Zaškrtávátko je kreslené divem — bez role/aria-checked ho čtečka
+                  ohlásí jen jako tlačítko a stav vůbec nesdělí. */}
               <button
                 onClick={() => setOnlyInStock(v => !v)}
-                className="flex items-center gap-3 text-sm text-text-muted hover:text-text-base transition-colors w-full"
+                role="checkbox"
+                aria-checked={onlyInStock}
+                className="flex items-center gap-3 text-sm text-text-muted hover:text-text-base transition-colors w-full min-h-11"
               >
-                <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-150 shrink-0 ${
+                <span aria-hidden="true" className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-150 shrink-0 ${
                   onlyInStock ? "bg-primary border-primary" : "border-border-strong"
                 }`}>
-                  {onlyInStock && <Check size={11} strokeWidth={3} className="text-dark" />}
-                </div>
+                  {onlyInStock && <Check size={11} strokeWidth={3} className="text-on-primary" />}
+                </span>
                 Pouze skladem
               </button>
             </div>
@@ -288,24 +303,31 @@ export default function KategorieClient({
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Mobile filter button */}
+            {/* Popisek je pod sm: schovaný → aria-label drží název i tam.
+                Tečka aktivních filtrů je jen vizuální signál, proto se stav
+                říká slovy v aria-labelu. */}
             <button
               onClick={() => setMobileFilterOpen(true)}
-              className="lg:hidden inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white border border-border text-text-muted text-sm hover:text-text-base transition-colors shadow-sm"
+              aria-label={activeFilters ? "Filtrovat — filtry jsou aktivní" : "Filtrovat"}
+              className="lg:hidden inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 min-h-11 rounded-xl bg-white border border-border text-text-muted text-sm hover:text-text-base transition-colors shadow-sm"
             >
-              <SlidersHorizontal size={14} />
+              <SlidersHorizontal size={14} aria-hidden="true" />
               <span className="hidden sm:inline">Filtrovat</span>
-              {activeFilters && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+              {activeFilters && <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-primary" />}
             </button>
 
             {/* Sort */}
             <div className="relative">
               <button
                 onClick={() => setSortOpen(v => !v)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white border border-border text-text-muted text-sm hover:text-text-base transition-colors shadow-sm"
+                aria-label={`Řadit produkty — vybráno ${currentSort.label}`}
+                aria-expanded={sortOpen}
+                aria-haspopup="menu"
+                className="inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 min-h-11 rounded-xl bg-white border border-border text-text-muted text-sm hover:text-text-base transition-colors shadow-sm"
               >
                 <span className="hidden sm:inline">{currentSort.label}</span>
                 <span className="sm:hidden">Řadit</span>
-                <ChevronDown size={13} className={`transition-transform duration-200 ${sortOpen ? "rotate-180" : ""}`} />
+                <ChevronDown size={13} aria-hidden="true" className={`transition-transform duration-200 ${sortOpen ? "rotate-180" : ""}`} />
               </button>
               {sortOpen && (
                 <div className="absolute right-0 top-full mt-2 bg-white border border-border rounded-xl py-1.5 z-30 min-w-[180px] shadow-lg">
@@ -314,7 +336,7 @@ export default function KategorieClient({
                       key={opt.value}
                       onClick={() => { setSort(opt.value); setSortOpen(false); }}
                       className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
-                        sort === opt.value ? "text-primary" : "text-text-muted hover:text-text-base"
+                        sort === opt.value ? "text-primary-ink" : "text-text-muted hover:text-text-base"
                       }`}
                     >
                       {opt.label}
@@ -335,11 +357,11 @@ export default function KategorieClient({
             <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-sm">
               <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                 <div className="flex items-center gap-2">
-                  <SlidersHorizontal size={14} className="text-primary" />
+                  <SlidersHorizontal size={14} className="text-primary-ink" />
                   <span className="text-text-base font-semibold text-sm">Filtrovat</span>
                 </div>
                 {activeFilters && (
-                  <button onClick={resetFilters} className="text-text-subtle hover:text-primary text-xs transition-colors">
+                  <button onClick={resetFilters} className="text-text-subtle hover:text-primary-ink text-xs transition-colors">
                     Zrušit vše
                   </button>
                 )}
@@ -360,7 +382,7 @@ export default function KategorieClient({
                 <p className="text-text-muted text-sm mt-1">Zkus změnit nebo zrušit filtry.</p>
                 <button
                   onClick={resetFilters}
-                  className="mt-5 px-5 py-2.5 rounded-full bg-primary text-dark font-semibold text-sm hover:brightness-105 transition-all"
+                  className="mt-5 px-5 py-2.5 rounded-full bg-primary text-on-primary font-semibold text-sm hover:brightness-105 transition-all"
                 >
                   Zrušit filtry
                 </button>
@@ -409,7 +431,7 @@ export default function KategorieClient({
 
                         {/* Cena + stock */}
                         <div className="flex items-center justify-between gap-2 mt-0.5">
-                          <p className="text-primary font-extrabold text-2xl leading-none">
+                          <p className="text-primary-ink font-extrabold text-2xl leading-none">
                             {formatPrice(getPrice(product.price as any, currency), currency)}
                           </p>
                           <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${stockLabel.cls}`}>
@@ -419,7 +441,7 @@ export default function KategorieClient({
                         </div>
 
                         {/* Tlačítko Detail */}
-                        <div className="mt-1 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-dark text-sm font-bold transition-all duration-150 group-hover:brightness-105">
+                        <div className="mt-1 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-bold transition-all duration-150 group-hover:brightness-105">
                           <span>Detail</span>
                           <ChevronDown size={14} className="-rotate-90" />
                         </div>
@@ -443,10 +465,14 @@ export default function KategorieClient({
           <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-border rounded-t-2xl p-5 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
-                <SlidersHorizontal size={15} className="text-primary" />
+                <SlidersHorizontal size={15} className="text-primary-ink" />
                 <span className="text-text-base font-semibold">Filtrovat</span>
               </div>
-              <button onClick={() => setMobileFilterOpen(false)} className="text-text-muted hover:text-text-base transition-colors">
+              <button
+                onClick={() => setMobileFilterOpen(false)}
+                aria-label="Zavřít filtry"
+                className="w-11 h-11 -mr-2 flex items-center justify-center rounded-full text-text-muted hover:text-text-base hover:bg-surface transition-colors"
+              >
                 <X size={20} />
               </button>
             </div>
@@ -463,7 +489,7 @@ export default function KategorieClient({
             )}
             <button
               onClick={() => setMobileFilterOpen(false)}
-              className="mt-3 w-full px-5 py-3 rounded-xl bg-primary text-dark font-semibold text-sm hover:brightness-105 transition-all"
+              className="mt-3 w-full px-5 py-3 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:brightness-105 transition-all"
             >
               Zobrazit výsledky ({filtered.length})
             </button>

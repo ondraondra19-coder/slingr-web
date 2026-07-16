@@ -166,7 +166,7 @@ export default function DashboardHome({
           <SectionCard
             title="Poslední objednávky"
             action={
-              <button onClick={() => onNavigate("reservations")} className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline shrink-0">
+              <button onClick={() => onNavigate("reservations")} className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-ink hover:underline shrink-0">
                 Zobrazit vše <ArrowRight size={11} />
               </button>
             }
@@ -196,7 +196,7 @@ export default function DashboardHome({
             title="Nízký sklad"
             subtitle={`Varianty s ${LOW_STOCK_THRESHOLD} nebo méně kusy na skladě`}
             action={
-              <button onClick={() => onNavigate("products")} className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline shrink-0">
+              <button onClick={() => onNavigate("products")} className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-ink hover:underline shrink-0">
                 Přejít na produkty <ArrowRight size={11} />
               </button>
             }

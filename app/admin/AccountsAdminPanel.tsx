@@ -108,7 +108,7 @@ export default function AccountsAdminPanel({ accounts, onChange }: AccountsAdmin
 
   return (
     <div className="space-y-8">
-      {error && <p className="text-sm text-primary">{error}</p>}
+      {error && <p className="text-sm text-primary-ink">{error}</p>}
 
       {/* Vytvoření nového účtu */}
       <form onSubmit={handleCreate} className="border border-[#e5e7eb] rounded-xl p-4 space-y-3">
@@ -174,7 +174,7 @@ export default function AccountsAdminPanel({ accounts, onChange }: AccountsAdmin
               <button
                 onClick={() => handleDelete(account.id)}
                 disabled={busyId === account.id}
-                className="text-xs font-semibold text-primary hover:text-primary/80 disabled:opacity-50"
+                className="text-xs font-semibold text-primary-ink hover:text-primary-ink/80 disabled:opacity-50"
               >
                 Smazat
               </button>

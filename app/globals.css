@@ -1,18 +1,29 @@
 @import "tailwindcss";
 
 @theme {
+  /* Značková růžová. Je to světlý odstín — unese text jen na tmavém pozadí
+     (na #1c1c1c má 7.95:1). Na bílé/surface má jen 2.14:1, takže jako barvu
+     textu na světlém pozadí použij --color-primary-ink, ne tuhle. */
   --color-primary: #ff8ad0;
   --color-secondary: #f1f1f3;
   --color-accent: #FF00E5;
+  /* POZOR: "dark" je historický název, ale je to BÍLÁ — používá se jako
+     pozadí stránek (`min-h-screen bg-dark`). Nepřebarvovat. */
   --color-dark: #ffffff;
   --color-header: #1c1c1c;
   --color-surface: #f7f6f4;
 
-  /* Texty */
+  /* Text na růžovém pozadí (tlačítka). Bílá na #ff8ad0 dává 2.14:1, tohle 8.94:1. */
+  --color-on-primary: #0f0f10;
+  /* Růžová pro text na světlém pozadí — ceny, odkazy. 5.13:1 na bílé, 4.75:1 na surface. */
+  --color-primary-ink: #c72d7b;
+
+  /* Texty. Odstíny voleny tak, aby splnily 4.5:1 na bílé (#ffffff),
+     surface (#f7f6f4) i secondary (#f1f1f3). */
   --color-text-base: #0f0f10;
   --color-text-strong: #fafafa;
-  --color-text-muted: #6b7280;
-  --color-text-subtle: #9ca3af;
+  --color-text-muted: #4b5563;
+  --color-text-subtle: #646b79;
 
   /* Bordery */
   --color-border: #e5e7eb;

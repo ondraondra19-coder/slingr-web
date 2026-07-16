@@ -129,7 +129,7 @@ export default function DiscountWidget() {
         <button
           onClick={handleApply}
           disabled={!code.trim() || checking}
-          className="px-4 py-2.5 rounded-xl bg-primary text-dark font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+          className="px-4 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
         >
           {checking ? "Ověřuji…" : "Uplatnit"}
         </button>

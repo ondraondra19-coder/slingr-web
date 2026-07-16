@@ -44,25 +44,25 @@ export default function KontaktPage() {
                 <div className="flex flex-col gap-5">
                   <a href="tel:+420737565577" className="flex items-start gap-4 group">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <Phone size={18} className="text-primary" />
+                      <Phone size={18} className="text-primary-ink" />
                     </div>
                     <div>
                       <p className="text-text-subtle text-xs mb-0.5">Telefon</p>
-                      <p className="text-text-base font-semibold group-hover:text-primary transition-colors">+420 737 565 577</p>
+                      <p className="text-text-base font-semibold group-hover:text-primary-ink transition-colors">+420 737 565 577</p>
                     </div>
                   </a>
                   <a href="mailto:info@dodelat.cz" className="flex items-start gap-4 group">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <Mail size={18} className="text-primary" />
+                      <Mail size={18} className="text-primary-ink" />
                     </div>
                     <div>
                       <p className="text-text-subtle text-xs mb-0.5">E-mail</p>
-                      <p className="text-text-base font-semibold group-hover:text-primary transition-colors">info@dodelat.cz</p>
+                      <p className="text-text-base font-semibold group-hover:text-primary-ink transition-colors">info@dodelat.cz</p>
                     </div>
                   </a>
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <MapPin size={18} className="text-primary" />
+                      <MapPin size={18} className="text-primary-ink" />
                     </div>
                     <div>
                       <p className="text-text-subtle text-xs mb-0.5">Adresa</p>
@@ -132,7 +132,7 @@ export default function KontaktPage() {
                     className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all w-fit ${
                       !name || !email || !message
                         ? "bg-border text-text-subtle cursor-not-allowed"
-                        : "bg-primary text-dark hover:brightness-105 active:scale-[0.98]"
+                        : "bg-primary text-on-primary hover:brightness-105 active:scale-[0.98]"
                     }`}
                   >
                     <Send size={14} />

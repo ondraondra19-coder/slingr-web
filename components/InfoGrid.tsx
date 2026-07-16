@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 import { useT } from "@/lib/useT";
 
 export default function InfoGrid() {
@@ -13,8 +14,16 @@ export default function InfoGrid() {
 
           {/* Levý — tým */}
           <div className="relative overflow-hidden rounded-2xl min-h-[320px] flex items-end p-8 bg-[#1a1a1a]">
-            <img src="/images/page/hero-product.jpg" alt="Náš tým" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+            {/* Přes next/image: syrový <img> obcházel optimalizaci a stahoval
+                plných 188 KB JPEG. sizes = dva sloupce od md výš, jinak celá šířka. */}
+            <Image
+              src="/images/page/hero-product.jpg"
+              alt=""
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+            />
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
             <div className="relative z-10">
               <h3 className="text-white text-2xl font-extrabold leading-tight">
                 {t("teamTitle")}<br />
@@ -34,8 +43,14 @@ export default function InfoGrid() {
 
           {/* Pravý — kontakt */}
           <div className="relative overflow-hidden rounded-2xl min-h-[220px] flex items-end p-8 bg-[#1a1a1a]">
-            <img src="/images/page/setup.jpg" alt="Kontakt" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+            <Image
+              src="/images/page/setup.jpg"
+              alt=""
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+            />
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
             <div className="relative z-10">
               <h3 className="text-white text-2xl font-extrabold leading-tight">
                 {t("contactTitle")}<br />

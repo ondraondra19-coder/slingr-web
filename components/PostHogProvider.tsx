@@ -10,10 +10,14 @@
 // při přihlášení se vedle httpOnly session cookie nastaví i čitelný
 // "admin_hint" cookie (viz lib/adminAuth.ts), podle kterého se tu
 // sledování rovnou vypne.
+//
+// posthog-js se sem NEimportuje staticky — je to ~75 KB, které by se stahovaly
+// do bundlu každé stránky i bez souhlasu. Stáhne se dynamicky (loadPostHog)
+// teprve ve chvíli, kdy souhlas skutečně padne.
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import posthog from "posthog-js";
 import { isPostHogLoaded } from "@/lib/analytics";
+import { getPostHog, loadPostHog } from "@/lib/posthogClient";
 import { CONSENT_CHANGED_EVENT, hasAnalyticsConsent } from "@/lib/consent";
 
 const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
@@ -33,11 +37,18 @@ function isAdminRoute(): boolean {
 }
 
 function capturePageview() {
-  posthog.capture("$pageview", { $current_url: window.location.href });
+  getPostHog()?.capture("$pageview", { $current_url: window.location.href });
 }
 
-function startPostHog() {
+// Teprve tady se posthog-js stáhne ze sítě — dřív než sem se běh dostane jen
+// tehdy, když je souhlas udělený a nejde o admina.
+async function startPostHog() {
   if (!POSTHOG_KEY || !POSTHOG_HOST || isPostHogLoaded() || isAdminSession() || isAdminRoute()) return;
+  const posthog = await loadPostHog();
+  // Mezi await a init mohl uživatel souhlas stihnout odvolat (nebo se odnavigovat
+  // do adminu) — druhá kontrola brání tomu, aby se PostHog zapnul až po odvolání.
+  if (!hasAnalyticsConsent() || isAdminSession() || isAdminRoute()) return;
+  if (isPostHogLoaded()) return;
   posthog.init(POSTHOG_KEY, {
     api_host: POSTHOG_HOST,
     person_profiles: "identified_only",
@@ -77,7 +88,10 @@ function clearPostHogStorage() {
 }
 
 function stopPostHog() {
+  // Když se posthog-js nikdy nestáhl, není co odhlašovat — jen uklidíme
+  // případné pozůstatky z dřívější návštěvy (viz clearPostHogStorage).
   if (isPostHogLoaded()) {
+    const posthog = getPostHog()!;
     posthog.opt_out_capturing();
     posthog.reset(true); // true = zahodit i device_id, nejen distinct_id
   }
@@ -90,10 +104,12 @@ function syncTrackingState() {
     return;
   }
   if (isPostHogLoaded()) {
-    posthog.opt_in_capturing();
+    getPostHog()!.opt_in_capturing();
     capturePageview();
   } else {
-    startPostHog();
+    // Bez await: listener CONSENT_CHANGED_EVENT musí zůstat synchronní.
+    // Chyba stahování nesmí shodit stránku — analytika prostě nenaběhne.
+    void startPostHog().catch(() => {});
   }
 }
 

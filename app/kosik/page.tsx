@@ -64,14 +64,14 @@ function Stepper({ step }: { step: 1 | 2 | 3 }) {
             <div className="flex flex-col items-center gap-1.5">
               {done && s.href ? (
                 <a href={s.href}>
-                  <span className="w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center bg-primary text-white hover:brightness-110 transition-all">
+                  <span className="w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center bg-primary text-on-primary hover:brightness-110 transition-all">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                       <path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </span>
                 </a>
               ) : (
-                <span className={`w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center ${active ? "bg-primary text-white" : "bg-border text-text-subtle"}`}>
+                <span className={`w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center ${active ? "bg-primary text-on-primary" : "bg-border text-text-subtle"}`}>
                   {s.n}
                 </span>
               )}
@@ -97,11 +97,11 @@ function ProductCard({ product, currency }: { product: typeof staticProducts[0];
       style={{ width: "clamp(200px, 22vw, 280px)" }}
     >
       <div className="relative bg-surface overflow-hidden" style={{ aspectRatio: "1/1" }}>
-        <Image src={product.img} alt={product.name} fill className="object-contain p-6 transition-transform duration-300 group-hover:scale-[1.04]" />
+        <Image src={product.img} alt="" fill sizes="(max-width: 640px) 50vw, 25vw" className="object-contain p-6 transition-transform duration-300 group-hover:scale-[1.04]" />
       </div>
       <div className="p-4 flex flex-col gap-1.5">
-        <p className="text-text-base text-sm font-semibold leading-snug line-clamp-2 group-hover:text-primary transition-colors">{product.name}</p>
-        <p className="text-primary font-extrabold text-xl mt-1">{formatPrice(getPrice(product.price, currency), currency)}</p>
+        <p className="text-text-base text-sm font-semibold leading-snug line-clamp-2 group-hover:text-primary-ink transition-colors">{product.name}</p>
+        <p className="text-primary-ink font-extrabold text-xl mt-1">{formatPrice(getPrice(product.price, currency), currency)}</p>
       </div>
     </a>
   );
@@ -344,7 +344,7 @@ export default function KosikPage() {
                     </div>
                     <p className="text-text-base font-semibold text-lg">Košík je prázdný</p>
                     <p className="text-text-muted text-sm mt-2">Přidejte produkty a vraťte se sem.</p>
-                    <a href="/" className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-dark font-bold text-sm hover:brightness-105 transition-all">
+                    <a href="/" className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-on-primary font-bold text-sm hover:brightness-105 transition-all">
                       Pokračovat v nákupu <ArrowRight size={14} />
                     </a>
                   </div>
@@ -364,15 +364,15 @@ export default function KosikPage() {
                                 const layered = getProductImgs(item.slug, item.variants);
                                 return (
                                   <div className="relative w-20 h-20 sm:w-32 sm:h-32 rounded-xl overflow-hidden bg-surface">
-                                    <Image src={layered?.img ?? item.img} alt={item.name} fill className="object-contain p-3" />
-                                    {layered?.img2 && <Image src={layered.img2} alt="" fill className="object-contain p-3" />}
+                                    <Image src={layered?.img ?? item.img} alt="" fill sizes="128px" className="object-contain p-3" />
+                                    {layered?.img2 && <Image src={layered.img2} alt="" fill sizes="128px" className="object-contain p-3" />}
                                   </div>
                                 );
                               })()}
                             </a>
                             <div className="flex-1 min-w-0 py-1">
                               <a href={`/produkt/${item.slug}`}>
-                                <p className="text-text-base font-semibold text-base leading-snug hover:text-primary transition-colors">{item.name}</p>
+                                <p className="text-text-base font-semibold text-base leading-snug hover:text-primary-ink transition-colors">{item.name}</p>
                               </a>
                               {item.variants && Object.entries(item.variants).length > 0 && (
                                 <p className="text-text-subtle text-sm mt-1.5">
@@ -384,34 +384,39 @@ export default function KosikPage() {
                                   <button
                                     onClick={() => updateQuantity(item.slug, item.quantity - 1, item.variants)}
                                     disabled={item.quantity <= 1}
-                                    className={`w-10 h-10 flex items-center justify-center transition-colors ${
+                                    aria-label={`Ubrat jeden kus — ${item.name}`}
+                                    className={`w-11 h-11 flex items-center justify-center transition-colors ${
                                       item.quantity <= 1
                                         ? "text-border cursor-not-allowed"
                                         : "text-text-muted hover:text-text-base hover:bg-border"
                                     }`}
                                   >
-                                    <Minus size={14} />
+                                    <Minus size={14} aria-hidden="true" />
                                   </button>
-                                  <span className="w-9 text-center text-text-base text-sm font-medium">{item.quantity}</span>
+                                  <span aria-live="polite" aria-atomic="true" className="w-9 text-center text-text-base text-sm font-medium">
+                                    <span className="sr-only">Počet kusů: </span>{item.quantity}
+                                  </span>
                                   <button
                                     onClick={() => updateQuantity(item.slug, item.quantity + 1, item.variants)}
                                     disabled={item.quantity >= getMaxQty(item)}
-                                    className={`w-10 h-10 flex items-center justify-center transition-colors ${
+                                    aria-label={`Přidat jeden kus — ${item.name}`}
+                                    className={`w-11 h-11 flex items-center justify-center transition-colors ${
                                       item.quantity >= getMaxQty(item)
                                         ? "text-border cursor-not-allowed"
                                         : "text-text-muted hover:text-text-base hover:bg-border"
                                     }`}
                                   >
-                                    <Plus size={14} />
+                                    <Plus size={14} aria-hidden="true" />
                                   </button>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                  <p className="text-primary font-extrabold text-xl">{formatPrice(itemPrice * item.quantity, currency)}</p>
+                                  <p className="text-primary-ink font-extrabold text-xl">{formatPrice(itemPrice * item.quantity, currency)}</p>
                                   <button
                                     onClick={() => removeItem(item.slug, item.variants)}
-                                    className="text-text-subtle hover:text-red-500 transition-colors"
+                                    aria-label={`Odebrat z košíku — ${item.name}`}
+                                    className="w-11 h-11 flex items-center justify-center rounded-lg text-text-subtle hover:text-red-500 hover:bg-red-50 transition-colors"
                                   >
-                                    <Trash2 size={17} />
+                                    <Trash2 size={17} aria-hidden="true" />
                                   </button>
                                 </div>
                               </div>
@@ -419,7 +424,7 @@ export default function KosikPage() {
                           </div>
                         );
                       })}
-                      <a href="/" className="inline-flex items-center gap-1.5 text-primary text-sm hover:underline mt-2">
+                      <a href="/" className="inline-flex items-center gap-1.5 text-primary-ink text-sm hover:underline mt-2">
                         ← Pokračovat v nákupu
                       </a>
                     </div>
@@ -453,7 +458,7 @@ export default function KosikPage() {
                           <div className="h-px bg-border my-1" />
                           <div className="flex items-center justify-between">
                             <span className="text-text-base font-bold">Celkem bez dopravy</span>
-                            <span className="text-primary font-extrabold text-xl">{formatPrice(finalPrice, currency)}</span>
+                            <span className="text-primary-ink font-extrabold text-xl">{formatPrice(finalPrice, currency)}</span>
                           </div>
                         </div>
 
@@ -464,7 +469,7 @@ export default function KosikPage() {
                         <div className="px-6 pb-6">
                           <button
                             onClick={handleCheckout}
-                            className="w-full py-4 rounded-2xl bg-primary text-dark font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                            className="w-full py-4 rounded-2xl bg-primary text-on-primary font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                           >
                             Pokračovat k dopravě <ArrowRight size={15} />
                           </button>

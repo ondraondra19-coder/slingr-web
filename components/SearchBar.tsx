@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo, useId } from "react";
 import Fuse from "fuse.js";
 import { Search, X, ArrowUpRight } from "lucide-react";
 import { products as staticProducts } from "@/lib/products";
@@ -213,8 +213,9 @@ function ConfidentCard({
       <div className="relative w-28 h-28 rounded-2xl border border-white/10 bg-white/5 shrink-0 overflow-hidden">
         <Image
           src={product.img}
-          alt={product.name}
+          alt=""
           fill
+          sizes="112px"
           className="object-contain p-2.5 group-hover:scale-105 transition-transform duration-300"
         />
       </div>
@@ -223,7 +224,7 @@ function ConfidentCard({
         <p className="text-text-strong text-strong font-semibold leading-snug line-clamp-2">
           {highlightMatch(getProductName(product, locale), query)}
         </p>
-        <p className="text-white/30 text-xs mt-1.5 capitalize">
+        <p className="text-white/55 text-xs mt-1.5 capitalize">
           {getCategoryLabel(product.categories[0])}
         </p>
       </div>
@@ -234,7 +235,7 @@ function ConfidentCard({
         </span>
         <ArrowUpRight
           size={16}
-          className="text-white/30 group-hover:text-white/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-150"
+          className="text-white/55 group-hover:text-white/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-150"
         />
       </div>
     </a>
@@ -252,6 +253,12 @@ export default function SearchBar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const t = useT("search");
   const { locale } = useLang();
+  // SearchBar je na stránce dvakrát (desktop + mobil), takže id musí být
+  // unikátní — jinak by aria-controls/aria-activedescendant mířily na cizí
+  // seznam. useId vygeneruje stabilní id shodné mezi serverem a klientem.
+  const uid = useId();
+  const listboxId = `${uid}-listbox`;
+  const optionId = (i: number) => `${uid}-opt-${i}`;
 
   // Vyhledávání funguje hned se statickým katalogem (žádné čekání na síť),
   // a jakmile dorazí odpověď z /api/products (s aktuálními cenami z admina),
@@ -349,6 +356,12 @@ export default function SearchBar() {
           aria-label="Vyhledat produkty"
           aria-expanded={showDropdown}
           aria-haspopup="listbox"
+          /* combobox bez aria-controls je nekompletní — čtečka pak neví, který
+             seznam k poli patří. aria-activedescendant hlásí položku vybranou
+             šipkami, aniž by se z inputu ztratil fokus. */
+          aria-controls={showDropdown ? listboxId : undefined}
+          aria-activedescendant={showDropdown && activeIndex >= 0 ? optionId(activeIndex) : undefined}
+          aria-autocomplete="list"
           role="combobox"
           translate="no"
           className="w-full bg-secondary border border-border rounded-full pl-10 pr-9 py-2.5 text-sm text-text-base placeholder-text-subtle focus:outline-none focus:border-primary/40 transition-colors"
@@ -364,55 +377,57 @@ export default function SearchBar() {
         )}
       </div>
 
-      {/* Dropdown */}
+      {/* Dropdown — role="listbox" NEPATŘÍ na tenhle vnější obal: obsahuje i
+          hlavičku s počtem a oddělovač, a listbox smí mít jen položky (jinak je
+          strom přístupnosti rozbitý). Listboxem je až vnitřní <ul> níž. */}
       {showDropdown && (
-        <div
-          role="listbox"
-          className="absolute top-full left-0 right-0 mt-2 bg-header border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
-        >
+        <div className="absolute top-full left-0 right-0 mt-2 bg-header border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden">
           {results.length === 0 ? (
             <div className="px-5 py-8 text-center">
-              <p className="text-text-subtle text-sm">Žádné výsledky pro</p>
-              <p className="text-text-muted text-sm font-semibold mt-0.5">„{trimmed}"</p>
+              {/* Dropdown má tmavé pozadí (bg-header) — text-muted/subtle jsou
+                  laděné na světlá pozadí, tady by splynuly. */}
+              <p className="text-white/60 text-sm">Žádné výsledky pro</p>
+              <p className="text-white/90 text-sm font-semibold mt-0.5">„{trimmed}"</p>
             </div>
           ) : (
             <>
               {/* Header */}
               <div className="px-4 py-2.5 border-b border-white/10 flex items-center justify-between">
-                <span className="text-white/30 text-xs">
+                <span aria-live="polite" className="text-white/55 text-xs">
                   {results.length} {results.length === 1 ? "výsledek" : results.length < 5 ? "výsledky" : "výsledků"} pro „{trimmed}"
                 </span>
-                <kbd className="hidden sm:inline-flex items-center gap-1 text-white/20 text-[10px] font-mono">
+                <kbd aria-hidden="true" className="hidden sm:inline-flex items-center gap-1 text-white/50 text-[10px] font-mono">
                   <span>↑↓</span> navigace
                 </kbd>
               </div>
 
-              {/* Confident card */}
-              {confident && (
-                <>
-                  <ConfidentCard
-                    product={results[0]}
-                    query={trimmed}
-                    currency={currency}
-                    locale={locale}
-                    onClick={handleResultClick}
-                  />
-                  {otherResults.length > 0 && (
-                    <div className="px-4 py-1.5 border-t border-b border-white/5">
-                      <span className="text-white/20 text-[10px] uppercase tracking-wider font-medium">
-                        Další výsledky
-                      </span>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {/* Standardní seznam */}
-              <ul>
+              {/* Jeden listbox pro všechny položky — včetně "confident" karty,
+                  která je taky plnohodnotný výsledek (index 0 při navigaci šipkami). */}
+              <ul role="listbox" id={listboxId} aria-label="Výsledky vyhledávání">
+                {confident && (
+                  <li id={optionId(0)} role="option" aria-selected={activeIndex === 0}>
+                    <ConfidentCard
+                      product={results[0]}
+                      query={trimmed}
+                      currency={currency}
+                      locale={locale}
+                      onClick={handleResultClick}
+                    />
+                  </li>
+                )}
+                {confident && otherResults.length > 0 && (
+                  /* Vizuální předěl uvnitř listboxu musí být presentation,
+                     jinak by ho čtečka počítala jako další položku. */
+                  <li role="presentation" className="px-4 py-1.5 border-t border-b border-white/5">
+                    <span className="text-white/50 text-[10px] uppercase tracking-wider font-medium">
+                      Další výsledky
+                    </span>
+                  </li>
+                )}
                 {otherResults.map((product, i) => {
                   const navIndex = confident ? i + 1 : i;
                   return (
-                    <li key={product.slug} role="option" aria-selected={navIndex === activeIndex}>
+                    <li key={product.slug} id={optionId(navIndex)} role="option" aria-selected={navIndex === activeIndex}>
                       <a
                         href={`/produkt/${product.slug}`}
                         onClick={handleResultClick}
@@ -424,16 +439,17 @@ export default function SearchBar() {
                         <div className="relative w-11 h-11 rounded-xl border border-white/10 bg-white/5 shrink-0 overflow-hidden">
                           <Image
                             src={product.img}
-                            alt={product.name}
+                            alt=""
                             fill
+                            sizes="44px"
                             className="object-contain p-1.5"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-text-subtle text-sm font-medium line-clamp-1">
+                          <p className="text-white/90 text-sm font-medium line-clamp-1">
                             {highlightMatch(getProductName(product, locale), trimmed)}
                           </p>
-                          <p className="text-white/30 text-xs mt-0.5 capitalize">
+                          <p className="text-white/55 text-xs mt-0.5 capitalize">
                             {getCategoryLabel(product.categories[0])}
                           </p>
                         </div>
@@ -443,7 +459,7 @@ export default function SearchBar() {
                           </span>
                           <ArrowUpRight
                             size={14}
-                            className={`text-white/20 transition-all duration-150 ${
+                            className={`text-white/50 transition-all duration-150 ${
                               navIndex === activeIndex ? "text-white/60 translate-x-0.5 -translate-y-0.5" : ""
                             }`}
                           />

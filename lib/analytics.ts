@@ -9,10 +9,15 @@
 // lib/posthog-server.ts (posthog-node, ne posthog-js — ten by na serveru
 // neměl co dělat), ale typy/názvy eventů sdílí odsud přes `import type`, aby
 // zůstaly konzistentní s tím, co pak čte lib/posthog-query.ts pro admin panel.
-import posthog from "posthog-js";
+// posthog-js se sem NEimportuje staticky — stahoval by se do bundlu každé
+// stránky. Instanci drží lib/posthogClient.ts a je k dispozici až po souhlasu
+// (viz components/PostHogProvider.tsx). Chování volajících se nemění: bez
+// souhlasu tu instance chybí a obě funkce dál v tichosti nic neudělají.
+import { getPostHog } from "./posthogClient";
 
 export function isPostHogLoaded(): boolean {
-  return Boolean((posthog as unknown as { __loaded?: boolean }).__loaded);
+  const posthog = getPostHog();
+  return Boolean(posthog && (posthog as unknown as { __loaded?: boolean }).__loaded);
 }
 
 // ── Client-side eventy (chování návštěvníka) ────────────────────────────────
@@ -31,12 +36,12 @@ export function trackEvent<E extends ClientAnalyticsEventName>(
   properties: ClientAnalyticsEventMap[E],
 ): void {
   if (!isPostHogLoaded()) return; // bez souhlasu (nebo mimo klienta) se nic neposílá
-  posthog.capture(event, properties);
+  getPostHog()!.capture(event, properties);
 }
 
 export function identifyUser(distinctId: string, properties?: Record<string, string>): void {
   if (!isPostHogLoaded()) return;
-  posthog.identify(distinctId, properties);
+  getPostHog()!.identify(distinctId, properties);
 }
 
 // ── Server-side eventy (Stripe webhook) ─────────────────────────────────────

@@ -63,7 +63,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 function StatusPill({ label, active = false }: { label: string; active?: boolean }) {
     return (
         <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-bold uppercase tracking-tight ${
-            active ? "bg-primary/10 border-primary/20 text-primary" : "bg-surface border-border text-text-muted"
+            active ? "bg-primary/10 border-primary/20 text-primary-ink" : "bg-surface border-border text-text-muted"
         }`}>
             <span className={`w-2 h-2 rounded-full ${active ? "bg-primary animate-pulse" : "bg-border"}`} />
             {label}
@@ -75,8 +75,9 @@ function CopyButton({ value }: { value: string }) {
     const [copied, setCopied] = useState(false);
     return (
         <button onClick={() => { navigator.clipboard.writeText(value).catch(() => {}); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-            className="p-1.5 rounded-lg hover:bg-border/50 transition-colors text-text-subtle hover:text-text-base" title="Kopírovat">
-            {copied ? <Check size={13} className="text-primary" /> : <Copy size={13} />}
+            aria-label={copied ? `Zkopírováno: ${value}` : `Kopírovat: ${value}`}
+            className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-border/50 transition-colors text-text-subtle hover:text-text-base" title="Kopírovat">
+            {copied ? <Check size={13} aria-hidden="true" className="text-primary-ink" /> : <Copy size={13} aria-hidden="true" />}
         </button>
     );
 }
@@ -136,7 +137,7 @@ function BankovniPrevod({ totalStr, vsymbol, amount, currencyCode }: { totalStr:
                         </div>
                         <div>
                             <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-1.5">Částka</p>
-                            <div className="bg-white border border-primary/20 rounded-xl px-4 py-3 font-mono font-black text-primary text-lg">{totalStr}</div>
+                            <div className="bg-white border border-primary/20 rounded-xl px-4 py-3 font-mono font-black text-primary-ink text-lg">{totalStr}</div>
                         </div>
                     </div>
                 </div>
@@ -148,7 +149,7 @@ function BankovniPrevod({ totalStr, vsymbol, amount, currencyCode }: { totalStr:
                         ) : (
                             <div className="w-40 h-40 bg-surface rounded-lg border border-dashed border-border flex flex-col items-center justify-center gap-2">
                                 <div className="w-10 h-10 border-2 border-dashed border-text-subtle/30 rounded-full flex items-center justify-center">
-                                    <span className="text-primary font-extrabold text-[10px]">QR</span>
+                                    <span className="text-primary-ink font-extrabold text-[10px]">QR</span>
                                 </div>
                                 <span className="text-[10px] font-bold text-text-subtle uppercase tracking-tight text-center px-2">
                                     {showQr ? <>Generuji...</> : <>QR platba není<br />pro tuto měnu dostupná</>}
@@ -213,7 +214,7 @@ function Dobirka({ totalStr, isZasilkovnaBox }: { totalStr: string; isZasilkovna
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {steps.map((s) => (
                         <div key={s.step} className="flex items-start gap-4">
-                            <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-extrabold text-sm ${s.active ? "bg-primary text-dark shadow-lg shadow-primary/20" : "bg-white border border-border text-text-subtle"}`}>{s.step}</div>
+                            <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-extrabold text-sm ${s.active ? "bg-primary text-on-primary shadow-lg shadow-primary/20" : "bg-white border border-border text-text-subtle"}`}>{s.step}</div>
                             <div>
                                 <p className="text-sm font-bold text-text-base mb-0.5">{s.title}</p>
                                 <p className="text-xs text-text-muted leading-snug">{s.desc}</p>
@@ -260,7 +261,7 @@ function KartaStripe({ totalStr, orderId }: { totalStr: string; orderId: string 
                     ].map(({ label, value, highlight }) => (
                         <div key={label} className="flex items-center justify-between py-3.5 border-b border-border last:border-0">
                             <span className="text-xs font-bold uppercase tracking-wider text-text-subtle">{label}</span>
-                            <span className={`text-sm font-bold ${highlight ? "text-primary" : "text-text-base"}`}>{value}</span>
+                            <span className={`text-sm font-bold ${highlight ? "text-primary-ink" : "text-text-base"}`}>{value}</span>
                         </div>
                     ))}
                     <div className="mt-5 flex items-center gap-2 justify-center">
@@ -310,7 +311,7 @@ function DeliveryAddressBlock({ info, orderData }: { info: SnapshotInfo; orderDa
                 <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-2">Způsob doručení</p>
                     <div className="flex items-center gap-2 text-sm font-semibold text-text-base">
-                        <Truck size={14} className="text-primary shrink-0" />
+                        <Truck size={14} className="text-primary-ink shrink-0" />
                         {orderData.dopravaName}
                     </div>
                 </div>
@@ -323,7 +324,7 @@ function DeliveryAddressBlock({ info, orderData }: { info: SnapshotInfo; orderDa
                 <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-2">Výdejní místo</p>
                     <div className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10">
-                        <Package size={14} className="text-primary mt-0.5 shrink-0" />
+                        <Package size={14} className="text-primary-ink mt-0.5 shrink-0" />
                         <div className="text-xs text-text-muted leading-relaxed">
                             <p className="font-bold text-text-base">{orderData.zbox.name}</p>
                             <p>{orderData.zbox.nameStreet}</p>
@@ -523,10 +524,10 @@ function SuccessContent() {
                         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
                             <div className="flex items-start gap-6">
                                 <div className="shrink-0 w-16 h-16 rounded-2xl bg-primary/15 border border-primary/20 flex items-center justify-center">
-                                    <CheckCircle2 size={30} className="text-primary" />
+                                    <CheckCircle2 size={30} className="text-primary-ink" />
                                 </div>
                                 <div>
-                                    <p className="text-primary text-xs font-bold uppercase tracking-[0.18em] mb-2">Objednávka přijata</p>
+                                    <p className="text-primary-ink text-xs font-bold uppercase tracking-[0.18em] mb-2">Objednávka přijata</p>
                                     <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight tracking-tight mb-3">Děkujeme za nákup!</h1>
                                     <p className="text-white/50 text-base leading-relaxed">
                                         Objednávka{" "}
@@ -636,7 +637,7 @@ function SuccessContent() {
                                         )}
                                         <div className="flex justify-between text-sm font-extrabold text-text-base pt-2 border-t border-border">
                                             <span>Celkem</span>
-                                            <span className="text-primary tabular-nums">{celkemStr}</span>
+                                            <span className="text-primary-ink tabular-nums">{celkemStr}</span>
                                         </div>
                                     </div>
                                 )}
@@ -702,7 +703,7 @@ function SuccessContent() {
 
                     {/* CTA */}
                     <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Link href="/" className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-primary text-dark font-extrabold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/10">
+                        <Link href="/" className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-primary text-on-primary font-extrabold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/10">
                             <ShoppingBag size={16} /> Pokračovat v nákupu
                         </Link>
                         <Link href="/reklamace" className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-border text-text-muted font-bold text-sm hover:bg-white hover:text-text-base transition-all flex items-center justify-center gap-2">

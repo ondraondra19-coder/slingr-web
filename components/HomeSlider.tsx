@@ -118,7 +118,7 @@ export default function HomeSlider() {
           <div className="flex flex-col gap-5 max-w-lg">
 
             {/* Label */}
-            <span className="inline-flex items-center gap-2 w-fit px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-widest">
+            <span className="inline-flex items-center gap-2 w-fit px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary-ink text-xs font-semibold uppercase tracking-widest">
               {slide.label}
             </span>
 
@@ -126,7 +126,7 @@ export default function HomeSlider() {
             <h2 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-[1.1] tracking-tight">
               <span className="text-text-base">{slide.headline}</span>
               <br />
-              <span className="text-primary">{slide.headlineAccent}</span>
+              <span className="text-primary-ink">{slide.headlineAccent}</span>
             </h2>
 
             {/* Sub */}
@@ -136,7 +136,7 @@ export default function HomeSlider() {
             <div className="flex items-center gap-3 mt-1">
               <a
                 href={slide.href}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-dark font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all duration-150"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-on-primary font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all duration-150"
               >
                 {slide.cta}
                 <ArrowRight size={14} />
@@ -152,10 +152,13 @@ export default function HomeSlider() {
             {/* Soft glow behind image */}
             <div className="absolute inset-8 rounded-full bg-primary/8 blur-3xl" />
             <div className="relative w-full h-full">
+              {/* Kontejner je clamp(280px, 32vw, 440px) — bez sizes by prohlížeč
+                  předpokládal 100vw a stáhl zbytečně velkou variantu. */}
               <Image
                 src={slide.img}
-                alt={slide.headline}
+                alt={`${slide.headline} ${slide.headlineAccent}`}
                 fill
+                sizes="(max-width: 768px) 0px, 440px"
                 className="object-contain drop-shadow-xl"
                 priority
               />
@@ -181,17 +184,26 @@ export default function HomeSlider() {
         <ChevronRight size={17} />
       </button>
 
-      {/* Dots */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
-        {slides.map((_, i) => (
+      {/* Dots — samotná tečka je 6px, což je hluboko pod 24×24. Tlačítko je proto
+          44×44 a průhledné; viditelnou tečku kreslí vnitřní <span>. Vzhled beze
+          změny, dotykový cíl vyhovuje. */}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center z-10" role="tablist" aria-label="Výběr slidu">
+        {slides.map((slide, i) => (
           <button
             key={i}
             onClick={() => go(i, i > current ? "right" : "left")}
-            aria-label={`Slide ${i + 1}`}
-            className={`rounded-full transition-all duration-300 ${
-              i === current ? "w-6 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-text-subtle hover:bg-text-muted"
-            }`}
-          />
+            role="tab"
+            aria-selected={i === current}
+            aria-label={`${slide.headline} ${slide.headlineAccent}`}
+            className="w-11 h-11 flex items-center justify-center group"
+          >
+            <span
+              aria-hidden="true"
+              className={`rounded-full transition-all duration-300 ${
+                i === current ? "w-6 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-text-subtle group-hover:bg-text-muted"
+              }`}
+            />
+          </button>
         ))}
       </div>
 

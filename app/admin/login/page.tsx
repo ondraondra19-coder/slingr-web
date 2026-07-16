@@ -44,7 +44,7 @@ function LoginForm() {
         {/* Logo ve stejném stylu jako v sidebaru dashboardu */}
         <div className="flex items-baseline font-bold tracking-tight text-lg mb-1 text-[#0f0f10]">
           <span>Hack</span>
-          <span className="text-primary">Pack</span>
+          <span className="text-primary-ink">Pack</span>
           <span className="ml-1.5 text-[9px] font-mono font-medium bg-primary/5 text-zinc-500 px-1 py-0.5 rounded uppercase tracking-wider">
             Admin
           </span>
@@ -78,12 +78,12 @@ function LoginForm() {
           className="w-full border border-[#e5e7eb] rounded-lg px-3 py-2 mb-4 text-sm text-[#0f0f10] focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
         />
 
-        {error && <p className="text-primary text-sm mb-4">{error}</p>}
+        {error && <p className="text-primary-ink text-sm mb-4">{error}</p>}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary text-white rounded-lg py-2 text-sm font-semibold hover:bg-primary/80 disabled:opacity-50 transition-colors"
+          className="w-full bg-primary text-on-primary rounded-lg py-2 text-sm font-semibold hover:bg-primary/80 disabled:opacity-50 transition-colors"
         >
           {loading ? "Přihlašuji…" : "Přihlásit se"}
         </button>

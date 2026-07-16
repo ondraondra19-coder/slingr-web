@@ -23,7 +23,7 @@ const shippingMethods = [
     icon: MapPin,
     title: "Zásilkovna — výdejní místo",
     tag: "Nejoblíbenější",
-    tagColor: "text-primary bg-primary/10",
+    tagColor: "text-primary-ink bg-primary/10",
     desc: "Vyzvedněte si balíček na jednom z tisíců Z-Boxů a výdejních míst po celé ČR a SR. Čekací e-mail zašleme obratem.",
     price: formatPrice(SHIPPING_PRICES.zasilkovna_box.CZK, CURRENCIES.CZK),
     freeOver: 0,
@@ -132,7 +132,7 @@ export default function DopravaAPlatbaPage() {
             </nav>
 
             <div className="max-w-2xl">
-              <p className="text-primary text-xs font-bold uppercase tracking-[0.18em] mb-4">
+              <p className="text-primary-ink text-xs font-bold uppercase tracking-[0.18em] mb-4">
                 Informace pro zákazníky
               </p>
               <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight tracking-tight mb-5">
@@ -156,7 +156,7 @@ export default function DopravaAPlatbaPage() {
                 className="bg-white rounded-2xl border border-border p-5 shadow-sm flex flex-col gap-3"
               >
                 <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center">
-                  <b.icon size={17} className="text-primary" />
+                  <b.icon size={17} className="text-primary-ink" />
                 </div>
                 <div>
                   <p className="text-text-base font-bold text-sm mb-1">{b.title}</p>
@@ -198,7 +198,7 @@ export default function DopravaAPlatbaPage() {
                         {s.price}
                       </p>
                       {s.freeOver > 0 && (
-                        <div className="inline-flex items-center gap-1 text-primary text-[11px] font-bold">
+                        <div className="inline-flex items-center gap-1 text-primary-ink text-[11px] font-bold">
                           <CheckCircle2 size={11} />
                           Zdarma nad {s.freeOver} Kč
                         </div>
@@ -230,7 +230,7 @@ export default function DopravaAPlatbaPage() {
                     <div className="flex items-start justify-between gap-3 mb-1">
                       <h3 className="text-text-base font-bold text-sm">{p.title}</h3>
                       <span className={`shrink-0 text-sm font-extrabold leading-none ${
-                        p.isFree ? "text-primary" : "text-text-base"
+                        p.isFree ? "text-primary-ink" : "text-text-base"
                       }`}>
                         {p.price}
                       </span>
@@ -249,7 +249,7 @@ export default function DopravaAPlatbaPage() {
                 <div className="lg:w-2 bg-primary shrink-0" />
                 <div className="flex-1 p-8 flex flex-col sm:flex-row items-start gap-6">
                   <div className="shrink-0 w-12 h-12 rounded-xl bg-primary/8 flex items-center justify-center">
-                    <ShieldCheck size={22} className="text-primary" />
+                    <ShieldCheck size={22} className="text-primary-ink" />
                   </div>
                   <div>
                     <p className="text-text-base font-bold text-base mb-2">
@@ -297,7 +297,7 @@ export default function DopravaAPlatbaPage() {
 
             <a
               href="/kontakt"
-              className="relative z-10 shrink-0 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-primary text-white font-bold text-sm hover:brightness-110 active:scale-[0.97] transition-all shadow-lg shadow-primary/20"
+              className="relative z-10 shrink-0 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-primary text-on-primary font-bold text-sm hover:brightness-110 active:scale-[0.97] transition-all shadow-lg shadow-primary/20"
             >
               Kontaktovat nás
               <ArrowRight size={15} />

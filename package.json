@@ -26,6 +26,16 @@
     "stripe": "^22.0.1",
     "xlsx": "^0.18.5"
   },
+  "_comment_browserslist": "Bez tohohle cílí Next až na Safari 12 (2018) a do bundlu přibalí polyfilly, které dnes nikdo nepotřebuje. Safari 15.4 = březen 2022, iOS 15 běží i na iPhonu 6s (2015) — reálné publikum e-shopu je pokryté. Když se objeví stížnost od starého zařízení, stačí čísla snížit.",
+  "browserslist": [
+    "chrome >= 108",
+    "edge >= 108",
+    "firefox >= 108",
+    "safari >= 15.4",
+    "ios_saf >= 15.4",
+    "not dead",
+    "not op_mini all"
+  ],
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

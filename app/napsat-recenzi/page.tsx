@@ -52,14 +52,14 @@ function ReviewCard({ review }: { review: Review }) {
   return (
     <div className="flex gap-4 py-5 border-b border-border last:border-0">
       <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-        <span className="text-primary text-xs font-bold">{review.initials}</span>
+        <span className="text-primary-ink text-xs font-bold">{review.initials}</span>
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 flex-wrap">
           <span className="text-text-base font-semibold text-sm">{review.name}</span>
           <div className="flex items-center gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} size={12} className={i < review.rating ? "fill-primary text-primary" : "fill-border text-border"} />
+              <Star key={i} size={12} className={i < review.rating ? "fill-primary text-primary-ink" : "fill-border text-border"} />
             ))}
           </div>
           <span className="text-text-subtle text-xs">{formatDate(review.date)}</span>
@@ -70,7 +70,7 @@ function ReviewCard({ review }: { review: Review }) {
         {isLong && (
           <button
             onClick={() => setExpanded(v => !v)}
-            className="mt-1.5 text-xs text-primary hover:underline flex items-center gap-1"
+            className="mt-1.5 text-xs text-primary-ink hover:underline flex items-center gap-1"
           >
             {expanded ? "Zobrazit méně" : "Zobrazit více"}
             <ChevronDown size={11} className={`transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
@@ -291,15 +291,21 @@ export default function RecenzePage() {
                   {/* Hvězdičky */}
                   <div>
                     <label className="block text-text-muted text-xs font-medium mb-2">Vaše hodnocení *</label>
-                    <div className="flex items-center gap-1">
+                    {/* Hvězdičky jsou výběr jedné hodnoty z pěti — radiogroup to
+                        čtečce sdělí i s pořadím ("3 z 5"). Bez aria-labelu to byla
+                        pětice nepojmenovaných tlačítek. */}
+                    <div className="flex items-center gap-1" role="radiogroup" aria-label="Hodnocení hvězdičkami">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <button key={i}
                           onMouseEnter={() => setHovered(i + 1)}
                           onMouseLeave={() => setHovered(0)}
                           onClick={() => setRating(i + 1)}
-                          className="transition-transform hover:scale-110"
+                          role="radio"
+                          aria-checked={rating === i + 1}
+                          aria-label={`${i + 1} ${i === 0 ? "hvězdička" : i < 4 ? "hvězdičky" : "hvězdiček"}`}
+                          className="w-11 h-11 flex items-center justify-center transition-transform hover:scale-110"
                         >
-                          <Star size={28} className={i < (hovered || rating) ? "fill-primary text-primary" : "fill-border text-border"} />
+                          <Star size={28} aria-hidden="true" className={i < (hovered || rating) ? "fill-primary text-primary-ink" : "fill-border text-border"} />
                         </button>
                       ))}
                       {rating > 0 && (
@@ -367,7 +373,7 @@ export default function RecenzePage() {
                     className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all w-fit ${
                       !canSubmit || submitting
                         ? "bg-border text-text-subtle cursor-not-allowed"
-                        : "bg-primary text-dark hover:brightness-105 active:scale-[0.98]"
+                        : "bg-primary text-on-primary hover:brightness-105 active:scale-[0.98]"
                     }`}>
                     <Send size={14} />
                     {submitting ? "Odesílám…" : "Odeslat hodnocení"}
@@ -392,7 +398,7 @@ export default function RecenzePage() {
                 <div className="py-5 flex justify-center border-t border-border">
                   <button
                     onClick={() => setVisibleCount(v => v + LOAD_MORE_COUNT)}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl border border-border text-text-muted text-sm font-medium hover:border-primary hover:text-primary transition-all"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl border border-border text-text-muted text-sm font-medium hover:border-primary hover:text-primary-ink transition-all"
                   >
                     Zobrazit další recenze
                     <ChevronDown size={15} />

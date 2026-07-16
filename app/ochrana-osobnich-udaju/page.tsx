@@ -10,7 +10,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <div className="mb-12">
       <h2 className="text-xl font-bold text-text-base mb-5 pb-3 border-b border-border">{title}</h2>
-      <div className="flex flex-col gap-4 text-text-muted text-base leading-relaxed [&_strong]:text-text-base [&_a]:text-primary [&_a]:hover:underline [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-2">
+      <div className="flex flex-col gap-4 text-text-muted text-base leading-relaxed [&_strong]:text-text-base [&_a]:text-primary-ink [&_a]:hover:underline [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-2">
         {children}
       </div>
     </div>

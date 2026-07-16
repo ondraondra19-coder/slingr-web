@@ -4,6 +4,13 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  images: {
+    // AVIF/WebP místo původních PNG/JPEG. Next zkouší formáty v tomto pořadí
+    // a podle Accept hlavičky prohlížeče vybere první podporovaný; staré
+    // prohlížeče dostanou originál, takže je to bezpečné.
+    formats: ["image/avif", "image/webp"],
+  },
+
   async headers() {
     return [
       {

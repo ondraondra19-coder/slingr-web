@@ -86,7 +86,7 @@ export default function CampaignsPanel() {
 
       {/* Počet odběratelů */}
       <div className="flex items-center gap-2 text-xs text-zinc-600 bg-zinc-50 border border-[#e5e7eb] rounded-xl px-4 py-3 w-fit">
-        <Users size={15} className="text-primary" />
+        <Users size={15} className="text-primary-ink" />
         <span>
           Odběratelé:{" "}
           <strong className="text-[#0f0f10]">
@@ -147,7 +147,7 @@ export default function CampaignsPanel() {
             </div>
             <div className="bg-white p-4">
               <div className="text-[#1c1c1c] font-extrabold text-sm mb-2">
-                Hack<span className="text-primary">Pack</span>
+                Hack<span className="text-primary-ink">Pack</span>
               </div>
               {subject.trim() && <div className="font-bold text-[#0f0f10] text-sm mb-2">{subject}</div>}
               <div className="text-zinc-600 text-xs leading-relaxed whitespace-pre-wrap">{body}</div>
@@ -174,7 +174,7 @@ export default function CampaignsPanel() {
             className={`flex items-start gap-2 text-xs rounded-lg px-3 py-2.5 ${
               notice.kind === "success"
                 ? "bg-green-50 text-green-700 border border-green-200"
-                : "bg-red-50 text-primary border border-red-200"
+                : "bg-red-50 text-primary-ink border border-red-200"
             }`}
           >
             {notice.kind === "success" ? (

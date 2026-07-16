@@ -82,7 +82,7 @@ export default function DiscountsAdminPanel({ discounts, onChange }: DiscountsAd
 
   return (
     <div className="space-y-8">
-      {error && <p className="text-sm text-primary">{error}</p>}
+      {error && <p className="text-sm text-primary-ink">{error}</p>}
 
       {/* Vytvoření nového kódu */}
       <form onSubmit={handleCreate} className="border border-[#e5e7eb] rounded-xl p-4 space-y-3">
@@ -187,7 +187,7 @@ export default function DiscountsAdminPanel({ discounts, onChange }: DiscountsAd
                     {discount.type === "percent" ? `${discount.value} %` : formatMoney(discount.value, "CZK")}
                   </span>
                   {(disabled || expired) && (
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-primary">
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-primary-ink">
                       {expired ? "Vypršel" : "Vypnutý"}
                     </span>
                   )}
@@ -200,7 +200,7 @@ export default function DiscountsAdminPanel({ discounts, onChange }: DiscountsAd
                 <button
                   onClick={() => discount.id && handleDelete(discount.id)}
                   disabled={busyId === discount.id}
-                  className="text-xs font-semibold text-primary hover:text-primary/80 disabled:opacity-50 shrink-0"
+                  className="text-xs font-semibold text-primary-ink hover:text-primary-ink/80 disabled:opacity-50 shrink-0"
                 >
                   Smazat
                 </button>

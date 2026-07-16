@@ -93,7 +93,7 @@ export default function Header() {
       {/* ── TOP BAR — pouze desktop ── */}
       <div className="hidden lg:block pt-3">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 flex items-center justify-between">
-          <div className="flex items-center gap-5 text-white/40 text-xs">
+          <div className="flex items-center gap-5 text-white/60 text-xs">
             <a href="tel:+420737565577" className="inline-flex items-center gap-1.5 hover:text-white transition-colors">
               <Phone size={11} />
               <span>+420 737 565 577</span>
@@ -105,9 +105,15 @@ export default function Header() {
           </div>
           <div className="flex items-center gap-3">
             <div className="relative">
-              <button onClick={() => { setCurrencyOpen(v => !v); setLangOpen(false); }} className="inline-flex items-center gap-1 text-white/40 text-xs hover:text-white transition-colors">
+              <button
+                onClick={() => { setCurrencyOpen(v => !v); setLangOpen(false); }}
+                aria-label={`Změnit měnu — vybráno ${currencyMounted ? currency.code : ""}`}
+                aria-expanded={currencyOpen}
+                aria-haspopup="menu"
+                className="inline-flex items-center gap-1 min-h-11 text-white/60 text-xs hover:text-white transition-colors"
+              >
                 <span className="notranslate" translate="no">{currencyMounted ? currency.code : "···"}</span>
-                <ChevronDown size={11} className={`transition-transform duration-150 ${currencyOpen ? "rotate-180" : ""}`} />
+                <ChevronDown size={11} aria-hidden="true" className={`transition-transform duration-150 ${currencyOpen ? "rotate-180" : ""}`} />
               </button>
               {currencyOpen && (
                 <div className="absolute right-0 top-full mt-1 bg-header border border-white/10 rounded-lg py-1 z-50 min-w-[72px] shadow-md">
@@ -119,12 +125,18 @@ export default function Header() {
                 </div>
               )}
             </div>
-            <span className="text-white/20">|</span>
+            <span aria-hidden="true" className="text-white/50">|</span>
             <div className="relative">
-              <button onClick={() => { setLangOpen(v => !v); setCurrencyOpen(false); }} className="inline-flex items-center gap-1 text-white/40 text-xs hover:text-white transition-colors">
-                <Globe size={11} />
+              <button
+                onClick={() => { setLangOpen(v => !v); setCurrencyOpen(false); }}
+                aria-label={`Změnit jazyk — vybráno ${language.label}`}
+                aria-expanded={langOpen}
+                aria-haspopup="menu"
+                className="inline-flex items-center gap-1 min-h-11 text-white/60 text-xs hover:text-white transition-colors"
+              >
+                <Globe size={11} aria-hidden="true" />
                 <span className="notranslate" translate="no">{language.label}</span>
-                <ChevronDown size={11} className={`transition-transform duration-150 ${langOpen ? "rotate-180" : ""}`} />
+                <ChevronDown size={11} aria-hidden="true" className={`transition-transform duration-150 ${langOpen ? "rotate-180" : ""}`} />
               </button>
               {langOpen && (
                 <div className="absolute right-0 top-full mt-1 bg-header border border-white/10 rounded-lg py-1 z-50 min-w-[120px] shadow-md">
@@ -181,20 +193,27 @@ export default function Header() {
 
         {/* Pravá strana */}
         <div className="flex items-center gap-2">
-          <a href="/kosik" className="relative flex items-center gap-2 px-3 lg:px-4 py-2 rounded-full bg-primary text-dark font-semibold text-sm hover:brightness-105 transition-all">
-            <ShoppingCart size={15} />
+          {/* Popisek "Košík" je pod sm: schovaný, takže na mobilu by z odkazu
+              zbyla holá ikona bez názvu — aria-label ho drží vždy. */}
+          <a
+            href="/kosik"
+            aria-label={totalItems > 0 ? `Otevřít košík — ${totalItems} ${totalItems === 1 ? "položka" : totalItems < 5 ? "položky" : "položek"}` : "Otevřít košík — prázdný"}
+            className="relative flex items-center gap-2 px-3 lg:px-4 py-2 min-h-11 rounded-full bg-primary text-on-primary font-semibold text-sm hover:brightness-105 transition-all"
+          >
+            <ShoppingCart size={15} aria-hidden="true" />
             <span className="hidden sm:inline">{t("cart")}</span>
             {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-header text-primary text-[10px] font-bold flex items-center justify-center border border-primary">
+              <span aria-hidden="true" className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-header text-primary text-[10px] font-bold flex items-center justify-center border border-primary">
                 {totalItems}
               </span>
             )}
           </a>
 
           <button
-            className="lg:hidden p-2.5 text-white/60 hover:text-white transition-colors"
+            className="lg:hidden w-11 h-11 flex items-center justify-center text-white/60 hover:text-white transition-colors"
             onClick={() => setMobileOpen(v => !v)}
-            aria-label="Menu"
+            aria-label={mobileOpen ? "Zavřít menu" : "Otevřít menu"}
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
@@ -243,7 +262,7 @@ export default function Header() {
           <ul className="flex items-center gap-1">
             {navRight.map(item => (
               <li key={item.label}>
-                <a href={item.href} className="inline-flex items-center px-3 py-3.5 text-sm font-medium text-white/40 hover:text-white transition-colors">
+                <a href={item.href} className="inline-flex items-center px-3 py-3.5 text-sm font-medium text-white/60 hover:text-white transition-colors">
                   {item.label}
                 </a>
               </li>
@@ -260,13 +279,14 @@ export default function Header() {
               <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-6">
                 <div className="flex items-center gap-2 mb-5">
                   <span className="text-white font-semibold text-sm">{active.label}</span>
-                  <span className="text-white/30 text-xs">— {active.children.length} {t("products")}</span>
+                  <span className="text-white/55 text-xs">— {active.children.length} {t("products")}</span>
                 </div>
                 <div className="grid grid-cols-6 gap-4">
                   {active.children.map(child => (
                     <a key={child.label} href={child.href} className="group flex flex-col items-center gap-2.5">
                       <div className="w-full aspect-square rounded-xl overflow-hidden relative bg-white shadow-sm group-hover:shadow-md transition-shadow duration-150">
-                        <Image src={child.img} alt={child.label} fill className="object-contain p-3" />
+                        {/* Dropdown má 6 sloupců v max-w-screen-2xl (1536px) → ~240px */}
+                        <Image src={child.img} alt="" fill sizes="240px" className="object-contain p-3" />
                       </div>
                       <p className="text-white/60 text-xs text-center leading-tight group-hover:text-white transition-colors line-clamp-2 w-full">{child.label}</p>
                     </a>
@@ -292,11 +312,12 @@ export default function Header() {
                     {item.label}
                   </a>
                   <button
-                    className="px-4 py-4 text-white/30 hover:text-white transition-colors"
+                    className="px-4 py-4 min-w-11 min-h-11 text-white/55 hover:text-white transition-colors"
                     onClick={() => setMobileExpanded(v => v === item.label ? null : item.label)}
-                    aria-label={`Rozbalit ${item.label}`}
+                    aria-label={mobileExpanded === item.label ? `Sbalit ${item.label}` : `Rozbalit ${item.label}`}
+                    aria-expanded={mobileExpanded === item.label}
                   >
-                    <ChevronDown size={14} className={`transition-transform duration-200 ${mobileExpanded === item.label ? "rotate-180 text-primary" : ""}`} />
+                    <ChevronDown size={14} aria-hidden="true" className={`transition-transform duration-200 ${mobileExpanded === item.label ? "rotate-180 text-primary" : ""}`} />
                   </button>
                 </div>
                 {mobileExpanded === item.label && (
@@ -305,7 +326,8 @@ export default function Header() {
                       <li key={child.label}>
                         <a href={child.href} className="flex items-center gap-3 px-5 py-2.5 text-sm text-white/50 hover:text-white transition-colors">
                           <div className="w-8 h-8 rounded-lg shrink-0 relative overflow-hidden bg-white shadow-sm">
-                            <Image src={child.img} alt={child.label} fill className="object-contain p-1" />
+                            {/* alt="" — název produktu je hned vedle jako text odkazu */}
+                            <Image src={child.img} alt="" fill sizes="32px" className="object-contain p-1" />
                           </div>
                           {child.label}
                         </a>
@@ -318,7 +340,7 @@ export default function Header() {
             <li className="border-t border-white/10" />
             {navRight.map(item => (
               <li key={item.label}>
-                <a href={item.href} className="block px-5 py-4 text-sm font-medium text-white/40 hover:text-white transition-colors">
+                <a href={item.href} className="block px-5 py-4 text-sm font-medium text-white/60 hover:text-white transition-colors">
                   {item.label}
                 </a>
               </li>
@@ -329,14 +351,14 @@ export default function Header() {
               která je na mobilu skrytá celá, takže sem patří jediná mobilní varianta. */}
           <div className="border-t border-white/10 px-5 py-4 space-y-3">
             <div>
-              <p className="text-white/30 text-[11px] font-medium uppercase tracking-wide mb-2">Měna</p>
+              <p className="text-white/55 text-[11px] font-medium uppercase tracking-wide mb-2">Měna</p>
               <div className="flex gap-2">
                 {(["CZK", "EUR", "USD"] as CurrencyCode[]).map(code => (
                   <button
                     key={code}
                     translate="no"
                     onClick={() => setCurrency(code)}
-                    className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${code === currency.code ? "bg-primary text-dark" : "bg-white/5 text-white/50 hover:text-white"}`}
+                    className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${code === currency.code ? "bg-primary text-on-primary" : "bg-white/5 text-white/50 hover:text-white"}`}
                   >
                     <span className="notranslate">{code}</span>
                   </button>
@@ -344,7 +366,7 @@ export default function Header() {
               </div>
             </div>
             <div>
-              <p className="text-white/30 text-[11px] font-medium uppercase tracking-wide mb-2">Jazyk</p>
+              <p className="text-white/55 text-[11px] font-medium uppercase tracking-wide mb-2">Jazyk</p>
               <div className="flex gap-2">
                 {languages.map(l => (
                   <button
@@ -355,7 +377,7 @@ export default function Header() {
                       setLocale(l.gtCode as "cs" | "sk" | "en");
                       switchGoogleTranslate(l.gtCode);
                     }}
-                    className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${l.code === language.code ? "bg-primary text-dark" : "bg-white/5 text-white/50 hover:text-white"}`}
+                    className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${l.code === language.code ? "bg-primary text-on-primary" : "bg-white/5 text-white/50 hover:text-white"}`}
                   >
                     <span className="notranslate">{l.label}</span>
                   </button>

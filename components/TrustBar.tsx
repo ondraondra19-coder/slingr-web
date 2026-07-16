@@ -32,7 +32,7 @@ export default function TrustBar() {
             <div key={item.title} className="flex flex-col items-center text-center gap-3">
               {/* Ikona v kroužku */}
               <div className="w-14 h-14 rounded-full border-2 border-primary/30 flex items-center justify-center">
-                <item.icon size={22} className="text-primary" />
+                <item.icon size={22} className="text-primary-ink" />
               </div>
               {/* Titul */}
               <p className="text-text-base font-semibold text-sm underline underline-offset-2">{item.title}</p>

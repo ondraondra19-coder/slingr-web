@@ -59,13 +59,17 @@ function ColorSwatch({
   colors,
   selected,
   onChange,
+  label = "Barva",
 }: {
   colors: { label: string; value: string; hex?: string }[];
   selected: string;
   onChange: (value: string) => void;
+  label?: string;
 }) {
   return (
-    <div className="flex flex-wrap gap-2.5">
+    /* radiogroup: výběr barvy je jedna volba z několika — čtečka pak ohlásí
+       "1 z 7" a vybraný stav. Samotný title= přístupný název spolehlivě nedává. */
+    <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label={label}>
       {colors.map((c) => {
         const hex = c.hex ?? COLOR_MAP[c.value] ?? "#cccccc";
         const bright = parseInt(hex.replace("#", ""), 16) > 0xbbbbbb;
@@ -74,7 +78,10 @@ function ColorSwatch({
             key={c.value}
             onClick={() => onChange(c.value)}
             title={c.label}
-            className={`relative w-10 h-10 rounded-full transition-all duration-150 focus:outline-none ring-offset-2 ring-offset-white ${
+            role="radio"
+            aria-checked={selected === c.value}
+            aria-label={c.label}
+            className={`relative w-10 h-10 rounded-full transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-base ring-offset-2 ring-offset-white ${
               selected === c.value
                 ? "ring-2 ring-primary scale-110 shadow-md"
                 : "ring-1 ring-border-strong hover:scale-105"
@@ -99,20 +106,25 @@ function SizePills({
   options,
   selected,
   onChange,
+  label = "Varianta",
 }: {
   options: { label: string; value: string }[];
   selected: string;
   onChange: (value: string) => void;
+  label?: string;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={label}>
       {options.map((opt) => (
         <button
           key={opt.value}
           onClick={() => onChange(opt.value)}
-          className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all duration-150 ${
+          role="radio"
+          aria-checked={selected === opt.value}
+          /* min-h-11 = 44px: varianty produktu jsou na mobilu častý cíl překliku */
+          className={`px-4 py-2 min-h-11 rounded-xl text-sm font-medium border transition-all duration-150 ${
             selected === opt.value
-              ? "bg-primary text-dark border-primary"
+              ? "bg-primary text-on-primary border-primary"
               : "bg-secondary text-text-muted border-border hover:border-border-strong hover:text-text-base"
           }`}
         >
@@ -129,7 +141,7 @@ function VideoThumb({ poster }: { poster?: string }) {
   return (
     <div className="relative w-full h-full">
       {poster
-        ? <Image src={poster} alt="" fill className="object-cover" />
+        ? <Image src={poster} alt="" fill sizes="64px" className="object-cover" />
         : <div className="w-full h-full bg-secondary" />
       }
       <div className="absolute inset-0 flex items-center justify-center">
@@ -145,10 +157,12 @@ function Gallery({
   items,
   layeredBody,
   layeredCap,
+  productName,
 }: {
   items: MediaItem[];
   layeredBody?: string;
   layeredCap?: string;
+  productName: string;
 }) {
   const [active, setActive] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -173,8 +187,10 @@ function Gallery({
 
         {layeredBody ? (
           <>
-            <Image src={layeredBody} alt="" fill className="object-contain" priority />
-            {layeredCap && <Image src={layeredCap} alt="" fill className="object-contain" />}
+            {/* Tělo nese popis celého produktu, hlavička je jen druhá vrstva
+                téhož obrázku — proto u ní alt="" (jinak by čtečka četla dvakrát). */}
+            <Image src={layeredBody} alt={productName} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-contain" priority />
+            {layeredCap && <Image src={layeredCap} alt="" fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-contain" />}
           </>
         ) : current?.type === "video" ? (
           <video
@@ -190,8 +206,9 @@ function Gallery({
           <Image
             key={current.src}
             src={current.src}
-            alt=""
+            alt={productName}
             fill
+            sizes="(max-width: 1024px) 100vw, 50vw"
             className="object-contain"
             priority
           />
@@ -202,12 +219,14 @@ function Gallery({
           <>
             <button
               onClick={prev}
+              aria-label="Předchozí fotka produktu"
               className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-border shadow flex items-center justify-center text-text-muted hover:text-text-base transition-all z-10"
             >
               <ChevronLeft size={16} />
             </button>
             <button
               onClick={next}
+              aria-label="Další fotka produktu"
               className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-border shadow flex items-center justify-center text-text-muted hover:text-text-base transition-all z-10"
             >
               <ChevronRight size={16} />
@@ -223,13 +242,15 @@ function Gallery({
             <button
               key={i}
               onClick={() => handleThumbClick(i)}
+              aria-label={item.type === "video" ? `Přehrát video ${i + 1}` : `Zobrazit fotku ${i + 1} z ${items.length}`}
+              aria-current={i === active}
               className={`relative shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
                 i === active ? "border-primary" : "border-border hover:border-border-strong"
               }`}
             >
               {item.type === "video"
                 ? <VideoThumb poster={item.poster} />
-                : <Image src={item.src} alt="" fill className="object-contain" />
+                : <Image src={item.src} alt="" fill sizes="64px" className="object-contain" />
               }
             </button>
           ))}
@@ -247,9 +268,14 @@ function AddedModal({ productName, productImg, onClose }: {
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center px-4">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Produkt přidán do košíku"
+      className="fixed inset-0 z-[200] flex items-center justify-center px-4"
+    >
+      {/* Backdrop — dekorace, klik zavírá; čtečka ho ignoruje (tlačítko Zavřít je níž) */}
+      <div aria-hidden="true" className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
 
       {/* Panel */}
       <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
@@ -257,6 +283,7 @@ function AddedModal({ productName, productImg, onClose }: {
         {/* Zavřít */}
         <button
           onClick={onClose}
+          aria-label="Zavřít"
           className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-text-subtle hover:text-text-base hover:bg-surface transition-all"
         >
           <X size={18} />
@@ -267,12 +294,12 @@ function AddedModal({ productName, productImg, onClose }: {
           {/* Produkt */}
           <div className="flex items-center gap-5 mb-8">
             <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-surface border border-border shrink-0">
-              <Image src={productImg} alt={productName} fill className="object-contain p-2" />
+              <Image src={productImg} alt="" fill sizes="80px" className="object-contain p-2" />
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1.5">
                 <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Check size={11} strokeWidth={3} className="text-primary" />
+                  <Check size={11} strokeWidth={3} className="text-primary-ink" />
                 </div>
                 <p className="text-base font-bold text-text-base">Přidali jste do košíku</p>
               </div>
@@ -290,7 +317,7 @@ function AddedModal({ productName, productImg, onClose }: {
             </button>
             <a
               href="/kosik"
-              className="flex-1 py-3.5 rounded-2xl bg-primary text-dark font-bold text-sm text-center hover:brightness-105 active:scale-[0.98] transition-all shadow-lg shadow-primary/20"
+              className="flex-1 py-3.5 rounded-2xl bg-primary text-on-primary font-bold text-sm text-center hover:brightness-105 active:scale-[0.98] transition-all shadow-lg shadow-primary/20"
             >
               Pokračovat do košíku →
             </a>
@@ -309,9 +336,15 @@ function NotifyModal({ onClose }: { onClose: () => void }) {
   const [sent, setSent] = useState(false);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Připomenout, až bude skladem"
+      className="fixed inset-0 z-[100] flex items-center justify-center px-4"
+    >
       {/* Backdrop */}
       <div
+        aria-hidden="true"
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
@@ -320,10 +353,14 @@ function NotifyModal({ onClose }: { onClose: () => void }) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-border">
           <div className="flex items-center gap-2.5">
-            <Bell size={16} className="text-primary" />
+            <Bell size={16} className="text-primary-ink" />
             <p className="text-text-base font-semibold text-sm"><span>Připomenout, až bude skladem</span></p>
           </div>
-          <button onClick={onClose} className="text-text-subtle hover:text-text-base transition-colors">
+          <button
+            onClick={onClose}
+            aria-label="Zavřít"
+            className="w-11 h-11 -mr-2 flex items-center justify-center rounded-full text-text-subtle hover:text-text-base hover:bg-surface transition-colors"
+          >
             <X size={18} />
           </button>
         </div>
@@ -338,7 +375,7 @@ function NotifyModal({ onClose }: { onClose: () => void }) {
               <p className="text-text-muted text-sm"><span>Jakmile bude zboží dostupné, dáme ti vědět.</span></p>
               <button
                 onClick={onClose}
-                className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-dark font-semibold text-sm hover:brightness-105 transition-all"
+                className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:brightness-105 transition-all"
               >
                 <span>Zavřít</span>
               </button>
@@ -352,6 +389,8 @@ function NotifyModal({ onClose }: { onClose: () => void }) {
                 onChange={e => setEmail(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter" && email.trim()) setSent(true); }}
                 placeholder="tvuj@email.cz"
+                aria-label="Tvůj e-mail"
+                autoComplete="email"
                 autoFocus
                 className="w-full border border-border rounded-xl px-4 py-2.5 text-sm text-text-base placeholder-text-subtle focus:outline-none focus:border-primary/50 transition-colors bg-surface"
               />
@@ -361,7 +400,7 @@ function NotifyModal({ onClose }: { onClose: () => void }) {
                 className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
                   !email.trim()
                     ? "bg-border text-text-subtle cursor-not-allowed"
-                    : "bg-primary text-dark hover:brightness-105"
+                    : "bg-primary text-on-primary hover:brightness-105"
                 }`}
               >
                 <span>Připomenout</span>
@@ -689,6 +728,7 @@ export default function ProduktClient({
                 items={galleryItems}
                 layeredBody={layeredBodySrc}
                 layeredCap={layeredCapSrc}
+                productName={product.name}
               />
             </div>
 
@@ -701,7 +741,7 @@ export default function ProduktClient({
                   <span>{product.name}</span>
                 </h1>
                 <div className="flex items-center gap-4 mt-3 flex-wrap">
-                  <span className="text-3xl sm:text-4xl font-extrabold text-primary leading-none">
+                  <span className="text-3xl sm:text-4xl font-extrabold text-primary-ink leading-none">
                     {currencyMounted ? formatPrice(totalPrice, currency) : <span className="opacity-0">—</span>}
                   </span>
                   {comboExtra > 0 && (
@@ -737,7 +777,7 @@ export default function ProduktClient({
                       — <span>{newSizes.find(s => s.value === sizeValue)?.label}</span>
                     </span>
                   </p>
-                  <SizePills options={newSizes} selected={sizeValue} onChange={(v) => { setSizeValue(v); setQty(1); }} />
+                  <SizePills options={newSizes} selected={sizeValue} label={sizesLabel} onChange={(v) => { setSizeValue(v); setQty(1); }} />
                 </div>
               )}
 
@@ -765,6 +805,7 @@ export default function ProduktClient({
                       <SizePills
                         options={product.models!.map(m => ({ label: m.label, value: m.id }))}
                         selected={modelId}
+                        label="Model"
                         onChange={(v) => { handleModelChange(v); setQty(1); }}
                       />
                     </div>
@@ -773,13 +814,15 @@ export default function ProduktClient({
                     <div className="flex flex-col gap-4">
                       <button
                         onClick={() => setCombo(v => !v)}
-                        className="flex items-center gap-3 text-sm text-text-muted hover:text-text-base transition-colors w-fit"
+                        role="checkbox"
+                        aria-checked={combo}
+                        className="flex items-center gap-3 text-sm text-text-muted hover:text-text-base transition-colors w-fit min-h-11"
                       >
-                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-150 ${
+                        <span aria-hidden="true" className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-150 ${
                           combo ? "bg-primary border-primary" : "border-border-strong"
                         }`}>
-                          {combo && <Check size={11} strokeWidth={3} className="text-dark" />}
-                        </div>
+                          {combo && <Check size={11} strokeWidth={3} className="text-on-primary" />}
+                        </span>
                         <span>Vlastní barevná kombinace</span>
                         <span className="text-text-subtle text-xs">
                           <span>(+{formatPrice(getPrice(model.comboExtra ?? 0, currency), currency)} za různé barvy)</span>
@@ -797,6 +840,7 @@ export default function ProduktClient({
                             <ColorSwatch
                               colors={model.colors as { label: string; value: string; hex?: string }[]}
                               selected={bodyValue}
+                              label="Barva těla"
                               onChange={setBodyValue}
                             />
                           </div>
@@ -810,6 +854,7 @@ export default function ProduktClient({
                             <ColorSwatch
                               colors={model.colors as { label: string; value: string; hex?: string }[]}
                               selected={capValue}
+                              label="Barva hlavičky"
                               onChange={setCapValue}
                             />
                           </div>
@@ -838,12 +883,14 @@ export default function ProduktClient({
                       <ColorSwatch
                         colors={variant.options}
                         selected={selected ?? ""}
+                        label={variant.type}
                         onChange={(val) => setSelectedVariants(prev => ({ ...prev, [variant.type]: val }))}
                       />
                     ) : (
                       <SizePills
                         options={variant.options}
                         selected={selected ?? ""}
+                        label={variant.type}
                         onChange={(val) => setSelectedVariants(prev => ({ ...prev, [variant.type]: val }))}
                       />
                     )}
@@ -867,20 +914,33 @@ export default function ProduktClient({
                   ) : (
                     <div className="flex items-stretch gap-2.5">
                       {/* Počítadlo */}
+                      {/* Znaménka − / + nesdělí čtečce, co dělají — proto aria-label.
+                          aria-live na počtu ohlásí novou hodnotu po kliknutí. */}
                       <div className="flex items-center rounded-xl border border-border bg-white overflow-hidden shrink-0">
                         <button
                           onClick={() => setQty(q => Math.max(1, q - 1))}
-                          className="w-10 h-full flex items-center justify-center text-text-muted hover:text-text-base hover:bg-surface transition-colors text-base font-light"
+                          disabled={qty <= 1}
+                          aria-label="Ubrat jeden kus"
+                          className={`w-11 min-h-11 h-full flex items-center justify-center transition-colors text-base font-light ${
+                            qty <= 1
+                              ? "text-border cursor-not-allowed"
+                              : "text-text-muted hover:text-text-base hover:bg-surface"
+                          }`}
                         >
                           −
                         </button>
-                        <span className="w-7 text-center text-text-base text-sm font-semibold tabular-nums select-none">
-                          {qty}
+                        <span
+                          aria-live="polite"
+                          aria-atomic="true"
+                          className="w-7 text-center text-text-base text-sm font-semibold tabular-nums select-none"
+                        >
+                          <span className="sr-only">Počet kusů: </span>{qty}
                         </span>
                         <button
                           onClick={() => setQty(q => Math.min(canAddMoreQty, q + 1))}
                           disabled={qty >= canAddMoreQty}
-                          className={`w-10 h-full flex items-center justify-center transition-colors text-base font-light ${
+                          aria-label="Přidat jeden kus"
+                          className={`w-11 min-h-11 h-full flex items-center justify-center transition-colors text-base font-light ${
                             qty >= canAddMoreQty
                               ? "text-border cursor-not-allowed"
                               : "text-text-muted hover:text-text-base hover:bg-surface"
@@ -897,10 +957,10 @@ export default function ProduktClient({
                         disabled={added || (!isOutOfStock && !canAddToCart)}
                         className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold text-sm transition-all duration-200 ${
                           added
-                            ? "bg-primary/15 text-primary cursor-default"
+                            ? "bg-primary/15 text-primary-ink cursor-default"
                             : !canAddToCart
                             ? "bg-border text-text-subtle cursor-not-allowed"
-                            : "bg-primary text-dark hover:brightness-105 active:scale-[0.98] shadow-md shadow-primary/20"
+                            : "bg-primary text-on-primary hover:brightness-105 active:scale-[0.98] shadow-md shadow-primary/20"
                         }`}
                       >
                         {added
@@ -926,7 +986,7 @@ export default function ProduktClient({
                     { icon: ShieldCheck, label: "Záruka",    sub: "2 roky" },
                   ].map((item, i) => (
                     <div key={item.label} className={`flex flex-col items-center justify-center gap-1.5 py-4 px-2 ${i < 2 ? "border-r border-border" : ""}`}>
-                      <item.icon size={20} className="text-primary" />
+                      <item.icon size={20} className="text-primary-ink" />
                       <span className="text-text-base text-xs font-bold leading-none">{item.label}</span>
                       <span className="text-text-subtle text-[11px] leading-none">{item.sub}</span>
                     </div>
@@ -958,14 +1018,15 @@ export default function ProduktClient({
                     <div className="relative aspect-square bg-surface">
                       <Image
                         src={p.img}
-                        alt={p.name}
+                        alt=""
                         fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         className="object-contain p-4 transition-transform duration-300 group-hover:scale-[1.04]"
                       />
                     </div>
                     <div className="flex flex-col gap-1 p-3 sm:p-4 border-t border-border">
-                      <p className="text-text-base text-xs sm:text-sm font-semibold leading-snug group-hover:text-primary transition-colors line-clamp-2"><span>{p.name}</span></p>
-                      <p className="text-primary font-bold text-sm sm:text-base mt-0.5"><span>{formatPrice(getPrice(p.price, currency), currency)}</span></p>
+                      <p className="text-text-base text-xs sm:text-sm font-semibold leading-snug group-hover:text-primary-ink transition-colors line-clamp-2"><span>{p.name}</span></p>
+                      <p className="text-primary-ink font-bold text-sm sm:text-base mt-0.5"><span>{formatPrice(getPrice(p.price, currency), currency)}</span></p>
                     </div>
                   </a>
                 ))}

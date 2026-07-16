@@ -15,7 +15,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <div className="mb-12">
       <h2 className="text-xl font-bold text-text-base mb-5 pb-3 border-b border-border">{title}</h2>
-      <div className="flex flex-col gap-4 text-text-muted text-base leading-relaxed [&_strong]:text-text-base [&_a]:text-primary [&_a]:hover:underline [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-2">
+      <div className="flex flex-col gap-4 text-text-muted text-base leading-relaxed [&_strong]:text-text-base [&_a]:text-primary-ink [&_a]:hover:underline [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-2">
         {children}
       </div>
     </div>
@@ -250,13 +250,13 @@ export default function CookiesPage() {
                 {/* Technické */}
                 <div className="p-4 bg-dark/40 border border-border rounded-xl flex items-start justify-between">
                   <div className="flex gap-3">
-                    <Shield size={18} className="text-primary mt-0.5 shrink-0" />
+                    <Shield size={18} className="text-primary-ink mt-0.5 shrink-0" />
                     <div>
                       <span className="font-bold text-sm text-text-base block">Technické cookies (Nezbytné)</span>
                       <span className="text-text-muted text-xs block mt-1">Nutné pro fungování nákupního košíku, přihlášení a bezpečnosti webu.</span>
                     </div>
                   </div>
-                  <div className="h-5 w-5 rounded bg-border/40 text-primary flex items-center justify-center text-xs shrink-0">
+                  <div className="h-5 w-5 rounded bg-border/40 text-primary-ink flex items-center justify-center text-xs shrink-0">
                     <Check size={14} className="stroke-[3]" />
                   </div>
                 </div>
@@ -278,7 +278,7 @@ export default function CookiesPage() {
                     type="checkbox"
                     checked={analytics}
                     onChange={(e) => { setAnalytics(e.target.checked); setSavedNote(null); }}
-                    className="mt-1 h-4 w-4 rounded border-border bg-dark text-primary focus:ring-0 cursor-pointer accent-primary shrink-0"
+                    className="mt-1 h-4 w-4 rounded border-border bg-dark text-primary-ink focus:ring-0 cursor-pointer accent-primary shrink-0"
                   />
                 </label>
 
@@ -299,7 +299,7 @@ export default function CookiesPage() {
                     type="checkbox"
                     checked={marketing}
                     onChange={(e) => { setMarketing(e.target.checked); setSavedNote(null); }}
-                    className="mt-1 h-4 w-4 rounded border-border bg-dark text-primary focus:ring-0 cursor-pointer accent-primary shrink-0"
+                    className="mt-1 h-4 w-4 rounded border-border bg-dark text-primary-ink focus:ring-0 cursor-pointer accent-primary shrink-0"
                   />
                 </label>
               </div>
@@ -308,7 +308,7 @@ export default function CookiesPage() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleAcceptAll}
-                  className="flex-1 py-2.5 px-4 rounded-lg bg-primary hover:bg-primary/90 text-white font-bold text-xs tracking-wide transition-colors cursor-pointer text-center"
+                  className="flex-1 py-2.5 px-4 rounded-lg bg-primary hover:bg-primary/90 text-on-primary font-bold text-xs tracking-wide transition-colors cursor-pointer text-center"
                 >
                   Povolit všechny cookies
                 </button>
@@ -327,7 +327,7 @@ export default function CookiesPage() {
               </div>
 
               {savedNote && (
-                <p role="status" className="mt-4 inline-flex items-center gap-2 text-primary text-xs font-medium">
+                <p role="status" className="mt-4 inline-flex items-center gap-2 text-primary-ink text-xs font-medium">
                   <Check size={13} className="stroke-[3]" />
                   {savedNote}
                 </p>
@@ -362,7 +362,7 @@ export default function CookiesPage() {
                         <td className="p-4 whitespace-nowrap">{item.expiry}</td>
                         <td className="p-4 whitespace-nowrap">
                           <span className={`inline-block px-2.5 py-0.5 rounded text-xs font-semibold ${
-                            item.type === "Nezbytné" ? "bg-primary/10 text-primary border border-primary/20" : "bg-border/40 text-text-muted"
+                            item.type === "Nezbytné" ? "bg-primary/10 text-primary-ink border border-primary/20" : "bg-border/40 text-text-muted"
                           }`}>
                             {item.type}
                           </span>

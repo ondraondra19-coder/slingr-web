@@ -34,8 +34,9 @@ export default async function BlogPage() {
               <a key={post.slug} href={`/blog/${post.slug}`} className="group relative flex flex-col rounded-2xl overflow-hidden aspect-[16/9]">
                 <Image 
                   src={post.img} 
-                  alt={post.title} 
+                  alt="" 
                   fill 
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" 
                   unoptimized={post.img.startsWith("http")}
                 />
@@ -45,7 +46,7 @@ export default async function BlogPage() {
                       <h2 className="text-text-base font-bold text-sm leading-snug mb-1">{post.title}</h2>
                       <p className="text-text-subtle text-xs">{post.date}</p>
                     </div>
-                    <div className="shrink-0 w-9 h-9 rounded-full border border-border flex items-center justify-center text-text-muted group-hover:bg-primary group-hover:border-primary group-hover:text-dark transition-all duration-200">
+                    <div className="shrink-0 w-9 h-9 rounded-full border border-border flex items-center justify-center text-text-muted group-hover:bg-primary group-hover:border-primary group-hover:text-on-primary transition-all duration-200">
                       <ArrowUpRight size={15} />
                     </div>
                   </div>
@@ -61,8 +62,9 @@ export default async function BlogPage() {
                 <a key={post.slug} href={`/blog/${post.slug}`} className="group relative flex flex-col rounded-2xl overflow-hidden aspect-square">
                   <Image 
                     src={post.img} 
-                    alt={post.title} 
+                    alt="" 
                     fill 
+                    sizes="(max-width: 640px) 50vw, 25vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" 
                     unoptimized={post.img.startsWith("http")}
                   />
@@ -72,7 +74,7 @@ export default async function BlogPage() {
                         <h3 className="text-text-base font-bold text-sm leading-snug mb-1">{post.title}</h3>
                         <p className="text-text-subtle text-xs">{post.date}</p>
                       </div>
-                      <div className="shrink-0 w-9 h-9 rounded-full border border-border flex items-center justify-center text-text-muted group-hover:bg-primary group-hover:border-primary group-hover:text-dark transition-all duration-200">
+                      <div className="shrink-0 w-9 h-9 rounded-full border border-border flex items-center justify-center text-text-muted group-hover:bg-primary group-hover:border-primary group-hover:text-on-primary transition-all duration-200">
                         <ArrowUpRight size={15} />
                       </div>
                     </div>

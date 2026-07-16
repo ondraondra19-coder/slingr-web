@@ -176,8 +176,8 @@ export default function MagazinAdminList() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h4 className="text-sm font-bold text-[#0f0f10]">{isNew ? "Nový článek" : "Upravit článek"}</h4>
-          <button onClick={closeEditor} className="text-zinc-400 hover:text-zinc-600 transition-colors">
-            <X size={18} />
+          <button onClick={closeEditor} aria-label="Zavřít editor článku" className="w-10 h-10 -mr-2 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 transition-colors">
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 
@@ -347,11 +347,11 @@ export default function MagazinAdminList() {
                 <p className="text-[11px] text-zinc-500 mt-0.5">{post.date} {post.tag && `· ${post.tag}`}</p>
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <button onClick={() => openEdit(post)} className="p-2 rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-[#0f0f10] transition-colors">
-                  <Pencil size={15} />
+                <button onClick={() => openEdit(post)} aria-label={`Upravit článek: ${post.title}`} className="w-10 h-10 flex items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-[#0f0f10] transition-colors">
+                  <Pencil size={15} aria-hidden="true" />
                 </button>
-                <button onClick={() => handleDelete(post)} className="p-2 rounded-lg text-zinc-500 hover:bg-red-50 hover:text-red-600 transition-colors">
-                  <Trash2 size={15} />
+                <button onClick={() => handleDelete(post)} aria-label={`Smazat článek: ${post.title}`} className="w-10 h-10 flex items-center justify-center rounded-lg text-zinc-500 hover:bg-red-50 hover:text-red-600 transition-colors">
+                  <Trash2 size={15} aria-hidden="true" />
                 </button>
               </div>
             </div>

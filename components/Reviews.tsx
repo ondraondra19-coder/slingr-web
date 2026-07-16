@@ -50,7 +50,7 @@ function ReviewCard({ review }: { review: Review }) {
     <div className="flex flex-col gap-4 p-5 lg:p-6 rounded-2xl bg-white shadow-sm shrink-0 w-full">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-          <span className="text-primary text-xs font-bold">{review.initials}</span>
+          <span className="text-primary-ink text-xs font-bold">{review.initials}</span>
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-text-base text-sm font-semibold leading-none">{review.name}</p>
@@ -70,7 +70,7 @@ function ReviewCard({ review }: { review: Review }) {
         {isLong && (
           <button
             onClick={() => setExpanded(v => !v)}
-            className="mt-1.5 text-xs text-primary hover:underline flex items-center gap-1"
+            className="mt-1.5 text-xs text-primary-ink hover:underline flex items-center gap-1"
           >
             {expanded ? "Zobrazit méně" : "Zobrazit více"}
             <ChevronDown
@@ -154,7 +154,7 @@ export default function Reviews() {
             </div>
             <a
               href="/napsat-recenzi"
-              className="inline-flex items-center gap-2 px-4 lg:px-5 py-2.5 rounded-xl bg-primary text-dark font-semibold text-sm hover:brightness-105 transition-all"
+              className="inline-flex items-center gap-2 px-4 lg:px-5 py-2.5 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:brightness-105 transition-all"
             >
               Všechny recenze
               <ArrowRight size={14} />
@@ -167,13 +167,14 @@ export default function Reviews() {
           <button
             onClick={prev}
             disabled={index === 0}
-            className={`shrink-0 w-8 h-8 lg:w-9 lg:h-9 rounded-full border flex items-center justify-center transition-all ${
+            aria-label="Předchozí recenze"
+            className={`shrink-0 w-11 h-11 rounded-full border flex items-center justify-center transition-all ${
               index === 0
                 ? "border-border text-border cursor-default"
                 : "border-border-strong text-text-muted hover:text-text-base hover:border-text-subtle"
             }`}
           >
-            <ChevronLeft size={15} />
+            <ChevronLeft size={15} aria-hidden="true" />
           </button>
 
           <div className="flex-1 overflow-hidden">
@@ -199,13 +200,14 @@ export default function Reviews() {
           <button
             onClick={next}
             disabled={index >= maxIndex}
-            className={`shrink-0 w-8 h-8 lg:w-9 lg:h-9 rounded-full border flex items-center justify-center transition-all ${
+            aria-label="Další recenze"
+            className={`shrink-0 w-11 h-11 rounded-full border flex items-center justify-center transition-all ${
               index >= maxIndex
                 ? "border-border text-border cursor-default"
                 : "border-border-strong text-text-muted hover:text-text-base hover:border-text-subtle"
             }`}
           >
-            <ChevronRight size={15} />
+            <ChevronRight size={15} aria-hidden="true" />
           </button>
         </div>
 

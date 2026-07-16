@@ -188,7 +188,7 @@ export default function AdminDashboard({
   const menuItems = allMenuItems.filter((item) => item.visible);
 
   return (
-    <div className="flex h-screen bg-[#f7f6f4] text-[#0f0f10] font-sans antialiased overflow-hidden selection:bg-primary/10 selection:text-primary">
+    <div className="flex h-screen bg-[#f7f6f4] text-[#0f0f10] font-sans antialiased overflow-hidden selection:bg-primary/10 selection:text-primary-ink">
 
       {/* Overlay pro zavření sidebaru na mobilu kliknutím mimo — stejný vzor jako profil dropdown níže */}
       {isSidebarOpen && (
@@ -231,7 +231,7 @@ export default function AdminDashboard({
                   }}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-150 text-left ${
                     isActive
-                      ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                      ? 'bg-primary text-on-primary shadow-lg shadow-primary/20'
                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.03]'
                   }`}
                 >
@@ -331,7 +331,7 @@ export default function AdminDashboard({
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2.5 text-xs text-primary hover:bg-red-50 flex items-center space-x-2 transition-colors font-semibold"
+                    className="w-full text-left px-4 py-2.5 text-xs text-primary-ink hover:bg-red-50 flex items-center space-x-2 transition-colors font-semibold"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                     <span>Odhlásit se</span>
@@ -441,7 +441,7 @@ export default function AdminDashboard({
 
               <div className="mt-6 pt-4 border-t border-[#e5e7eb] flex items-center justify-between text-[11px] text-zinc-400 font-mono">
                 <span>ACTIVE_ROUTE</span>
-                <span className="text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/10">
+                <span className="text-primary-ink bg-primary/5 px-2 py-0.5 rounded border border-primary/10">
                   /admin/{activeTab}
                 </span>
               </div>

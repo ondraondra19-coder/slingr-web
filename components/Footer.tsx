@@ -100,7 +100,7 @@ function Newsletter() {
             <p className="text-white font-bold text-base mb-1">
               Buďte první, kdo se dozví o novinkách
             </p>
-            <p className="text-white/40 text-sm">
+            <p className="text-white/60 text-sm">
               Slevy, nové produkty a tipy přímo do schránky. Odhlásit se lze kdykoliv.
             </p>
           </div>
@@ -122,8 +122,12 @@ function Newsletter() {
                     onKeyDown={e => e.key === "Enter" && handleSubmit()}
                     disabled={loading}
                     placeholder="váš@email.cz"
-                    className={`w-full sm:w-64 bg-white/6 border rounded-full px-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-primary/60 transition-colors disabled:opacity-60 ${
-                      error ? "border-red-500/60" : "border-white/12"
+                    aria-label="E-mail pro odběr novinek"
+                    aria-invalid={!!error}
+                    /* border-white/40 = 3.81:1 vůči #1c1c1c — hranice formulářového
+                       pole je UI komponenta a potřebuje 3:1 (dřív /12 ≈ 1.3:1). */
+                    className={`w-full sm:w-64 bg-white/6 border rounded-full px-4 py-2.5 text-sm text-white placeholder-white/55 focus:outline-none focus:border-primary/60 transition-colors disabled:opacity-60 ${
+                      error ? "border-red-500/60" : "border-white/40"
                     }`}
                   />
                   {error && (
@@ -135,7 +139,7 @@ function Newsletter() {
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-primary text-dark font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all shrink-0 w-full sm:w-auto disabled:opacity-70 disabled:active:scale-100"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all shrink-0 w-full sm:w-auto disabled:opacity-70 disabled:active:scale-100"
                 >
                   <span>{loading ? "Odesílám…" : "Odebírat"}</span>
                   {!loading && <ArrowRight size={14} />}
@@ -187,14 +191,14 @@ export default function Footer() {
             </a>
 
             {/* Popis */}
-            <p className="text-white/40 text-sm leading-relaxed max-w-[260px]">
+            <p className="text-white/60 text-sm leading-relaxed max-w-[260px]">
               Originální Apple příslušenství za férové ceny. Každý kus testován a připraven k expedici do 24 hodin.
             </p>
 
             {/* Trust pills */}
             <div className="flex flex-col gap-2">
               {trustItems.map(item => (
-                <div key={item.label} className="inline-flex items-center gap-2.5 text-white/40 text-xs">
+                <div key={item.label} className="inline-flex items-center gap-2.5 text-white/60 text-xs">
                   <item.icon size={13} className="text-primary shrink-0" />
                   <span>{item.label}</span>
                 </div>
@@ -205,23 +209,23 @@ export default function Footer() {
             <div className="flex flex-col gap-2.5 pt-1 border-t border-white/8">
               <a
                 href="tel:+420737565577"
-                className="inline-flex items-center gap-2.5 text-white/40 text-sm hover:text-white/70 transition-colors"
+                className="inline-flex items-center gap-2.5 text-white/60 text-sm hover:text-white/70 transition-colors"
               >
                 <Phone size={13} className="text-primary shrink-0" />
                 <span>+420 737 565 577</span>
               </a>
               <a
                 href="mailto:info@dodelat.cz"
-                className="inline-flex items-center gap-2.5 text-white/40 text-sm hover:text-white/70 transition-colors"
+                className="inline-flex items-center gap-2.5 text-white/60 text-sm hover:text-white/70 transition-colors"
               >
                 <Mail size={13} className="text-primary shrink-0" />
                 <span>info@dodelat.cz</span>
               </a>
-              <div className="inline-flex items-start gap-2.5 text-white/40 text-sm">
+              <div className="inline-flex items-start gap-2.5 text-white/60 text-sm">
                 <MapPin size={13} className="text-primary shrink-0 mt-0.5" />
                 <span>Václavské nám. 1, 110 00 Praha 1</span>
               </div>
-              <div className="inline-flex items-start gap-2.5 text-white/40 text-sm">
+              <div className="inline-flex items-start gap-2.5 text-white/60 text-sm">
                 <Clock size={13} className="text-primary shrink-0 mt-0.5" />
                 <span>Po–Pá 9–18 h · So 10–14 h</span>
               </div>
@@ -236,7 +240,7 @@ export default function Footer() {
                   aria-label={s.label}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/30 hover:text-white hover:border-white/30 transition-all duration-200"
+                  className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/55 hover:text-white hover:border-white/30 transition-all duration-200"
                 >
                   <s.icon size={15} />
                 </a>
@@ -258,7 +262,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-white/35 text-sm hover:text-white/75 transition-colors duration-150"
+                      className="text-white/55 text-sm hover:text-white/75 transition-colors duration-150"
                     >
                       {link.label}
                     </a>
@@ -274,7 +278,7 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-white/8">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-white/25 text-xs">
+          <p className="text-white/50 text-xs">
             © {new Date().getFullYear()} HackPack s.r.o. — Všechna práva vyhrazena.
           </p>
           <div className="flex items-center gap-1">
@@ -286,12 +290,14 @@ export default function Footer() {
               <span key={link.label} className="flex items-center gap-1">
                 <a
                   href={link.href}
-                  className="text-white/25 text-xs hover:text-white/55 transition-colors"
+                  className="text-white/50 text-xs hover:text-white/55 transition-colors"
                 >
                   {link.label}
                 </a>
                 {i < arr.length - 1 && (
-                  <span className="text-white/15 text-xs select-none">·</span>
+                  /* Čistě dekorativní oddělovač — aria-hidden, ať ho čtečka nečte
+                     mezi odkazy. Kontrast se u dekorace neposuzuje. */
+                  <span aria-hidden="true" className="text-white/15 text-xs select-none">·</span>
                 )}
               </span>
             ))}

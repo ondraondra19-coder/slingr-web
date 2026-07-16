@@ -195,7 +195,7 @@ export default function FeaturedProducts({ products }: { products: Product[] }) 
                   <p className="text-white font-bold text-base leading-snug line-clamp-2 mb-2.5">
                     {product.name}
                   </p>
-                  <p className="text-primary font-extrabold text-xl leading-none">
+                  <p className="text-primary-ink font-extrabold text-xl leading-none">
                     {formatPrice(getPrice(product.price as any, currency), currency)}
                   </p>
                 </div>
@@ -209,20 +209,29 @@ export default function FeaturedProducts({ products }: { products: Product[] }) 
           ))}
         </div>
 
-        {/* Dots */}
+        {/* Dots — 44×44 dotykový cíl, viditelnou tečku kreslí vnitřní <span>.
+            Neaktivní tečka: bg-border-strong mělo vůči bílé 1.47:1, což je pod
+            3:1 pro UI prvek — text-subtle dává 5.36:1. */}
         {maxIndex > 0 && (
-          <div className="flex items-center justify-center gap-2 mt-7">
+          <div className="flex items-center justify-center mt-5" role="tablist" aria-label="Stránkování produktů">
             {Array.from({ length: maxIndex + 1 }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => goTo(i)}
-                aria-label={`Pozice ${i + 1}`}
-                className={`rounded-full transition-all duration-300 ${
-                  i === index
-                    ? "w-7 h-1.5 bg-primary"
-                    : "w-1.5 h-1.5 bg-border-strong hover:bg-text-subtle"
-                }`}
-              />
+                role="tab"
+                aria-selected={i === index}
+                aria-label={`Zobrazit produkty ${i + 1}. skupiny z ${maxIndex + 1}`}
+                className="w-11 h-11 flex items-center justify-center group"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`rounded-full transition-all duration-300 ${
+                    i === index
+                      ? "w-7 h-1.5 bg-primary"
+                      : "w-1.5 h-1.5 bg-text-subtle group-hover:bg-text-muted"
+                  }`}
+                />
+              </button>
             ))}
           </div>
         )}

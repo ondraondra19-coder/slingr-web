@@ -15,28 +15,28 @@ const steps = [
     {
         num: 1,
         tag: "Příprava",
-        tagColor: "text-primary bg-primary/10",
+        tagColor: "text-primary-ink bg-primary/10",
         title: "Vyplňte reklamační formulář",
         desc: "Popište závadu co nejpodrobněji a přiložte fotografie poškození. Formulář naleznete níže na stránce nebo nás kontaktujte e-mailem.",
     },
     {
         num: 2,
         tag: "Odeslání",
-        tagColor: "text-primary bg-primary/10",
+        tagColor: "text-primary-ink bg-primary/10",
         title: "Zašlete nám zboží",
         desc: "Zabalte zboží do původního nebo dostatečně pevného obalu. Přiložte vytištěný formulář a doklad o koupi (stačí kopie). Zásilku pošlete na naši adresu.",
     },
     {
         num: 3,
         tag: "Zpracování",
-        tagColor: "text-primary bg-primary/10",
+        tagColor: "text-primary-ink bg-primary/10",
         title: "Posoudíme reklamaci",
         desc: "Do 3 pracovních dnů od přijetí zásilky vás e-mailem informujeme o stavu reklamace. Zákonná lhůta pro vyřízení je 30 dní.",
     },
     {
         num: 4,
         tag: "Vyřízení",
-        tagColor: "text-primary bg-primary/10",
+        tagColor: "text-primary-ink bg-primary/10",
         title: "Oprava, výměna nebo vrácení peněz",
         desc: "Po uznání reklamace zvolíte preferovaný způsob vyřízení — opravený nebo nový kus zašleme zpět, případně vrátíme celou částku.",
     },
@@ -243,7 +243,7 @@ export default function ReklamaceAVraceniPage() {
                         </nav>
 
                         <div className="max-w-2xl">
-                            <p className="text-primary text-xs font-bold uppercase tracking-[0.18em] mb-4">
+                            <p className="text-primary-ink text-xs font-bold uppercase tracking-[0.18em] mb-4">
                                 Zákaznický servis
                             </p>
                             <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight tracking-tight mb-5">
@@ -273,7 +273,7 @@ export default function ReklamaceAVraceniPage() {
                                         <div className="absolute left-[19px] top-12 w-0.5 h-[calc(100%-8px)] bg-border" />
                                     )}
 
-                                    <div className="shrink-0 w-10 h-10 rounded-full bg-primary flex items-center justify-center text-dark font-extrabold text-sm z-10">
+                                    <div className="shrink-0 w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-extrabold text-sm z-10">
                                         {s.num}
                                     </div>
 
@@ -312,7 +312,7 @@ export default function ReklamaceAVraceniPage() {
                                         </div>
                                         <p className="text-text-muted text-sm leading-relaxed mb-2">{m.desc}</p>
                                         {m.isFree && (
-                                            <div className="inline-flex items-center gap-1 text-primary text-[11px] font-bold">
+                                            <div className="inline-flex items-center gap-1 text-primary-ink text-[11px] font-bold">
                                                 <CheckCircle2 size={11} />
                                                 {m.freeNote}
                                             </div>
@@ -411,12 +411,12 @@ export default function ReklamaceAVraceniPage() {
                                     <div className="md:col-span-2 pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-6">
                                         <p className="text-xs text-text-subtle leading-relaxed max-w-md text-center sm:text-left">
                                             Odesláním formuláře berete na vědomí{" "}
-                                            <a href="/ochrana-osobnich-udaju" className="text-primary hover:underline font-semibold">zpracování osobních údajů</a>
+                                            <a href="/ochrana-osobnich-udaju" className="text-primary-ink hover:underline font-semibold">zpracování osobních údajů</a>
                                             {" "}pro účely vyřízení reklamace. Pole označená * jsou povinná.
                                         </p>
                                         <button
                                             type="submit"
-                                            className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-primary text-dark font-extrabold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/10"
+                                            className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-primary text-on-primary font-extrabold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/10"
                                         >
                                             Odeslat žádost
                                             <Send size={16} />
@@ -432,7 +432,7 @@ export default function ReklamaceAVraceniPage() {
                                         <div className="flex flex-col gap-6">
                                             <div className="flex items-start gap-5">
                                                 <div className="shrink-0 w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                                                    <CheckCircle2 size={28} className="text-primary" />
+                                                    <CheckCircle2 size={28} className="text-primary-ink" />
                                                 </div>
                                                 <div>
                                                     <h3 className="text-xl font-extrabold text-text-base mb-1 leading-tight">
@@ -448,7 +448,7 @@ export default function ReklamaceAVraceniPage() {
                                             <div className="bg-surface rounded-2xl border border-border p-6">
                                                 <div className="flex items-center justify-between mb-5">
                                                     <p className="text-xs font-bold text-text-subtle uppercase tracking-widest">Číslo žádosti</p>
-                                                    <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-extrabold tracking-wide">
+                                                    <span className="px-3 py-1 rounded-full bg-primary/10 text-primary-ink text-xs font-extrabold tracking-wide">
                                                         TG-{ticketNumber}
                                                     </span>
                                                 </div>
@@ -491,7 +491,7 @@ export default function ReklamaceAVraceniPage() {
                                                         { title: "Odešlete zásilku", desc: "Zašlete ji dle zvoleného způsobu dopravy na naši adresu." },
                                                     ].map((item, i) => (
                                                         <div key={i} className="flex items-start gap-4">
-                                                            <span className="shrink-0 mt-0.5 w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-extrabold flex items-center justify-center">
+                                                            <span className="shrink-0 mt-0.5 w-7 h-7 rounded-full bg-primary/10 text-primary-ink text-xs font-extrabold flex items-center justify-center">
                                                                 {i + 1}
                                                             </span>
                                                             <div>
@@ -506,7 +506,7 @@ export default function ReklamaceAVraceniPage() {
 
                                                 <a
                                                     href="/kontakt"
-                                                    className="w-full sm:w-auto px-6 py-3 rounded-full bg-primary text-dark font-extrabold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/10"
+                                                    className="w-full sm:w-auto px-6 py-3 rounded-full bg-primary text-on-primary font-extrabold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/10"
                                                 >
                                                     Kontaktovat podporu
                                                     <ArrowRight size={14} />
@@ -582,7 +582,7 @@ export default function ReklamaceAVraceniPage() {
 
                         <a
                             href="/kontakt"
-                            className="relative z-10 shrink-0 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-primary text-dark font-bold text-sm hover:brightness-110 active:scale-[0.97] transition-all shadow-lg shadow-primary/20"
+                            className="relative z-10 shrink-0 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-primary text-on-primary font-bold text-sm hover:brightness-110 active:scale-[0.97] transition-all shadow-lg shadow-primary/20"
                         >
                             Kontaktovat nás
                             <ArrowRight size={15} />

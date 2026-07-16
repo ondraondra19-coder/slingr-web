@@ -74,7 +74,7 @@ export default function ONasPage() {
               {values.map((v) => (
                 <div key={v.title} className="flex flex-col items-center text-center gap-3">
                   <div className="w-14 h-14 rounded-full border-2 border-primary/30 flex items-center justify-center">
-                    <v.icon size={22} className="text-primary" />
+                    <v.icon size={22} className="text-primary-ink" />
                   </div>
                   <p className="text-text-base font-semibold text-sm">{v.title}</p>
                   <p className="text-text-muted text-sm leading-relaxed">{v.desc}</p>
@@ -123,7 +123,7 @@ export default function ONasPage() {
 
             <a
               href="/kontakt"
-              className="relative z-10 shrink-0 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-primary text-dark font-bold text-sm hover:brightness-110 active:scale-[0.97] transition-all shadow-lg shadow-primary/20"
+              className="relative z-10 shrink-0 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-primary text-on-primary font-bold text-sm hover:brightness-110 active:scale-[0.97] transition-all shadow-lg shadow-primary/20"
             >
               Kontaktovat nás
               <ArrowRight size={15} />

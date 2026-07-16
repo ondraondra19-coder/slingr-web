@@ -11,7 +11,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <div className="mb-12">
       <h2 className="text-xl font-bold text-text-base mb-5 pb-3 border-b border-border">{title}</h2>
-      <div className="flex flex-col gap-4 text-text-muted text-base leading-relaxed [&_strong]:text-text-base [&_a]:text-primary [&_a]:hover:underline [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-2">
+      <div className="flex flex-col gap-4 text-text-muted text-base leading-relaxed [&_strong]:text-text-base [&_a]:text-primary-ink [&_a]:hover:underline [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-2">
         {children}
       </div>
     </div>
@@ -79,7 +79,7 @@ export default function ObchodniPodminkyPage() {
             <p>Prodávající odpovídá kupujícímu, že zboží při převzetí nemá vady. Na nové zboží se vztahuje zákonná lhůta pro uplatnění práv z vadného plnění v délce <strong>24 měsíců</strong>. U použitého nebo repasovaného zboží je tato lhůta <strong>12 měsíců</strong>.</p>
             <p>Projeví-li se vada v průběhu jednoho roku od převzetí, má se za to, že zboží bylo vadné již při převzetí, ledaže to povaha věci nebo vady vylučuje.</p>
             <p>V případě vady má kupující právo na odstranění vady opravou nebo dodáním nové věci. Není-li to možné, může kupující požadovat přiměřenou slevu nebo od smlouvy odstoupit.</p>
-            <p>Reklamaci uplatněte e-mailem na <strong>[EMAIL]</strong> nebo písemně na adrese sídla. V reklamaci uveďte číslo objednávky, popis závady a zvolený způsob vyřízení. Podrobný technický postup a formuláře naleznete na naší stránce <Link href="/reklamace" className="text-primary hover:underline font-bold">Reklamace a vrácení zboží</Link>.</p>
+            <p>Reklamaci uplatněte e-mailem na <strong>[EMAIL]</strong> nebo písemně na adrese sídla. V reklamaci uveďte číslo objednávky, popis závady a zvolený způsob vyřízení. Podrobný technický postup a formuláře naleznete na naší stránce <Link href="/reklamace" className="text-primary-ink hover:underline font-bold">Reklamace a vrácení zboží</Link>.</p>
             <p>Reklamaci včetně odstranění vady vyřídíme bez zbytečného odkladu, nejpozději do <strong>30 dnů</strong>. Záruka se nevztahuje na poškození způsobené nesprávným používáním, mechanickým poškozením nebo přirozeným opotřebením.</p>
           </Section>
 

@@ -22,7 +22,7 @@ const categories = [
     id: "doprava",
     icon: Truck,
     label: "Doprava & Doručení",
-    color: "text-primary",
+    color: "text-primary-ink",
     bg: "bg-primary/8",
     questions: [
       {
@@ -47,7 +47,7 @@ const categories = [
     id: "vraceni",
     icon: RotateCcw,
     label: "Vrácení & Reklamace",
-    color: "text-primary",
+    color: "text-primary-ink",
     bg: "bg-primary/8",
     questions: [
       {
@@ -72,7 +72,7 @@ const categories = [
     id: "platba",
     icon: CreditCard,
     label: "Platby",
-    color: "text-primary",
+    color: "text-primary-ink",
     bg: "bg-primary/8",
     questions: [
       {
@@ -93,7 +93,7 @@ const categories = [
     id: "produkty",
     icon: Package,
     label: "Produkty & Záruka",
-    color: "text-primary",
+    color: "text-primary-ink",
     bg: "bg-primary/8",
     questions: [
       {
@@ -118,7 +118,7 @@ const categories = [
     id: "podpora",
     icon: Headphones,
     label: "Zákaznická podpora",
-    color: "text-primary",
+    color: "text-primary-ink",
     bg: "bg-primary/8",
     questions: [
       {
@@ -139,7 +139,7 @@ const categories = [
     id: "zabezpeceni",
     icon: ShieldCheck,
     label: "Bezpečnost & Soukromí",
-    color: "text-primary",
+    color: "text-primary-ink",
     bg: "bg-primary/8",
     questions: [
       {
@@ -186,14 +186,14 @@ function AccordionItem({
           </span>
         </span>
 
-        <span className="flex-1 text-text-base font-semibold text-sm sm:text-base leading-snug group-hover:text-primary transition-colors duration-150">
+        <span className="flex-1 text-text-base font-semibold text-sm sm:text-base leading-snug group-hover:text-primary-ink transition-colors duration-150">
           {question}
         </span>
 
         <span
           className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 mt-0.5 ${
             isOpen
-              ? "border-primary bg-primary text-white rotate-45"
+              ? "border-primary bg-primary text-on-primary rotate-45"
               : "border-border-strong text-text-muted"
           }`}
         >
@@ -296,7 +296,7 @@ export default function FaqPage() {
             </nav>
 
             <div className="max-w-2xl">
-              <p className="text-primary text-xs font-bold uppercase tracking-[0.18em] mb-4">
+              <p className="text-primary-ink text-xs font-bold uppercase tracking-[0.18em] mb-4">
                 Nápověda
               </p>
               <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight tracking-tight mb-5">
@@ -305,7 +305,7 @@ export default function FaqPage() {
               <p className="text-white/50 text-base leading-relaxed">
                 Odpovědi na {totalQuestions} nejčastějších otázek zákazníků.
                 Nenašli jste co hledáte?{" "}
-                <a href="/kontakt" className="text-primary hover:underline font-medium">
+                <a href="/kontakt" className="text-primary-ink hover:underline font-medium">
                   Napište nám.
                 </a>
               </p>
@@ -352,7 +352,7 @@ export default function FaqPage() {
                 </p>
                 <a
                   href="/kontakt"
-                  className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:brightness-105 transition-all"
+                  className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-primary text-on-primary text-sm font-bold hover:brightness-105 transition-all"
                 >
                   Napsat nám
                   <ChevronDown size={13} className="-rotate-90" />
@@ -392,7 +392,7 @@ export default function FaqPage() {
                 <div className="relative z-10 shrink-0">
                   <a
                     href="/kontakt"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-white text-sm font-bold hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-primary/20"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-on-primary text-sm font-bold hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-primary/20"
                   >
                     Zeptejte se nás
                   </a>

@@ -16,7 +16,7 @@ export default function InstagramFeed() {
     <section className="py-14">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
         <div className="flex items-center gap-3 mb-8">
-          <Instagram size={20} className="text-primary" />
+          <Instagram size={20} className="text-primary-ink" />
           <h2 className="text-2xl font-bold text-text-base">@hackpack.cz</h2>
         </div>
         <div className="grid grid-cols-3 lg:grid-cols-6 gap-2">

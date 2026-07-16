@@ -77,7 +77,7 @@ function MockZboxModal({ onPick, onClose }: { onPick: (point: PacketaPoint) => v
               onClick={() => onPick(point)}
               className="w-full flex items-start gap-2 text-left px-4 py-3 rounded-xl hover:bg-surface transition-colors"
             >
-              <MapPin size={14} className="text-primary mt-0.5 shrink-0" />
+              <MapPin size={14} className="text-primary-ink mt-0.5 shrink-0" />
               <span>
                 <span className="block text-text-base text-sm font-semibold">{point.name}</span>
                 <span className="block text-text-subtle text-xs">{point.nameStreet}, {point.zip} {point.city}</span>
@@ -107,12 +107,12 @@ function Stepper({ step }: { step: 1 | 2 | 3 }) {
             <div className="flex flex-col items-center gap-1.5">
               {clickable ? (
                 <a href={s.href!}>
-                  <span className="w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center bg-primary text-white hover:brightness-110 transition-all">
+                  <span className="w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center bg-primary text-on-primary hover:brightness-110 transition-all">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </span>
                 </a>
               ) : (
-                <span className={`w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center ${active ? "bg-primary text-dark" : "bg-border text-text-subtle"}`}>
+                <span className={`w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center ${active ? "bg-primary text-on-primary" : "bg-border text-text-subtle"}`}>
                   {s.n}
                 </span>
               )}
@@ -302,9 +302,9 @@ export default function ObjednavkaPage() {
                               : "border-dashed border-border-strong text-text-muted hover:border-primary/40 hover:text-text-base"
                             }`}
                           >
-                            <MapPin size={14} className={selectedZbox ? "text-primary" : errors.zasilkovna ? "text-red-500" : "text-text-subtle"} />
+                            <MapPin size={14} className={selectedZbox ? "text-primary-ink" : errors.zasilkovna ? "text-red-500" : "text-text-subtle"} />
                             {selectedZbox ? selectedZbox.nameStreet : "Vybrat výdejní místo"}
-                            {selectedZbox && <Check size={13} className="text-primary ml-1" />}
+                            {selectedZbox && <Check size={13} className="text-primary-ink ml-1" />}
                           </button>
                           {errors.zasilkovna && (
                             <p className="flex items-center gap-1 text-red-500 text-xs mt-1 ml-1">
@@ -344,7 +344,7 @@ export default function ObjednavkaPage() {
                         {platba === opt.id && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
                       </div>
                       <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                        <opt.icon size={18} className="text-primary" />
+                        <opt.icon size={18} className="text-primary-ink" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-text-base font-medium text-sm">{opt.name}</p>
@@ -361,7 +361,7 @@ export default function ObjednavkaPage() {
               <div className="bg-secondary border border-border rounded-2xl overflow-hidden">
                 <div className="px-5 py-4 border-b border-border flex items-center justify-between">
                   <h2 className="text-text-base font-semibold text-sm">Objednávka</h2>
-                  <a href="/kosik" className="text-primary text-xs hover:underline">Upravit</a>
+                  <a href="/kosik" className="text-primary-ink text-xs hover:underline">Upravit</a>
                 </div>
                 <div className="px-5 py-3 flex flex-col gap-3 max-h-52 overflow-y-auto">
                   {items.map((item) => (
@@ -415,7 +415,7 @@ export default function ObjednavkaPage() {
                   <div className="h-px bg-border" />
                   <div className="flex items-center justify-between">
                     <span className="text-text-base font-bold">Celkem</span>
-                    <span className="text-primary font-extrabold text-xl">{formatPrice(celkem, currency)}</span>
+                    <span className="text-primary-ink font-extrabold text-xl">{formatPrice(celkem, currency)}</span>
                   </div>
                 </div>
 
@@ -426,7 +426,7 @@ export default function ObjednavkaPage() {
 
                 <div className="px-5 pb-5">
                   <button onClick={handleSubmit}
-                    className="w-full py-4 rounded-2xl bg-primary text-dark font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    className="w-full py-4 rounded-2xl bg-primary text-on-primary font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
                     Pokračovat k informacím <ChevronRight size={15} />
                   </button>
                   <p className="text-text-subtle text-xs text-center mt-3">Zabezpečená platba · SSL šifrování</p>
