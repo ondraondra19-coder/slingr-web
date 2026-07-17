@@ -16,6 +16,9 @@ import { buildSpdString, orderIdToVariableSymbol } from "@/lib/qrPlatba";
 import QRCode from "qrcode";
 import { DOBIRKA_FEE } from "@/lib/fees";
 import { identifyUser } from "@/lib/analytics";
+import { useT } from "@/lib/useT";
+import { shippingLabel, paymentLabel } from "@/lib/shippingLabels";
+import { COUNTRY_CZECHIA } from "@/lib/shipping/pricing";
 
 const SNAPSHOT_KEY = "hackpack-order-snapshot";
 
@@ -83,6 +86,7 @@ function CopyButton({ value }: { value: string }) {
 }
 
 function BankovniPrevod({ totalStr, vsymbol, amount, currencyCode }: { totalStr: string; vsymbol: string; amount: number; currencyCode: string }) {
+    const t = useT("success");
     const accountDisplay = process.env.NEXT_PUBLIC_BANK_ACCOUNT_DISPLAY;
     const iban = process.env.NEXT_PUBLIC_BANK_ACCOUNT_IBAN;
     const bankName = process.env.NEXT_PUBLIC_BANK_NAME;
@@ -105,20 +109,20 @@ function BankovniPrevod({ totalStr, vsymbol, amount, currencyCode }: { totalStr:
     return (
         <div>
             <div className="mb-8">
-                <SectionLabel>Platební instrukce</SectionLabel>
-                <h2 className="text-2xl font-extrabold text-text-base tracking-tight mb-2">Dokončete platbu převodem</h2>
-                <p className="text-text-muted text-sm leading-relaxed max-w-lg">Objednávku jsme zaevidovali. Prosíme o zaslání platby na níže uvedený účet — expedujeme ihned po připsání částky.</p>
+                <SectionLabel>{t("transferEyebrow")}</SectionLabel>
+                <h2 className="text-2xl font-extrabold text-text-base tracking-tight mb-2">{t("transferTitle")}</h2>
+                <p className="text-text-muted text-sm leading-relaxed max-w-lg">{t("transferDesc")}</p>
             </div>
             {!accountDisplay ? (
                 <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
                     <div className="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center text-[10px] font-black text-white">!</div>
-                    <p className="text-xs text-amber-900 leading-relaxed">Platba převodem zatím není nastavena — chybí bankovní účet. Ozvěte se prosím na e-mail v hlavičce, domluvíme se individuálně.</p>
+                    <p className="text-xs text-amber-900 leading-relaxed">{t("transferNotSetUp")}</p>
                 </div>
             ) : (
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 <div className="lg:col-span-3 bg-surface rounded-2xl border border-border p-6 space-y-5">
                     <div>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-1.5">Číslo účtu</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-1.5">{t("accountNumber")}</p>
                         <div className="flex items-center justify-between bg-white border border-border rounded-xl px-4 py-3">
                             <span className="font-mono font-black text-text-base text-lg tracking-wide">{accountDisplay}</span>
                             <div className="flex items-center gap-2">
@@ -129,44 +133,44 @@ function BankovniPrevod({ totalStr, vsymbol, amount, currencyCode }: { totalStr:
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-1.5">Variabilní symbol</p>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-1.5">{t("variableSymbol")}</p>
                             <div className="flex items-center justify-between bg-white border border-border rounded-xl px-4 py-3">
                                 <span className="font-mono font-black text-text-base">{vsymbol}</span>
                                 <CopyButton value={vsymbol} />
                             </div>
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-1.5">Částka</p>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-1.5">{t("amount")}</p>
                             <div className="bg-white border border-primary/20 rounded-xl px-4 py-3 font-mono font-black text-primary-ink text-lg">{totalStr}</div>
                         </div>
                     </div>
                 </div>
                 <div className="lg:col-span-2 bg-surface rounded-2xl border border-border p-6 flex flex-col items-center justify-center gap-4">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle">Rychlá platba QR kódem</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle">{t("qrTitle")}</p>
                     <div className="bg-white border border-border rounded-2xl p-4 shadow-sm">
                         {showQr && qrDataUrl ? (
-                            <Image src={qrDataUrl} alt="QR platba" width={160} height={160} className="w-40 h-40" unoptimized />
+                            <Image src={qrDataUrl} alt={t("qrAlt")} width={160} height={160} className="w-40 h-40" unoptimized />
                         ) : (
                             <div className="w-40 h-40 bg-surface rounded-lg border border-dashed border-border flex flex-col items-center justify-center gap-2">
                                 <div className="w-10 h-10 border-2 border-dashed border-text-subtle/30 rounded-full flex items-center justify-center">
                                     <span className="text-primary-ink font-extrabold text-[10px]">QR</span>
                                 </div>
                                 <span className="text-[10px] font-bold text-text-subtle uppercase tracking-tight text-center px-2">
-                                    {showQr ? <>Generuji...</> : <>QR platba není<br />pro tuto měnu dostupná</>}
+                                    {showQr ? t("qrGenerating") : t("qrUnavailable")}
                                 </span>
                             </div>
                         )}
                     </div>
-                    <p className="text-xs text-text-muted text-center leading-relaxed">Kompatibilní s většinou českých bankovních aplikací</p>
+                    <p className="text-xs text-text-muted text-center leading-relaxed">{t("qrCompatible")}</p>
                 </div>
             </div>
             )}
             {accountDisplay && (
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
-                    { icon: Banknote, label: "Odešlete platbu", desc: "Na výše uvedený účet s variabilním symbolem." },
-                    { icon: Clock, label: "Platba se připsala", desc: "Obvykle do několika hodin, max. 1 pracovní den." },
-                    { icon: Truck, label: "Expedujeme", desc: "Zásilku odešleme do 24 h od přijetí platby." },
+                    { icon: Banknote, label: t("transferStep1"), desc: t("transferStep1Desc") },
+                    { icon: Clock, label: t("transferStep2"), desc: t("transferStep2Desc") },
+                    { icon: Truck, label: t("transferStep3"), desc: t("transferStep3Desc") },
                 ].map((item) => (
                     <div key={item.label} className="flex items-start gap-4 bg-surface rounded-2xl border border-border p-4">
                         <div className="shrink-0 w-9 h-9 rounded-xl bg-white border border-border flex items-center justify-center">
@@ -185,29 +189,28 @@ function BankovniPrevod({ totalStr, vsymbol, amount, currencyCode }: { totalStr:
 }
 
 function Dobirka({ totalStr, isZasilkovnaBox }: { totalStr: string; isZasilkovnaBox: boolean }) {
+    const t = useT("success");
     const steps = isZasilkovnaBox
         ? [
-            { step: "1", icon: Package, title: "Balíme", desc: "Sklad expeduje vaši objednávku do 24 hodin.", active: true },
-            { step: "2", icon: Smartphone, title: "Zaplatíte předem", desc: "Dobírku uhradíte v aplikaci Zásilkovna nebo přes odkaz v e-mailu — Z-BOX nemá terminál ani nepřijímá hotovost.", active: false },
-            { step: "3", icon: MapPin, title: "Vyzvednete v Z-BOXu", desc: "Po zaplacení vám přijde kód pro vyzvednutí zásilky.", active: false },
+            { step: "1", icon: Package, title: t("codPacking"), desc: t("codPackingDesc"), active: true },
+            { step: "2", icon: Smartphone, title: t("codBoxPay"), desc: t("codBoxPayDesc"), active: false },
+            { step: "3", icon: MapPin, title: t("codBoxPickup"), desc: t("codBoxPickupDesc"), active: false },
         ]
         : [
-            { step: "1", icon: Package, title: "Balíme", desc: "Sklad expeduje vaši objednávku do 24 hodin.", active: true },
-            { step: "2", icon: Truck, title: "Kurýr dorazí", desc: "Den před doručením dostanete SMS s časovým oknem.", active: false },
-            { step: "3", icon: Banknote, title: "Zaplatíte", desc: "Hotovost nebo karta — kurýři akceptují oboje.", active: false },
+            { step: "1", icon: Package, title: t("codPacking"), desc: t("codPackingDesc"), active: true },
+            { step: "2", icon: Truck, title: t("codCourier"), desc: t("codCourierDesc"), active: false },
+            { step: "3", icon: Banknote, title: t("codPay"), desc: t("codPayDesc"), active: false },
         ];
 
     return (
         <div>
             <div className="mb-8">
-                <SectionLabel>Způsob úhrady</SectionLabel>
+                <SectionLabel>{t("paymentMethodEyebrow")}</SectionLabel>
                 <h2 className="text-2xl font-extrabold text-text-base tracking-tight mb-2">
-                    {isZasilkovnaBox ? "Platba dobírky předem" : "Platba při doručení"}
+                    {isZasilkovnaBox ? t("codBoxTitle") : t("codTitle")}
                 </h2>
                 <p className="text-text-muted text-sm leading-relaxed max-w-lg">
-                    {isZasilkovnaBox
-                        ? "Zásilku právě balíme. Než si ji vyzvednete v Z-BOXu, uhraďte dobírku online v aplikaci Zásilkovna nebo přes odkaz z e-mailu."
-                        : "Nemusíte dělat nic — zásilku právě balíme. Zaplatíte až kurýrovi při předání."}
+                    {isZasilkovnaBox ? t("codBoxDesc") : t("codDesc")}
                 </p>
             </div>
             <div className="bg-surface rounded-2xl border border-border p-6 lg:p-8 mb-6">
@@ -224,18 +227,16 @@ function Dobirka({ totalStr, isZasilkovnaBox }: { totalStr: string; isZasilkovna
                 </div>
                 <div className="mt-8 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-1 text-center sm:text-left">Celková částka k zaplacení</p>
-                        <p className="text-3xl font-black text-text-base text-center sm:text-left">{totalStr}<span className="text-sm font-normal text-text-muted ml-2">vč. poplatku za dobírku</span></p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-1 text-center sm:text-left">{t("amountDue")}</p>
+                        <p className="text-3xl font-black text-text-base text-center sm:text-left">{totalStr}<span className="text-sm font-normal text-text-muted ml-2">{t("inclCodFee")}</span></p>
                     </div>
-                    <StatusPill label="Připraveno k expedici" active />
+                    <StatusPill label={t("statusReady")} active />
                 </div>
             </div>
             <div className="flex items-center gap-3 bg-surface rounded-xl border border-border px-5 py-4">
-                <Phone size={16} className="text-text-muted shrink-0" />
+                <Phone size={16} className="text-text-muted shrink-0" aria-hidden="true" />
                 <p className="text-xs text-text-muted leading-relaxed">
-                    {isZasilkovnaBox
-                        ? <>Odkaz k platbě dobírky vám přijde <strong className="text-text-base">e-mailem</strong> spolu se sledováním zásilky.</>
-                        : <>Kurýr vás bude kontaktovat <strong className="text-text-base">SMS zprávou</strong> v den doručení.</>}
+                    {isZasilkovnaBox ? t("codBoxNote") : t("codCourierNote")}
                 </p>
             </div>
         </div>
@@ -243,21 +244,22 @@ function Dobirka({ totalStr, isZasilkovnaBox }: { totalStr: string; isZasilkovna
 }
 
 function KartaStripe({ totalStr, orderId }: { totalStr: string; orderId: string }) {
+    const t = useT("success");
     return (
         <div>
             <div className="mb-8">
-                <SectionLabel>Potvrzení transakce</SectionLabel>
-                <h2 className="text-2xl font-extrabold text-text-base tracking-tight mb-2">Platba proběhla v pořádku</h2>
-                <p className="text-text-muted text-sm leading-relaxed max-w-lg">Transakce byla úspěšně autorizována. Vaši objednávku nyní prioritně zpracováváme.</p>
+                <SectionLabel>{t("cardEyebrow")}</SectionLabel>
+                <h2 className="text-2xl font-extrabold text-text-base tracking-tight mb-2">{t("cardTitle")}</h2>
+                <p className="text-text-muted text-sm leading-relaxed max-w-lg">{t("cardDesc")}</p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-surface rounded-2xl border border-border p-6">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-4">Souhrn transakce</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-4">{t("cardSummary")}</p>
                     {[
-                        { label: "Stav platby", value: "✓ Zaplaceno", highlight: true },
-                        { label: "Způsob úhrady", value: "Platební karta / Apple Pay", highlight: false },
-                        { label: "Číslo objednávky", value: `#${orderId}`, highlight: false },
-                        { label: "Celková částka", value: totalStr, highlight: true },
+                        { label: t("cardStatusLabel"), value: `✓ ${t("cardStatusPaid")}`, highlight: true },
+                        { label: t("paymentMethodEyebrow"), value: t("cardMethod"), highlight: false },
+                        { label: t("orderNumber"), value: `#${orderId}`, highlight: false },
+                        { label: t("totalAmount"), value: totalStr, highlight: true },
                     ].map(({ label, value, highlight }) => (
                         <div key={label} className="flex items-center justify-between py-3.5 border-b border-border last:border-0">
                             <span className="text-xs font-bold uppercase tracking-wider text-text-subtle">{label}</span>
@@ -265,17 +267,17 @@ function KartaStripe({ totalStr, orderId }: { totalStr: string; orderId: string 
                         </div>
                     ))}
                     <div className="mt-5 flex items-center gap-2 justify-center">
-                        <ShieldCheck size={13} className="text-text-subtle" />
-                        <p className="text-[10px] font-bold text-text-subtle uppercase tracking-[0.12em]">Zabezpečeno přes Stripe</p>
+                        <ShieldCheck size={13} className="text-text-subtle" aria-hidden="true" />
+                        <p className="text-[10px] font-bold text-text-subtle uppercase tracking-[0.12em]">{t("securedByStripe")}</p>
                     </div>
                 </div>
                 <div className="bg-surface rounded-2xl border border-border p-6">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-4">Co bude dál?</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-4">{t("whatsNext")}</p>
                     <div className="space-y-4">
                         {[
-                            { icon: Mail, title: "Potvrzovací e-mail", desc: "Zaslán na váš e-mail z objednávky." },
-                            { icon: Package, title: "Balíme zásilku", desc: "Expedice probíhá do 24 hodin." },
-                            { icon: Truck, title: "Kurýr dorazí", desc: "SMS notifikace v den doručení." },
+                            { icon: Mail, title: t("nextEmail"), desc: t("nextEmailDesc") },
+                            { icon: Package, title: t("nextPacking"), desc: t("nextPackingDesc") },
+                            { icon: Truck, title: t("nextCourier"), desc: t("nextCourierDesc") },
                         ].map((item) => (
                             <div key={item.title} className="flex items-start gap-3">
                                 <div className="shrink-0 w-8 h-8 rounded-xl bg-white border border-border flex items-center justify-center mt-0.5">
@@ -297,6 +299,8 @@ function KartaStripe({ totalStr, orderId }: { totalStr: string; orderId: string 
 // ── Adresní blok — zobrazí kam se balík posílá ──────────────────────────────
 
 function DeliveryAddressBlock({ info, orderData }: { info: SnapshotInfo; orderData: Snapshot["orderData"] }) {
+    const t = useT("success");
+    const tc = useT("checkout");
     const isZasilkovna = orderData?.doprava === "zasilkovna_box";
 
     // Doručovací adresa = jiná adresa pokud zaškrtnuta, jinak fakturační
@@ -309,10 +313,10 @@ function DeliveryAddressBlock({ info, orderData }: { info: SnapshotInfo; orderDa
             {/* Způsob doručení */}
             {orderData?.dopravaName && (
                 <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-2">Způsob doručení</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-2">{t("deliveryMethod")}</p>
                     <div className="flex items-center gap-2 text-sm font-semibold text-text-base">
-                        <Truck size={14} className="text-primary-ink shrink-0" />
-                        {orderData.dopravaName}
+                        <Truck size={14} className="text-primary-ink shrink-0" aria-hidden="true" />
+                        {shippingLabel(tc, orderData.doprava, orderData.dopravaName)}
                     </div>
                 </div>
             )}
@@ -322,7 +326,7 @@ function DeliveryAddressBlock({ info, orderData }: { info: SnapshotInfo; orderDa
             {/* Výdejní místo Zásilkovny */}
             {isZasilkovna && orderData?.zbox ? (
                 <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-2">Výdejní místo</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-2">{t("pickupPoint")}</p>
                     <div className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10">
                         <Package size={14} className="text-primary-ink mt-0.5 shrink-0" />
                         <div className="text-xs text-text-muted leading-relaxed">
@@ -337,7 +341,7 @@ function DeliveryAddressBlock({ info, orderData }: { info: SnapshotInfo; orderDa
                 deliveryAddr && (
                     <div>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-2">
-                            {info.jineDorucenoAdresa && info.dorAdresa?.uliceCp ? "Doručovací adresa" : "Fakturační adresa"}
+                            {info.jineDorucenoAdresa && info.dorAdresa?.uliceCp ? t("deliveryAddress") : t("billingAddress")}
                         </p>
                         <div className="flex items-start gap-3">
                             <MapPin size={14} className="text-text-subtle mt-0.5 shrink-0" />
@@ -352,7 +356,7 @@ function DeliveryAddressBlock({ info, orderData }: { info: SnapshotInfo; orderDa
                                 {(deliveryAddr.psc || deliveryAddr.mesto) && (
                                     <p>{[deliveryAddr.psc, deliveryAddr.mesto].filter(Boolean).join(" ")}</p>
                                 )}
-                                {deliveryAddr.zeme && deliveryAddr.zeme !== "Česká republika" && (
+                                {deliveryAddr.zeme && deliveryAddr.zeme !== COUNTRY_CZECHIA && (
                                     <p>{deliveryAddr.zeme}</p>
                                 )}
                             </div>
@@ -366,7 +370,7 @@ function DeliveryAddressBlock({ info, orderData }: { info: SnapshotInfo; orderDa
                 <>
                     <div className="h-px bg-border" />
                     <div>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-2">Fakturační adresa</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-2">{t("billingAddress")}</p>
                         <div className="flex items-start gap-3">
                             <MapPin size={14} className="text-text-subtle mt-0.5 shrink-0" />
                             <div className="text-sm text-text-muted leading-relaxed">
@@ -380,7 +384,7 @@ function DeliveryAddressBlock({ info, orderData }: { info: SnapshotInfo; orderDa
                                 {(info.adresa.psc || info.adresa.mesto) && (
                                     <p>{[info.adresa.psc, info.adresa.mesto].filter(Boolean).join(" ")}</p>
                                 )}
-                                {info.adresa.zeme && info.adresa.zeme !== "Česká republika" && (
+                                {info.adresa.zeme && info.adresa.zeme !== COUNTRY_CZECHIA && (
                                     <p>{info.adresa.zeme}</p>
                                 )}
                             </div>
@@ -393,6 +397,9 @@ function DeliveryAddressBlock({ info, orderData }: { info: SnapshotInfo; orderDa
 }
 
 function SuccessContent() {
+    const t = useT("success");
+    const tc = useT("checkout");
+    const tcart = useT("cart");
     const searchParams = useSearchParams();
     const { currency } = useCurrency();
 
@@ -502,8 +509,8 @@ function SuccessContent() {
     const celkem = apiTotal ?? (subtotal + dopravaPrice + dobirkaExtra);
     const celkemStr = hydrated ? formatPrice(celkem, currency) : "—";
 
-    const statusLabel = method === "prevod" ? "Čeká na platbu" : method === "dobirka" ? "Připraveno k expedici" : "Zaplaceno";
-    const methodLabel = method === "prevod" ? "Bankovní převod" : method === "dobirka" ? "Dobírka" : "Platební karta";
+    const statusLabel = method === "prevod" ? t("statusAwaitingPayment") : method === "dobirka" ? t("statusReady") : t("statusPaid");
+    const methodLabel = paymentLabel(tc, method, t("cardMethodShort"));
 
     return (
         <>
@@ -611,7 +618,7 @@ function SuccessContent() {
                                 {hydrated && (
                                     <div className="border-t border-border pt-4 space-y-2">
                                         <div className="flex justify-between text-xs text-text-muted">
-                                            <span>Mezisoučet</span>
+                                            <span>{tc("subtotal")}</span>
                                             <span className="tabular-nums">{formatPrice(subtotal, currency)}</span>
                                         </div>
                                         {orderData?.discountCode && (
@@ -624,19 +631,19 @@ function SuccessContent() {
                                             </div>
                                         )}
                                         <div className="flex justify-between text-xs text-text-muted">
-                                            <span>Doprava{orderData?.dopravaName ? ` (${orderData.dopravaName})` : ""}</span>
+                                            <span>{tc("shipping")}{orderData?.doprava ? ` (${shippingLabel(tc, orderData.doprava, orderData.dopravaName)})` : ""}</span>
                                             <span className="tabular-nums">
                                                 {dopravaPrice > 0 ? formatPrice(dopravaPrice, currency) : "Zdarma"}
                                             </span>
                                         </div>
                                         {orderData?.isDobirka && (
                                             <div className="flex justify-between text-xs text-text-muted">
-                                                <span>Dobírka</span>
+                                                <span>{tc("cod")}</span>
                                                 <span className="tabular-nums">{formatPrice(dobirkaExtra, currency)}</span>
                                             </div>
                                         )}
                                         <div className="flex justify-between text-sm font-extrabold text-text-base pt-2 border-t border-border">
-                                            <span>Celkem</span>
+                                            <span>{tc("total")}</span>
                                             <span className="text-primary-ink tabular-nums">{celkemStr}</span>
                                         </div>
                                     </div>
@@ -685,9 +692,9 @@ function SuccessContent() {
                     {/* Spodní info lišta */}
                     <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {[
-                            { icon: Mail, title: "Potvrzení e-mailem", desc: "Kopie objednávky čeká ve vaší schránce." },
-                            { icon: Truck, title: "Expedice do 24 h", desc: "Zásilku odesíláme ihned po potvrzení platby." },
-                            { icon: ShieldCheck, title: "30 dní na vrácení", desc: "Zboží lze vrátit bez udání důvodu do 30 dní." },
+                            { icon: Mail, title: t("trustEmail"), desc: t("trustEmailDesc") },
+                            { icon: Truck, title: t("trustShipping"), desc: t("trustShippingDesc") },
+                            { icon: ShieldCheck, title: t("trustReturns"), desc: t("trustReturnsDesc") },
                         ].map((item) => (
                             <div key={item.title} className="flex items-start gap-4 bg-white rounded-2xl border border-border shadow-sm p-5">
                                 <div className="shrink-0 w-10 h-10 rounded-xl bg-surface border border-border flex items-center justify-center">
@@ -704,7 +711,7 @@ function SuccessContent() {
                     {/* CTA */}
                     <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link href="/" className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-primary text-on-primary font-extrabold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/10">
-                            <ShoppingBag size={16} /> Pokračovat v nákupu
+                            <ShoppingBag size={16} aria-hidden="true" /> {tcart("continueShopping")}
                         </Link>
                         <Link href="/reklamace" className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-border text-text-muted font-bold text-sm hover:bg-white hover:text-text-base transition-all flex items-center justify-center gap-2">
                             Reklamace a vrácení
