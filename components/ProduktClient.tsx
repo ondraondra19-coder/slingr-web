@@ -9,6 +9,10 @@ import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice, CURRENCIES } from "@/lib/currency";
 import { useStockPolling } from "@/lib/useStockPolling";
 import { trackEvent } from "@/lib/analytics";
+import { useT } from "@/lib/useT";
+import { useLang } from "@/lib/LangContext";
+import { getProductName, getProductDescription, getCategoryName, categories } from "@/lib/products";
+import { variantLabel, variantAttr, translateOptions } from "@/lib/variantLabels";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -37,14 +41,15 @@ const COLOR_MAP: Record<string, string> = {
 // ── Stock badge ──────────────────────────────────────────────────────────────
 
 function StockBadge({ available, anyInStock }: { available: number; anyInStock: boolean }) {
+  const t = useT("product");
   const state = !anyInStock ? "none" : available === 0 ? "variant" : available >= 5 ? "plenty" : "low";
   const colorClass = state === "plenty" ? "text-green-600" : state === "low" ? "text-amber-500" : "text-red-500";
   const dotClass = state === "plenty" ? "bg-green-500" : state === "low" ? "bg-amber-400 animate-pulse" : "bg-red-400";
   const label =
-    state === "none"    ? "Není skladem" :
-    state === "variant" ? "Tato varianta není skladem" :
-    state === "plenty"  ? "Skladem" :
-                          `Poslední ${available} ${available === 1 ? "kus" : "kusy"}`;
+    state === "none"    ? t("stockNone") :
+    state === "variant" ? t("stockVariant") :
+    state === "plenty"  ? t("stockPlenty") :
+                          t.plural(available, "stockLow");
   return (
     <span key={state} className={`inline-flex items-center gap-1.5 text-[12px] font-semibold ${colorClass}`}>
       <span className={`w-1.5 h-1.5 rounded-full inline-block ${dotClass}`} />
@@ -55,16 +60,18 @@ function StockBadge({ available, anyInStock }: { available: number; anyInStock: 
 
 // ── Color swatch ─────────────────────────────────────────────────────────────
 
+// `label` je povinný — dřív měl výchozí "Barva", což byl jediný český řetězec,
+// který by se do UI protekl i v anglické verzi. Všechna volání ho stejně předávají.
 function ColorSwatch({
   colors,
   selected,
   onChange,
-  label = "Barva",
+  label,
 }: {
   colors: { label: string; value: string; hex?: string }[];
   selected: string;
   onChange: (value: string) => void;
-  label?: string;
+  label: string;
 }) {
   return (
     /* radiogroup: výběr barvy je jedna volba z několika — čtečka pak ohlásí
@@ -164,6 +171,7 @@ function Gallery({
   layeredCap?: string;
   productName: string;
 }) {
+  const t = useT("product");
   const [active, setActive] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -219,14 +227,14 @@ function Gallery({
           <>
             <button
               onClick={prev}
-              aria-label="Předchozí fotka produktu"
+              aria-label={t("prevPhoto")}
               className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-border shadow flex items-center justify-center text-text-muted hover:text-text-base transition-all z-10"
             >
               <ChevronLeft size={16} />
             </button>
             <button
               onClick={next}
-              aria-label="Další fotka produktu"
+              aria-label={t("nextPhoto")}
               className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-border shadow flex items-center justify-center text-text-muted hover:text-text-base transition-all z-10"
             >
               <ChevronRight size={16} />
@@ -242,7 +250,7 @@ function Gallery({
             <button
               key={i}
               onClick={() => handleThumbClick(i)}
-              aria-label={item.type === "video" ? `Přehrát video ${i + 1}` : `Zobrazit fotku ${i + 1} z ${items.length}`}
+              aria-label={item.type === "video" ? t("playVideo", { n: i + 1 }) : t("showPhoto", { n: i + 1, total: items.length })}
               aria-current={i === active}
               className={`relative shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
                 i === active ? "border-primary" : "border-border hover:border-border-strong"
@@ -267,11 +275,12 @@ function AddedModal({ productName, productImg, onClose }: {
   productImg: string;
   onClose: () => void;
 }) {
+  const t = useT("product");
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Produkt přidán do košíku"
+      aria-label={t("addedModalLabel")}
       className="fixed inset-0 z-[200] flex items-center justify-center px-4"
     >
       {/* Backdrop — dekorace, klik zavírá; čtečka ho ignoruje (tlačítko Zavřít je níž) */}
@@ -283,10 +292,10 @@ function AddedModal({ productName, productImg, onClose }: {
         {/* Zavřít */}
         <button
           onClick={onClose}
-          aria-label="Zavřít"
+          aria-label={t("close")}
           className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-text-subtle hover:text-text-base hover:bg-surface transition-all"
         >
-          <X size={18} />
+          <X size={18} aria-hidden="true" />
         </button>
 
         {/* Obsah */}
@@ -301,7 +310,7 @@ function AddedModal({ productName, productImg, onClose }: {
                 <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Check size={11} strokeWidth={3} className="text-primary-ink" />
                 </div>
-                <p className="text-base font-bold text-text-base">Přidali jste do košíku</p>
+                <p className="text-base font-bold text-text-base">{t("addedToCart")}</p>
               </div>
               <p className="text-text-muted text-sm leading-snug">{productName}</p>
             </div>
@@ -313,13 +322,13 @@ function AddedModal({ productName, productImg, onClose }: {
               onClick={onClose}
               className="flex-1 py-3.5 rounded-2xl border border-border text-text-base font-semibold text-sm hover:bg-surface transition-colors"
             >
-              ← Zpět do obchodu
+              ← {t("backToShop")}
             </button>
             <a
               href="/kosik"
               className="flex-1 py-3.5 rounded-2xl bg-primary text-on-primary font-bold text-sm text-center hover:brightness-105 active:scale-[0.98] transition-all shadow-lg shadow-primary/20"
             >
-              Pokračovat do košíku →
+              {t("goToCart")} →
             </a>
           </div>
         </div>
@@ -332,6 +341,7 @@ function AddedModal({ productName, productImg, onClose }: {
 // ── Notify modal ──────────────────────────────────────────────────────────────
 
 function NotifyModal({ onClose }: { onClose: () => void }) {
+  const t = useT("product");
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
 
@@ -339,7 +349,7 @@ function NotifyModal({ onClose }: { onClose: () => void }) {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Připomenout, až bude skladem"
+      aria-label={t("notifyTitle")}
       className="fixed inset-0 z-[100] flex items-center justify-center px-4"
     >
       {/* Backdrop */}
@@ -354,11 +364,11 @@ function NotifyModal({ onClose }: { onClose: () => void }) {
         <div className="flex items-center justify-between px-6 py-5 border-b border-border">
           <div className="flex items-center gap-2.5">
             <Bell size={16} className="text-primary-ink" />
-            <p className="text-text-base font-semibold text-sm"><span>Připomenout, až bude skladem</span></p>
+            <p className="text-text-base font-semibold text-sm">{t("notifyTitle")}</p>
           </div>
           <button
             onClick={onClose}
-            aria-label="Zavřít"
+            aria-label={t("close")}
             className="w-11 h-11 -mr-2 flex items-center justify-center rounded-full text-text-subtle hover:text-text-base hover:bg-surface transition-colors"
           >
             <X size={18} />
@@ -371,25 +381,25 @@ function NotifyModal({ onClose }: { onClose: () => void }) {
               <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
                 <Check size={22} className="text-green-600" />
               </div>
-              <p className="text-text-base font-semibold text-sm"><span>Hotovo!</span></p>
-              <p className="text-text-muted text-sm"><span>Jakmile bude zboží dostupné, dáme ti vědět.</span></p>
+              <p className="text-text-base font-semibold text-sm">{t("notifyDone")}</p>
+              <p className="text-text-muted text-sm">{t("notifyDoneDesc")}</p>
               <button
                 onClick={onClose}
                 className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:brightness-105 transition-all"
               >
-                <span>Zavřít</span>
+                {t("close")}
               </button>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              <p className="text-text-muted text-sm"><span>Zadej svůj e-mail a my ti napíšeme, jakmile produkt naskladníme.</span></p>
+              <p className="text-text-muted text-sm">{t("notifyDesc")}</p>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter" && email.trim()) setSent(true); }}
-                placeholder="tvuj@email.cz"
-                aria-label="Tvůj e-mail"
+                placeholder={t("emailPlaceholder")}
+                aria-label={t("emailLabel")}
                 autoComplete="email"
                 autoFocus
                 className="w-full border border-border rounded-xl px-4 py-2.5 text-sm text-text-base placeholder-text-subtle focus:outline-none focus:border-primary/50 transition-colors bg-surface"
@@ -403,7 +413,7 @@ function NotifyModal({ onClose }: { onClose: () => void }) {
                     : "bg-primary text-on-primary hover:brightness-105"
                 }`}
               >
-                <span>Připomenout</span>
+                {t("remind")}
               </button>
             </div>
           )}
@@ -426,12 +436,26 @@ export default function ProduktClient({
 }) {
   const { items: cartItems, addItem } = useCart();
   const { currency, mounted: currencyMounted } = useCurrency();
+  const t  = useT("product");
+  const tv = useT("variants");
+  const { locale } = useLang();
   const productAny = product as any;
 
-  const newColors:  { label: string; value: string; hex?: string; img?: string }[] = productAny.colors  ?? [];
-  const newSizes:   { label: string; value: string }[]                             = productAny.sizes   ?? [];
-  const extraMedia: MediaItem[]                                                    = productAny.media   ?? [];
-  const sizesLabel: string                                                         = productAny.sizesLabel ?? "Velikost";
+  const productName = getProductName(product, locale);
+  const breadcrumbCategory = (() => {
+    const category = categories.find(c => c.slug === product.categories[0]);
+    return category ? getCategoryName(category, locale) : product.categories[0];
+  })();
+
+  // Popisky voleb chodí z katalogu česky ("Tmavě modrá"). Klíčem k překladu je
+  // syrová hodnota ("darkblue") — viz lib/variantLabels.ts.
+  const newColors:  { label: string; value: string; hex?: string; img?: string }[] =
+    translateOptions(tv, productAny.colors ?? []);
+  const newSizes:   { label: string; value: string }[] = translateOptions(tv, productAny.sizes ?? []);
+  const extraMedia: MediaItem[]                        = productAny.media ?? [];
+  const sizesLabel: string = productAny.sizesLabel
+    ? variantLabel(tv, productAny.sizesLabel, productAny.sizesLabel)
+    : t("size");
 
   const hasNewColors = newColors.length > 0;
   const hasNewSizes  = newSizes.length  > 0;
@@ -699,7 +723,7 @@ export default function ProduktClient({
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
-      {added && <AddedModal productName={product.name} productImg={mainImgSrc} onClose={() => { setAdded(false); setQty(1); }} />}
+      {added && <AddedModal productName={productName} productImg={mainImgSrc} onClose={() => { setAdded(false); setQty(1); }} />}
       {notifyOpen && <NotifyModal onClose={() => setNotifyOpen(false)} />}
 
       <main className="min-h-screen bg-surface">
@@ -707,17 +731,19 @@ export default function ProduktClient({
 
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-xs text-text-subtle mb-5 lg:mb-8 flex-wrap">
-            <a href="/" className="hover:text-text-muted transition-colors"><span>Domů</span></a>
-            <ChevronRight size={11} className="text-border" />
+            <a href="/" className="hover:text-text-muted transition-colors">{t("home")}</a>
+            <ChevronRight size={11} className="text-border" aria-hidden="true" />
             {product.categories[0] && (
               <>
-                <a href={`/kategorie/${product.categories[0]}`} className="hover:text-text-muted transition-colors capitalize">
-                  <span>{product.categories[0].replace(/-/g, " ")}</span>
+                {/* Dřív se tu sázel slug s pomlčkami nahrazenými mezerami
+                    ("pouzdra obaly") — katalog má skutečný název i s překlady. */}
+                <a href={`/kategorie/${product.categories[0]}`} className="hover:text-text-muted transition-colors">
+                  {breadcrumbCategory}
                 </a>
-                <ChevronRight size={11} className="text-border" />
+                <ChevronRight size={11} className="text-border" aria-hidden="true" />
               </>
             )}
-            <span className="text-text-muted line-clamp-1">{product.name}</span>
+            <span className="text-text-muted line-clamp-1">{productName}</span>
           </nav>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 mb-16 lg:mb-24">
@@ -728,7 +754,7 @@ export default function ProduktClient({
                 items={galleryItems}
                 layeredBody={layeredBodySrc}
                 layeredCap={layeredCapSrc}
-                productName={product.name}
+                productName={productName}
               />
             </div>
 
@@ -738,7 +764,7 @@ export default function ProduktClient({
               {/* Name + price + stock */}
               <div>
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-text-base leading-tight tracking-tight">
-                  <span>{product.name}</span>
+                  {productName}
                 </h1>
                 <div className="flex items-center gap-4 mt-3 flex-wrap">
                   <span className="text-3xl sm:text-4xl font-extrabold text-primary-ink leading-none">
@@ -746,7 +772,10 @@ export default function ProduktClient({
                   </span>
                   {comboExtra > 0 && (
                     <span className="text-xs text-text-subtle">
-                      <span>({formatPrice(basePrice, currency)} + {formatPrice(comboExtra, currency)} za různé barvy)</span>
+                      {t("comboExtra", {
+                        base: formatPrice(basePrice, currency),
+                        extra: formatPrice(comboExtra, currency),
+                      })}
                     </span>
                   )}
                   <StockBadge available={availableQty} anyInStock={anyInStock} />
@@ -759,12 +788,12 @@ export default function ProduktClient({
               {hasNewColors && (
                 <div>
                   <p className="text-text-base font-semibold text-sm mb-3">
-                    <span>Barva</span>
+                    {t("color")}
                     <span className="text-text-muted font-normal ml-2">
-                      — <span>{newColors.find(c => c.value === colorValue)?.label}</span>
+                      — {newColors.find(c => c.value === colorValue)?.label}
                     </span>
                   </p>
-                  <ColorSwatch colors={newColors} selected={colorValue} onChange={(v) => { setColorValue(v); setQty(1); }} />
+                  <ColorSwatch colors={newColors} selected={colorValue} label={t("color")} onChange={(v) => { setColorValue(v); setQty(1); }} />
                 </div>
               )}
 
@@ -772,9 +801,9 @@ export default function ProduktClient({
               {hasNewSizes && (
                 <div>
                   <p className="text-text-base font-semibold text-sm mb-3">
-                    <span>{sizesLabel}</span>
+                    {sizesLabel}
                     <span className="text-text-muted font-normal ml-2">
-                      — <span>{newSizes.find(s => s.value === sizeValue)?.label}</span>
+                      — {newSizes.find(s => s.value === sizeValue)?.label}
                     </span>
                   </p>
                   <SizePills options={newSizes} selected={sizeValue} label={sizesLabel} onChange={(v) => { setSizeValue(v); setQty(1); }} />
@@ -787,25 +816,26 @@ export default function ProduktClient({
                   {!combo && model.colors.length > 0 && (
                     <div>
                       <p className="text-text-base font-semibold text-sm mb-3">
-                        <span>Barva</span>
+                        {t("color")}
                         <span className="text-text-muted font-normal ml-2">
-                          — <span>{model.colors.find(c => c.value === legacyColor)?.label}</span>
+                          — {variantLabel(tv, legacyColor, model.colors.find(c => c.value === legacyColor)?.label)}
                         </span>
                       </p>
                       <ColorSwatch
-                        colors={model.colors as { label: string; value: string; hex?: string }[]}
+                        colors={translateOptions(tv, model.colors as { label: string; value: string; hex?: string }[])}
                         selected={legacyColor}
+                        label={t("color")}
                         onChange={(v) => { setLegacyColor(v); setQty(1); }}
                       />
                     </div>
                   )}
                   {product.models!.length > 1 && (
                     <div>
-                      <p className="text-text-base font-semibold text-sm mb-3"><span>Model</span></p>
+                      <p className="text-text-base font-semibold text-sm mb-3">{t("model")}</p>
                       <SizePills
                         options={product.models!.map(m => ({ label: m.label, value: m.id }))}
                         selected={modelId}
-                        label="Model"
+                        label={t("model")}
                         onChange={(v) => { handleModelChange(v); setQty(1); }}
                       />
                     </div>
@@ -823,38 +853,38 @@ export default function ProduktClient({
                         }`}>
                           {combo && <Check size={11} strokeWidth={3} className="text-on-primary" />}
                         </span>
-                        <span>Vlastní barevná kombinace</span>
+                        <span>{t("customCombo")}</span>
                         <span className="text-text-subtle text-xs">
-                          <span>(+{formatPrice(getPrice(model.comboExtra ?? 0, currency), currency)} za různé barvy)</span>
+                          {t("comboSurcharge", { extra: formatPrice(getPrice(model.comboExtra ?? 0, currency), currency) })}
                         </span>
                       </button>
                       {combo && (
                         <div className="flex flex-col gap-4 pl-8 border-l-2 border-primary/20">
                           <div>
                             <p className="text-text-base font-semibold text-sm mb-2">
-                              <span>Barva těla</span>
+                              {t("bodyColor")}
                               <span className="text-text-muted font-normal ml-2">
-                                — <span>{model.colors.find(c => c.value === bodyValue)?.label}</span>
+                                — {variantLabel(tv, bodyValue, model.colors.find(c => c.value === bodyValue)?.label)}
                               </span>
                             </p>
                             <ColorSwatch
-                              colors={model.colors as { label: string; value: string; hex?: string }[]}
+                              colors={translateOptions(tv, model.colors as { label: string; value: string; hex?: string }[])}
                               selected={bodyValue}
-                              label="Barva těla"
+                              label={t("bodyColor")}
                               onChange={setBodyValue}
                             />
                           </div>
                           <div>
                             <p className="text-text-base font-semibold text-sm mb-2">
-                              <span>Barva hlavičky</span>
+                              {t("capColor")}
                               <span className="text-text-muted font-normal ml-2">
-                                — <span>{model.colors.find(c => c.value === capValue)?.label}</span>
+                                — {variantLabel(tv, capValue, model.colors.find(c => c.value === capValue)?.label)}
                               </span>
                             </p>
                             <ColorSwatch
-                              colors={model.colors as { label: string; value: string; hex?: string }[]}
+                              colors={translateOptions(tv, model.colors as { label: string; value: string; hex?: string }[])}
                               selected={capValue}
-                              label="Barva hlavičky"
+                              label={t("capColor")}
                               onChange={setCapValue}
                             />
                           </div>
@@ -872,25 +902,25 @@ export default function ProduktClient({
                 return (
                   <div key={variant.type}>
                     <p className="text-text-base font-semibold text-sm mb-3">
-                      <span>{variant.type}</span>
+                      {variantAttr(tv, variant.type)}
                       {selected && (
                         <span className="text-text-muted font-normal ml-2">
-                          — <span>{variant.options.find(o => o.value === selected)?.label}</span>
+                          — {variantLabel(tv, selected, variant.options.find(o => o.value === selected)?.label)}
                         </span>
                       )}
                     </p>
                     {isColorVariant ? (
                       <ColorSwatch
-                        colors={variant.options}
+                        colors={translateOptions(tv, variant.options)}
                         selected={selected ?? ""}
-                        label={variant.type}
+                        label={variantAttr(tv, variant.type)}
                         onChange={(val) => setSelectedVariants(prev => ({ ...prev, [variant.type]: val }))}
                       />
                     ) : (
                       <SizePills
-                        options={variant.options}
+                        options={translateOptions(tv, variant.options)}
                         selected={selected ?? ""}
-                        label={variant.type}
+                        label={variantAttr(tv, variant.type)}
                         onChange={(val) => setSelectedVariants(prev => ({ ...prev, [variant.type]: val }))}
                       />
                     )}
@@ -908,8 +938,8 @@ export default function ProduktClient({
                       onClick={handleAddToCart}
                       className="w-full inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-bold text-sm bg-text-base text-white hover:bg-text-base/90 active:scale-[0.99] transition-all duration-200"
                     >
-                      <Bell size={16} />
-                      <span>Připomenout, až bude skladem</span>
+                      <Bell size={16} aria-hidden="true" />
+                      <span>{t("notifyTitle")}</span>
                     </button>
                   ) : (
                     <div className="flex items-stretch gap-2.5">
@@ -920,7 +950,7 @@ export default function ProduktClient({
                         <button
                           onClick={() => setQty(q => Math.max(1, q - 1))}
                           disabled={qty <= 1}
-                          aria-label="Ubrat jeden kus"
+                          aria-label={t("decreaseQty")}
                           className={`w-11 min-h-11 h-full flex items-center justify-center transition-colors text-base font-light ${
                             qty <= 1
                               ? "text-border cursor-not-allowed"
@@ -934,12 +964,12 @@ export default function ProduktClient({
                           aria-atomic="true"
                           className="w-7 text-center text-text-base text-sm font-semibold tabular-nums select-none"
                         >
-                          <span className="sr-only">Počet kusů: </span>{qty}
+                          <span className="sr-only">{t("quantity")}</span>{qty}
                         </span>
                         <button
                           onClick={() => setQty(q => Math.min(canAddMoreQty, q + 1))}
                           disabled={qty >= canAddMoreQty}
-                          aria-label="Přidat jeden kus"
+                          aria-label={t("increaseQty")}
                           className={`w-11 min-h-11 h-full flex items-center justify-center transition-colors text-base font-light ${
                             qty >= canAddMoreQty
                               ? "text-border cursor-not-allowed"
@@ -964,8 +994,8 @@ export default function ProduktClient({
                         }`}
                       >
                         {added
-                          ? <><Check size={15} /><span>Přidáno</span></>
-                          : <><ShoppingCart size={15} /><span>{!canAddToCart ? "Vyberte variantu" : "Přidat do košíku"}</span></>
+                          ? <><Check size={15} aria-hidden="true" /><span>{t("added")}</span></>
+                          : <><ShoppingCart size={15} aria-hidden="true" /><span>{!canAddToCart ? t("selectVariant") : t("addToCart")}</span></>
                         }
                       </button>
                     </div>
@@ -973,7 +1003,12 @@ export default function ProduktClient({
 
                   {!canAddToCart && !isOutOfStock && hasVariants && (
                     <p className="text-text-subtle text-xs text-center mt-2">
-                      <span>Prosím vyberte {product.variants!.filter(v => !selectedVariants[v.type]).map(v => v.type).join(" a ")}</span>
+                      {t("selectPrompt", {
+                        variants: product.variants!
+                          .filter(v => !selectedVariants[v.type])
+                          .map(v => variantAttr(tv, v.type).toLowerCase())
+                          .join(t("and")),
+                      })}
                     </p>
                   )}
                 </div>
@@ -981,9 +1016,9 @@ export default function ProduktClient({
                 {/* Trust bar */}
                 <div className="border-t border-border grid grid-cols-3">
                   {[
-                    { icon: Package,     label: "Expedice",  sub: "do 24 hodin" },
-                    { icon: RefreshCw,   label: "Vrácení",   sub: "do 30 dní" },
-                    { icon: ShieldCheck, label: "Záruka",    sub: "2 roky" },
+                    { icon: Package,     label: t("trustShipping"), sub: t("trustShippingSub") },
+                    { icon: RefreshCw,   label: t("trustReturns"),  sub: t("trustReturnsSub")  },
+                    { icon: ShieldCheck, label: t("trustWarranty"), sub: t("trustWarrantySub") },
                   ].map((item, i) => (
                     <div key={item.label} className={`flex flex-col items-center justify-center gap-1.5 py-4 px-2 ${i < 2 ? "border-r border-border" : ""}`}>
                       <item.icon size={20} className="text-primary-ink" />
@@ -997,8 +1032,8 @@ export default function ProduktClient({
 
               {/* ── Description ── */}
               <div className="pt-1 border-t border-border">
-                <p className="text-text-base font-semibold text-sm mb-2"><span>Popis produktu</span></p>
-                <p className="text-text-muted text-sm leading-relaxed"><span>{product.description}</span></p>
+                <p className="text-text-base font-semibold text-sm mb-2">{t("description")}</p>
+                <p className="text-text-muted text-sm leading-relaxed">{getProductDescription(product, locale)}</p>
               </div>
 
             </div>
@@ -1007,7 +1042,7 @@ export default function ProduktClient({
           {/* ── Related products ── */}
           {related.length > 0 && (
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-text-base mb-5"><span>Související produkty</span></h2>
+              <h2 className="text-lg sm:text-xl font-bold text-text-base mb-5">{t("related")}</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 {related.map((p) => (
                   <a
@@ -1025,8 +1060,8 @@ export default function ProduktClient({
                       />
                     </div>
                     <div className="flex flex-col gap-1 p-3 sm:p-4 border-t border-border">
-                      <p className="text-text-base text-xs sm:text-sm font-semibold leading-snug group-hover:text-primary-ink transition-colors line-clamp-2"><span>{p.name}</span></p>
-                      <p className="text-primary-ink font-bold text-sm sm:text-base mt-0.5"><span>{formatPrice(getPrice(p.price, currency), currency)}</span></p>
+                      <p className="text-text-base text-xs sm:text-sm font-semibold leading-snug group-hover:text-primary-ink transition-colors line-clamp-2">{getProductName(p, locale)}</p>
+                      <p className="text-primary-ink font-bold text-sm sm:text-base mt-0.5">{formatPrice(getPrice(p.price, currency), currency)}</p>
                     </div>
                   </a>
                 ))}

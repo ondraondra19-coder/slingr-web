@@ -11,21 +11,8 @@ import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice } from "@/lib/currency";
 import type { Currency } from "@/lib/currency";
 import DiscountWidget from "@/components/DiscountWidget";
-import { useT, type T } from "@/lib/useT";
-
-// Varianty se v košíku ukládají v syrové podobě ("darkblue", "gen2") a názvy
-// jejich atributů česky ("Tělo", "Hlavička") — tak přišly z katalogu. Do UI
-// se překládají až tady přes namespace `variants`; neznámou hodnotu ukážeme,
-// jak přišla, ať v košíku nesvítí "variants.neco" místo názvu barvy.
-function variantLabel(tv: T, raw: string): string {
-  const translated = tv(raw);
-  return translated === `variants.${raw}` ? raw : translated;
-}
-
-function variantAttr(tv: T, raw: string): string {
-  const translated = tv(`attr_${raw}`);
-  return translated === `variants.attr_${raw}` ? raw : translated;
-}
+import { useT } from "@/lib/useT";
+import { variantLabel, variantAttr } from "@/lib/variantLabels";
 
 function getProductImgs(slug: string, variants?: Record<string, string>): { img: string; img2?: string } | null {
   const product = staticProducts.find(p => p.slug === slug);
