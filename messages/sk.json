@@ -667,5 +667,10 @@
     "cooldownBanner": "Ďalšiu recenziu môžete napísať o {time}.",
     "emailLabel": "E-mail",
     "emailPlaceholder": "jan@email.sk"
+  },
+  "legal": {
+    "home": "Domov",
+    "effectiveFrom": "Platné od {date}",
+    "bindingVersion": "Toto je informatívny preklad. Záväzné je české znenie dokumentu; v prípade rozporu medzi jazykovými verziami má prednosť čeština."
   }
 }

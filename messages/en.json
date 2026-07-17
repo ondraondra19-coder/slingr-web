@@ -658,5 +658,10 @@
     "cooldownBanner": "You can write another review in {time}.",
     "emailLabel": "E-mail",
     "emailPlaceholder": "john@email.com"
+  },
+  "legal": {
+    "home": "Home",
+    "effectiveFrom": "Effective from {date}",
+    "bindingVersion": "This is an informative translation. The Czech wording of this document is the binding one; in the event of any discrepancy between language versions, the Czech version prevails."
   }
 }
