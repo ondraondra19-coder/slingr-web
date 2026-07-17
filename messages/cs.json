@@ -156,6 +156,65 @@
     "contactBtn": "Kontaktovat",
     "hours": "Po–Pá: 9:00–17:00"
   },
+  "chat": {
+    "title": "Máš dotaz?",
+    "subtitle": "Odpovíme co nejdříve",
+    "openChat": "Otevřít chat — napsat dotaz",
+    "closeChat": "Zavřít chat",
+    "closeForm": "Zavřít formulář dotazu",
+    "namePlaceholder": "Tvoje jméno",
+    "emailPlaceholder": "Tvůj e-mail",
+    "messagePlaceholder": "Napiš svůj dotaz...",
+    "messageLabel": "Text dotazu",
+    "submit": "Odeslat dotaz",
+    "sentTitle": "Dotaz odeslán!",
+    "sentDesc": "Ozveme se ti co nejdříve.",
+    "errorInvalidName": "Zadejte prosím své jméno.",
+    "errorInvalidEmail": "Zadejte platný e-mail.",
+    "errorInvalidText": "Zpráva je prázdná nebo příliš dlouhá.",
+    "errorCooldown": "Další zprávu můžete odeslat za {minutes} min.",
+    "errorFailed": "Nepodařilo se odeslat zprávu."
+  },
+  "newsletter": {
+    "emailLabel": "E-mail pro odběr novinek",
+    "errorInvalidEmail": "Zadejte platný e-mail",
+    "errorRateLimited": "Příliš mnoho pokusů. Zkuste to prosím později.",
+    "errorUnavailable": "Přihlášení k odběru zatím není k dispozici.",
+    "errorFailed": "Přihlášení se nezdařilo. Zkuste to prosím znovu.",
+    "errorNetwork": "Přihlášení se nezdařilo. Zkontrolujte připojení."
+  },
+  "discount": {
+    "codePlaceholder": "Slevový kód",
+    "apply": "Uplatnit",
+    "checking": "Ověřuji…",
+    "invalidCode": "Tento kód neexistuje nebo již není platný.",
+    "removeCode": "Odebrat slevový kód {code}",
+    "onlyFor": "Platí jen pro: {products}",
+    "upsell": "Nakupte ještě za {amount} a sleva se automaticky uplatní!",
+    "goToShop": "Přejít do obchodu",
+    "approxNote": "* Orientační přepočet. Podmínka platnosti kódu se počítá v Kč."
+  },
+  "trustbar": {
+    "shippingTitle": "Expedice do 24 hodin",
+    "shippingDesc": "Objednávky přijaté do 14:00 odesíláme ještě tentýž den.",
+    "returnsTitle": "30 dní na vrácení",
+    "returnsDesc": "Bez otázek. Zboží vrátíte do 30 dní od doručení.",
+    "warrantyTitle": "Záruka 2 roky",
+    "warrantyDesc": "Na veškeré zboží poskytujeme zákonnou záruku 24 měsíců.",
+    "supportTitle": "Podpora 7 dní v týdnu",
+    "supportDesc": "Chat, e-mail nebo telefon — jsme tu každý den pro vás."
+  },
+  "categorygrid": {
+    "warrantyTitle": "Na všechno zboží dáváme záruku",
+    "warrantyCta": "Více informací",
+    "deliveryTitle": "Doručujeme již",
+    "deliveryHighlight": "do druhého dne",
+    "deliveryCta": "Zjistit více"
+  },
+  "blog": {
+    "previewTitle": "Co je u nás nového",
+    "goToMagazine": "Přejít do magazínu"
+  },
   "reviews": {
     "sectionTitle": "Co říkají zákazníci",
     "sectionSubtitle": "Recenze zákazníků",

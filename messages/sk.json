@@ -156,6 +156,65 @@
     "contactBtn": "Kontaktovať",
     "hours": "Po–Pia: 9:00–17:00"
   },
+  "chat": {
+    "title": "Máš otázku?",
+    "subtitle": "Odpovieme čo najskôr",
+    "openChat": "Otvoriť chat — napísať otázku",
+    "closeChat": "Zavrieť chat",
+    "closeForm": "Zavrieť formulár otázky",
+    "namePlaceholder": "Tvoje meno",
+    "emailPlaceholder": "Tvoj e-mail",
+    "messagePlaceholder": "Napíš svoju otázku...",
+    "messageLabel": "Text otázky",
+    "submit": "Odoslať otázku",
+    "sentTitle": "Otázka odoslaná!",
+    "sentDesc": "Ozveme sa ti čo najskôr.",
+    "errorInvalidName": "Zadajte prosím svoje meno.",
+    "errorInvalidEmail": "Zadajte platný e-mail.",
+    "errorInvalidText": "Správa je prázdna alebo príliš dlhá.",
+    "errorCooldown": "Ďalšiu správu môžete odoslať o {minutes} min.",
+    "errorFailed": "Nepodarilo sa odoslať správu."
+  },
+  "newsletter": {
+    "emailLabel": "E-mail pre odber noviniek",
+    "errorInvalidEmail": "Zadajte platný e-mail",
+    "errorRateLimited": "Príliš veľa pokusov. Skúste to prosím neskôr.",
+    "errorUnavailable": "Prihlásenie na odber zatiaľ nie je k dispozícii.",
+    "errorFailed": "Prihlásenie sa nepodarilo. Skúste to prosím znova.",
+    "errorNetwork": "Prihlásenie sa nepodarilo. Skontrolujte pripojenie."
+  },
+  "discount": {
+    "codePlaceholder": "Zľavový kód",
+    "apply": "Uplatniť",
+    "checking": "Overujem…",
+    "invalidCode": "Tento kód neexistuje alebo už nie je platný.",
+    "removeCode": "Odobrať zľavový kód {code}",
+    "onlyFor": "Platí len pre: {products}",
+    "upsell": "Nakúpte ešte za {amount} a zľava sa automaticky uplatní!",
+    "goToShop": "Prejsť do obchodu",
+    "approxNote": "* Orientačný prepočet. Podmienka platnosti kódu sa počíta v Kč."
+  },
+  "trustbar": {
+    "shippingTitle": "Expedícia do 24 hodín",
+    "shippingDesc": "Objednávky prijaté do 14:00 odosielame ešte v ten istý deň.",
+    "returnsTitle": "30 dní na vrátenie",
+    "returnsDesc": "Bez otázok. Tovar vrátite do 30 dní od doručenia.",
+    "warrantyTitle": "Záruka 2 roky",
+    "warrantyDesc": "Na všetok tovar poskytujeme zákonnú záruku 24 mesiacov.",
+    "supportTitle": "Podpora 7 dní v týždni",
+    "supportDesc": "Chat, e-mail alebo telefón — sme tu pre vás každý deň."
+  },
+  "categorygrid": {
+    "warrantyTitle": "Na všetok tovar dávame záruku",
+    "warrantyCta": "Viac informácií",
+    "deliveryTitle": "Doručujeme už",
+    "deliveryHighlight": "na druhý deň",
+    "deliveryCta": "Zistiť viac"
+  },
+  "blog": {
+    "previewTitle": "Čo je u nás nové",
+    "goToMagazine": "Prejsť do magazínu"
+  },
   "reviews": {
     "sectionTitle": "Čo hovoria zákazníci",
     "sectionSubtitle": "Recenzie zákazníkov",

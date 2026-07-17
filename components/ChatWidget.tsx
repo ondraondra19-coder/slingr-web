@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { MessageCircle, X, Send, Check } from "lucide-react";
+import { useT } from "@/lib/useT";
 
 export default function ChatWidget() {
   const pathname = usePathname();
+  const t = useT("chat");
+  const tc = useT("common");
 
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -16,6 +19,19 @@ export default function ChatWidget() {
   const [error, setError] = useState<string | null>(null);
 
   const canSubmit = !!name && !!email && !!message && !sending;
+
+  // API vrací kód, ne hotovou větu — text se vybírá tady podle jazyka.
+  // Neznámý kód spadne na obecné "nepovedlo se", ať nikdy neukážeme
+  // "chat.neco" místo chyby.
+  function messageForCode(code: unknown, minutes: unknown): string {
+    switch (code) {
+      case "invalid_name":  return t("errorInvalidName");
+      case "invalid_email": return t("errorInvalidEmail");
+      case "invalid_text":  return t("errorInvalidText");
+      case "cooldown":      return t("errorCooldown", { minutes: typeof minutes === "number" ? minutes : 5 });
+      default:              return t("errorFailed");
+    }
+  }
 
   async function handleSubmit() {
     if (!canSubmit) return;
@@ -32,7 +48,7 @@ export default function ChatWidget() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Nepodařilo se odeslat zprávu.");
+        throw new Error(messageForCode(data?.code, data?.minutes));
       }
 
       setSent(true);
@@ -44,7 +60,7 @@ export default function ChatWidget() {
         setOpen(false);
       }, 2500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nepodařilo se odeslat zprávu.");
+      setError(err instanceof Error ? err.message : t("errorFailed"));
     } finally {
       setSending(false);
     }
@@ -63,12 +79,12 @@ export default function ChatWidget() {
           {/* Hlavička sedí na růžové — bílý text by měl 2.14:1, tmavý má 8.94:1. */}
           <div className="bg-primary px-5 py-4 flex items-center justify-between">
             <div>
-              <p className="text-on-primary font-semibold text-sm">Máš dotaz?</p>
-              <p className="text-on-primary/80 text-xs mt-0.5">Odpovíme co nejdříve</p>
+              <p className="text-on-primary font-semibold text-sm">{t("title")}</p>
+              <p className="text-on-primary/80 text-xs mt-0.5">{t("subtitle")}</p>
             </div>
             <button
               onClick={() => setOpen(false)}
-              aria-label="Zavřít formulář dotazu"
+              aria-label={t("closeForm")}
               className="w-11 h-11 -mr-2 flex items-center justify-center rounded-full text-on-primary/80 hover:text-on-primary hover:bg-on-primary/10 transition-colors"
             >
               <X size={18} />
@@ -82,8 +98,8 @@ export default function ChatWidget() {
                 <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
                   <Check size={22} className="text-green-600" />
                 </div>
-                <p className="text-text-base font-semibold text-sm">Dotaz odeslán!</p>
-                <p className="text-text-muted text-xs">Ozveme se ti co nejdříve.</p>
+                <p className="text-text-base font-semibold text-sm">{t("sentTitle")}</p>
+                <p className="text-text-muted text-xs">{t("sentDesc")}</p>
               </div>
             ) : (
               <div className="flex flex-col gap-3">
@@ -97,25 +113,25 @@ export default function ChatWidget() {
                 <input
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  placeholder="Tvoje jméno"
-                  aria-label="Tvoje jméno"
+                  placeholder={t("namePlaceholder")}
+                  aria-label={t("namePlaceholder")}
                   autoComplete="name"
                   className="w-full border border-border rounded-xl px-4 py-2.5 text-sm text-text-base placeholder-text-subtle focus:outline-none focus:border-primary/50 transition-colors bg-surface"
                 />
                 <input
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="Tvůj e-mail"
+                  placeholder={t("emailPlaceholder")}
                   type="email"
-                  aria-label="Tvůj e-mail"
+                  aria-label={t("emailPlaceholder")}
                   autoComplete="email"
                   className="w-full border border-border rounded-xl px-4 py-2.5 text-sm text-text-base placeholder-text-subtle focus:outline-none focus:border-primary/50 transition-colors bg-surface"
                 />
                 <textarea
                   value={message}
                   onChange={e => setMessage(e.target.value)}
-                  placeholder="Napiš svůj dotaz..."
-                  aria-label="Text dotazu"
+                  placeholder={t("messagePlaceholder")}
+                  aria-label={t("messageLabel")}
                   rows={4}
                   className="w-full border border-border rounded-xl px-4 py-3 text-sm text-text-base placeholder-text-subtle focus:outline-none focus:border-primary/50 transition-colors resize-none bg-surface"
                 />
@@ -128,8 +144,8 @@ export default function ChatWidget() {
                       : "bg-primary text-on-primary hover:brightness-105"
                   }`}
                 >
-                  <Send size={14} />
-                  <span>{sending ? "Odesílám…" : "Odeslat dotaz"}</span>
+                  <Send size={14} aria-hidden="true" />
+                  <span>{sending ? tc("sending") : t("submit")}</span>
                 </button>
               </div>
             )}
@@ -140,7 +156,7 @@ export default function ChatWidget() {
       {/* Tlačítko */}
       <button
         onClick={() => setOpen(v => !v)}
-        aria-label={open ? "Zavřít chat" : "Otevřít chat — napsat dotaz"}
+        aria-label={open ? t("closeChat") : t("openChat")}
         aria-expanded={open}
         className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 ${
           open ? "bg-text-base text-white" : "bg-primary text-on-primary hover:brightness-105 hover:scale-105"

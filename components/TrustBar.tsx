@@ -1,29 +1,20 @@
-import { Truck, RotateCcw, ShieldCheck, Headphones } from "lucide-react";
+"use client";
 
-const items = [
-  {
-    icon: Truck,
-    title: "Expedice do 24 hodin",
-    desc: "Objednávky přijaté do 14:00 odesíláme ještě tentýž den.",
-  },
-  {
-    icon: RotateCcw,
-    title: "30 dní na vrácení",
-    desc: "Bez otázek. Zboží vrátíte do 30 dní od doručení.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Záruka 2 roky",
-    desc: "Na veškeré zboží poskytujeme zákonnou záruku 24 měsíců.",
-  },
-  {
-    icon: Headphones,
-    title: "Podpora 7 dní v týdnu",
-    desc: "Chat, e-mail nebo telefon — jsme tu každý den pro vás.",
-  },
-];
+import { Truck, RotateCcw, ShieldCheck, Headphones } from "lucide-react";
+import { useT } from "@/lib/useT";
 
 export default function TrustBar() {
+  const t = useT("trustbar");
+
+  // Klíče schválně vypsané, ne skládané přes `t(`${key}Title`)` — takhle je
+  // najde scripts/check-messages.mjs a pozná, že se používají.
+  const items = [
+    { icon: Truck,       title: t("shippingTitle"), desc: t("shippingDesc") },
+    { icon: RotateCcw,   title: t("returnsTitle"),  desc: t("returnsDesc")  },
+    { icon: ShieldCheck, title: t("warrantyTitle"), desc: t("warrantyDesc") },
+    { icon: Headphones,  title: t("supportTitle"),  desc: t("supportDesc")  },
+  ];
+
   return (
     <section className="py-12">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">

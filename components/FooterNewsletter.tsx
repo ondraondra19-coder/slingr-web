@@ -9,17 +9,33 @@
 // formulář — zbytek patičky je od teď serverový a žádný JS nepotřebuje.
 import { useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
+import { useT } from "@/lib/useT";
 
 export default function Newsletter() {
+  const t = useT("footer");
+  const tn = useT("newsletter");
+  const tc = useT("common");
   const [email,     setEmail]     = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error,     setError]     = useState<string | null>(null);
   const [loading,   setLoading]   = useState(false);
 
+  // API vrací kód, ne hotovou větu — text se vybírá tady podle jazyka.
+  // Neznámý kód spadne na obecné "nepovedlo se", ať nikdy neukážeme
+  // "newsletter.neco" místo chyby.
+  function messageForCode(code: unknown): string {
+    switch (code) {
+      case "invalid_email":   return tn("errorInvalidEmail");
+      case "rate_limited":    return tn("errorRateLimited");
+      case "not_configured":  return tn("errorUnavailable");
+      default:                return tn("errorFailed");
+    }
+  }
+
   async function handleSubmit() {
     if (loading) return;
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Zadejte platný e-mail");
+      setError(t("emailError"));
       return;
     }
     setError(null);
@@ -34,10 +50,10 @@ export default function Newsletter() {
         setSubmitted(true);
       } else {
         const data = await res.json().catch(() => null);
-        setError(data?.error ?? "Přihlášení se nezdařilo. Zkuste to prosím znovu.");
+        setError(messageForCode(data?.code));
       }
     } catch {
-      setError("Přihlášení se nezdařilo. Zkontrolujte připojení.");
+      setError(tn("errorNetwork"));
     } finally {
       setLoading(false);
     }
@@ -51,10 +67,10 @@ export default function Newsletter() {
           {/* Left */}
           <div className="flex-1">
             <p className="text-white font-bold text-base mb-1">
-              Buďte první, kdo se dozví o novinkách
+              {t("newsletter")}
             </p>
             <p className="text-white/60 text-sm">
-              Slevy, nové produkty a tipy přímo do schránky. Odhlásit se lze kdykoliv.
+              {t("newsletterDesc")}
             </p>
           </div>
 
@@ -63,7 +79,7 @@ export default function Newsletter() {
             {submitted ? (
               <div className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-sm font-medium w-full sm:w-auto justify-center sm:justify-start">
                 <Check size={15} strokeWidth={2.5} />
-                <span>Přihlášení proběhlo úspěšně</span>
+                <span>{t("subscribed")}</span>
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -74,8 +90,8 @@ export default function Newsletter() {
                     onChange={e => { setEmail(e.target.value); setError(null); }}
                     onKeyDown={e => e.key === "Enter" && handleSubmit()}
                     disabled={loading}
-                    placeholder="váš@email.cz"
-                    aria-label="E-mail pro odběr novinek"
+                    placeholder={t("emailPlaceholder")}
+                    aria-label={tn("emailLabel")}
                     aria-invalid={!!error}
                     /* border-white/40 = 3.81:1 vůči #1c1c1c — hranice formulářového
                        pole je UI komponenta a potřebuje 3:1 (dřív /12 ≈ 1.3:1). */
@@ -94,7 +110,7 @@ export default function Newsletter() {
                   disabled={loading}
                   className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all shrink-0 w-full sm:w-auto disabled:opacity-70 disabled:active:scale-100"
                 >
-                  <span>{loading ? "Odesílám…" : "Odebírat"}</span>
+                  <span>{loading ? tc("sending") : t("subscribe")}</span>
                   {!loading && <ArrowRight size={14} />}
                 </button>
               </div>

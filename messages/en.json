@@ -154,6 +154,65 @@
     "contactBtn": "Get in touch",
     "hours": "Mon–Fri: 9:00–17:00"
   },
+  "chat": {
+    "title": "Got a question?",
+    "subtitle": "We'll reply as soon as we can",
+    "openChat": "Open chat — ask a question",
+    "closeChat": "Close chat",
+    "closeForm": "Close the question form",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "Your e-mail",
+    "messagePlaceholder": "Write your question...",
+    "messageLabel": "Question text",
+    "submit": "Send question",
+    "sentTitle": "Question sent!",
+    "sentDesc": "We'll get back to you as soon as we can.",
+    "errorInvalidName": "Please enter your name.",
+    "errorInvalidEmail": "Enter a valid e-mail.",
+    "errorInvalidText": "The message is empty or too long.",
+    "errorCooldown": "You can send another message in {minutes} min.",
+    "errorFailed": "Couldn't send the message."
+  },
+  "newsletter": {
+    "emailLabel": "E-mail for our newsletter",
+    "errorInvalidEmail": "Enter a valid e-mail",
+    "errorRateLimited": "Too many attempts. Please try again later.",
+    "errorUnavailable": "Newsletter sign-up isn't available right now.",
+    "errorFailed": "Sign-up failed. Please try again.",
+    "errorNetwork": "Sign-up failed. Check your connection."
+  },
+  "discount": {
+    "codePlaceholder": "Discount code",
+    "apply": "Apply",
+    "checking": "Checking…",
+    "invalidCode": "This code doesn't exist or is no longer valid.",
+    "removeCode": "Remove discount code {code}",
+    "onlyFor": "Valid only for: {products}",
+    "upsell": "Spend another {amount} and the discount applies automatically!",
+    "goToShop": "Go to the shop",
+    "approxNote": "* Approximate conversion. The code's minimum is calculated in CZK."
+  },
+  "trustbar": {
+    "shippingTitle": "Ships within 24 hours",
+    "shippingDesc": "Orders placed before 2pm go out the same day.",
+    "returnsTitle": "30-day returns",
+    "returnsDesc": "No questions asked. Return anything within 30 days of delivery.",
+    "warrantyTitle": "2-year warranty",
+    "warrantyDesc": "Every item comes with the statutory 24-month warranty.",
+    "supportTitle": "Support 7 days a week",
+    "supportDesc": "Chat, e-mail or phone — we're here for you every day."
+  },
+  "categorygrid": {
+    "warrantyTitle": "Everything we sell is covered by warranty",
+    "warrantyCta": "Learn more",
+    "deliveryTitle": "We deliver",
+    "deliveryHighlight": "as soon as the next day",
+    "deliveryCta": "Find out more"
+  },
+  "blog": {
+    "previewTitle": "What's new with us",
+    "goToMagazine": "Go to the magazine"
+  },
   "reviews": {
     "sectionTitle": "What customers say",
     "sectionSubtitle": "Customer reviews",

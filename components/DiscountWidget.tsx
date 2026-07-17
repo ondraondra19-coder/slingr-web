@@ -6,12 +6,16 @@ import { useCart } from "@/lib/cart";
 import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice } from "@/lib/currency";
 import { approxConvert, getActiveSlugs } from "@/lib/discounts";
-import { products } from "@/lib/products";
+import { products, getProductName } from "@/lib/products";
 import { CURRENCIES } from "@/lib/currency";
+import { useT } from "@/lib/useT";
+import { useLang } from "@/lib/LangContext";
 
 export default function DiscountWidget() {
   const { applyDiscountCode, removeDiscount, appliedDiscount, totalPriceCZK, isDiscountActive } = useCart();
   const { currency } = useCurrency();
+  const t = useT("discount");
+  const { locale } = useLang();
   const [code, setCode] = useState("");
   const [status, setStatus] = useState<"idle" | "ok" | "invalid">("idle");
   const [checking, setChecking] = useState(false);
@@ -66,7 +70,14 @@ export default function DiscountWidget() {
                 const slugs = getActiveSlugs(appliedDiscount);
                 return slugs && slugs.length > 0 ? (
                   <p className="text-[10px] text-amber-500 mt-0.5">
-                    Platí jen pro: {slugs.map(s => products.find(p => p.slug === s)?.name ?? s).join(", ")}
+                    {t("onlyFor", {
+                      products: slugs
+                        .map(s => {
+                          const product = products.find(p => p.slug === s);
+                          return product ? getProductName(product, locale) : s;
+                        })
+                        .join(", "),
+                    })}
                   </p>
                 ) : null;
               })()}
@@ -74,9 +85,10 @@ export default function DiscountWidget() {
           </div>
           <button
             onClick={handleRemove}
+            aria-label={t("removeCode", { code: appliedDiscount.code })}
             className={`p-1 rounded-lg transition-colors ${active ? "text-green-400 hover:text-green-700 hover:bg-green-100" : "text-amber-400 hover:text-amber-700 hover:bg-amber-100"}`}
           >
-            <X size={14} />
+            <X size={14} aria-hidden="true" />
           </button>
         </div>
 
@@ -85,23 +97,33 @@ export default function DiscountWidget() {
           <div className="flex items-start gap-2.5 px-3.5 py-3 rounded-xl bg-amber-50 border border-amber-200">
             <Sparkles size={14} className="text-amber-500 shrink-0 mt-0.5" />
             <p className="text-amber-800 text-xs leading-relaxed">
-              Nakupte ještě za{" "}
-              <span className="font-extrabold text-amber-900">
-                {showApprox
-                  ? <>{formatPrice(missingApprox, currency)}*</>
-                  : formatPrice(missingCZK, CURRENCIES.CZK)
-                }
-              </span>
-              {" "}a sleva se automaticky uplatní!
+              {/* Věta se v překladu drží vcelku (částka je uprostřed a každý
+                  jazyk ji staví jinak) — jen se rozsekne na {amount}, aby šla
+                  částka vysázet tučně. */}
+              {(() => {
+                const [before, after] = t("upsell").split("{amount}");
+                return (
+                  <>
+                    {before}
+                    <span className="font-extrabold text-amber-900">
+                      {showApprox
+                        ? <>{formatPrice(missingApprox, currency)}*</>
+                        : formatPrice(missingCZK, CURRENCIES.CZK)
+                      }
+                    </span>
+                    {after}
+                  </>
+                );
+              })()}
               <a
                 href="/"
                 className="ml-1.5 inline-flex items-center gap-0.5 text-amber-700 font-semibold hover:text-amber-900 transition-colors underline underline-offset-2"
               >
-                Přejít do obchodu <ArrowRight size={11} />
+                {t("goToShop")} <ArrowRight size={11} aria-hidden="true" />
               </a>
               {showApprox && (
                 <span className="block text-amber-500 text-[10px] mt-1">
-                  * Orientační přepočet. Podmínka platnosti kódu se počítá v Kč.
+                  {t("approxNote")}
                 </span>
               )}
             </p>
@@ -120,7 +142,8 @@ export default function DiscountWidget() {
             value={code}
             onChange={e => { setCode(e.target.value.toUpperCase()); setStatus("idle"); }}
             onKeyDown={e => e.key === "Enter" && handleApply()}
-            placeholder="Slevový kód"
+            placeholder={t("codePlaceholder")}
+            aria-label={t("codePlaceholder")}
             className={`w-full pl-8 pr-3 py-2.5 text-sm rounded-xl border bg-dark text-text-base placeholder-text-subtle focus:outline-none transition-colors ${
               status === "invalid" ? "border-red-400 focus:border-red-400" : "border-border focus:border-primary/50"
             }`}
@@ -131,12 +154,12 @@ export default function DiscountWidget() {
           disabled={!code.trim() || checking}
           className="px-4 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
         >
-          {checking ? "Ověřuji…" : "Uplatnit"}
+          {checking ? t("checking") : t("apply")}
         </button>
       </div>
       {status === "invalid" && (
         <p className="flex items-center gap-1 text-red-500 text-xs">
-          <AlertCircle size={11} /> Tento kód neexistuje nebo již není platný.
+          <AlertCircle size={11} aria-hidden="true" /> {t("invalidCode")}
         </p>
       )}
     </div>

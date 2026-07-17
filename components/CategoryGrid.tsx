@@ -1,11 +1,15 @@
-// Serverová komponenta — žádný "use client". Nejsou tu hooky ani handlery,
-// jen statické bloky, takže do prohlížeče nemusí odejít žádný JS.
-// Nepřidávej sem "use client" kvůli ikoně ani kvůli next/image — obojí
-// v serverové komponentě funguje.
+"use client";
+
+// Klientská komponenta kvůli jazyku (jazyk se čte z cookie až po hydrataci,
+// viz lib/locale.ts). Dřív byla serverová; texty jsou tu jen dva bloky, takže
+// rozdíl v bundlu je pár set bajtů.
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
+import { useT } from "@/lib/useT";
 
 export default function CategoryGrid() {
+  const t = useT("categorygrid");
+
   return (
     <section className="py-10">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
@@ -26,13 +30,13 @@ export default function CategoryGrid() {
                 text-on-primary dává 8.94:1 a pozadí zůstává značkově růžové. */}
             <div className="relative z-10 max-w-[55%]">
               <h3 className="text-on-primary text-2xl font-extrabold leading-tight">
-                Na všechno zboží dáváme záruku
+                {t("warrantyTitle")}
               </h3>
               <a
                 href="/zaruka"
                 className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-on-primary/40 text-on-primary text-sm font-medium hover:bg-on-primary/10 transition-all"
               >
-                Více informací
+                {t("warrantyCta")}
                 <ArrowUpRight size={14} />
               </a>
             </div>
@@ -48,14 +52,14 @@ export default function CategoryGrid() {
 
             <div className="relative z-10 ml-auto text-right max-w-[55%]">
               <h3 className="text-white text-2xl font-extrabold leading-tight">
-                Doručujeme již<br />
-                <span className="text-primary">do druhého dne</span>
+                {t("deliveryTitle")}<br />
+                <span className="text-primary">{t("deliveryHighlight")}</span>
               </h3>
               <a
                 href="/doprava"
                 className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/20 text-white text-sm font-medium hover:bg-white/10 transition-all"
               >
-                Zjistit více
+                {t("deliveryCta")}
                 <ArrowUpRight size={14} />
               </a>
             </div>
