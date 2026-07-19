@@ -116,6 +116,8 @@
     "emailPlaceholder": "tvuj@email.cz",
     "emailLabel": "Tvůj e-mail",
     "comboExtra": "({base} + {extra} za různé barvy)",
+    "youSave": "Ušetříš {amount} (−{percent} %)",
+    "ratingAria": "Hodnocení {rating} z 5",
     "comboSurcharge": "(+{extra} za různé barvy)",
     "trustShipping": "Expedice",
     "trustShippingSub": "do 24 hodin",

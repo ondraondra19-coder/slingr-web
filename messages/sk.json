@@ -116,6 +116,8 @@
     "emailPlaceholder": "tvoj@email.sk",
     "emailLabel": "Tvoj e-mail",
     "comboExtra": "({base} + {extra} za rôzne farby)",
+    "youSave": "Ušetríš {amount} (−{percent} %)",
+    "ratingAria": "Hodnotenie {rating} z 5",
     "comboSurcharge": "(+{extra} za rôzne farby)",
     "trustShipping": "Expedícia",
     "trustShippingSub": "do 24 hodín",

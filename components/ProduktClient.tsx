@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart, Check, ChevronRight, Package, RefreshCw, ShieldCheck, ChevronLeft, Bell, Play, X } from "lucide-react";
+import { ShoppingCart, Check, ChevronRight, Package, RefreshCw, ShieldCheck, ChevronLeft, Bell, Play, X, Tag, Star } from "lucide-react";
 import type { Product, ModelColor, ModelColorLayered } from "@/lib/products";
 import { useCart, type PriceRaw } from "@/lib/cart";
 import { useCurrency } from "@/lib/CurrencyContext";
@@ -41,18 +41,30 @@ const COLOR_MAP: Record<string, string> = {
 
 // ── Stock badge ──────────────────────────────────────────────────────────────
 
+// Brandová šrafovaná dlaždice pod fotkou — stejná jako v ProductRow / kategorii.
+const TILE_STYLE: React.CSSProperties = {
+  backgroundColor: "#eaf8f4",
+  backgroundImage:
+    "repeating-linear-gradient(-45deg, rgba(40,191,166,0.07) 0 16px, rgba(40,191,166,0.15) 16px 32px)",
+};
+
 function StockBadge({ available, anyInStock }: { available: number; anyInStock: boolean }) {
   const t = useT("product");
   const state = !anyInStock ? "none" : available === 0 ? "variant" : available >= 5 ? "plenty" : "low";
-  const colorClass = state === "plenty" ? "text-green-600" : state === "low" ? "text-amber-500" : "text-red-500";
-  const dotClass = state === "plenty" ? "bg-green-500" : state === "low" ? "bg-amber-400 animate-pulse" : "bg-red-400";
+  // Barevná pilulka — sklad tím dostane vlastní vizuální „chip" a nesplyne
+  // s cenou vedle. Tři stavy: dost skladem / poslední kusy / nedostupné.
+  const chipClass =
+    state === "plenty" ? "bg-emerald-50 text-emerald-700" :
+    state === "low"    ? "bg-amber-50 text-amber-700" :
+                         "bg-rose-50 text-rose-700";
+  const dotClass = state === "plenty" ? "bg-emerald-500" : state === "low" ? "bg-amber-400 animate-pulse" : "bg-rose-400";
   const label =
     state === "none"    ? t("stockNone") :
     state === "variant" ? t("stockVariant") :
     state === "plenty"  ? t("stockPlenty") :
                           t.plural(available, "stockLow");
   return (
-    <span key={state} className={`inline-flex items-center gap-1.5 text-[12px] font-semibold ${colorClass}`}>
+    <span key={state} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ${chipClass}`}>
       <span className={`w-1.5 h-1.5 rounded-full inline-block ${dotClass}`} />
       <span>{label}</span>
     </span>
@@ -568,6 +580,7 @@ export default function ProduktClient({
   const discountPercent  = model ? model.discountPercent : product.discountPercent;
   const hasSale = !!discountPercent && !!rawOriginalPrice;
   const originalTotalPrice = hasSale ? getPrice(rawOriginalPrice, currency) + comboExtra : 0;
+  const savings = hasSale ? Math.max(0, originalTotalPrice - totalPrice) : 0;
 
   // Jedno "product_viewed" za návštěvu detailu — čeká na currencyMounted, ať
   // se neposílá s cenou v (možná chybné) výchozí měně před hydratací.
@@ -857,32 +870,59 @@ export default function ProduktClient({
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-text-base leading-tight tracking-tight">
                   {productName}
                 </h1>
-                <div className="flex items-center gap-4 mt-3 flex-wrap">
-                  <span className="flex items-baseline gap-2.5">
-                    <span className="text-3xl sm:text-4xl font-extrabold text-primary-ink leading-none">
-                      {currencyMounted ? formatPrice(totalPrice, currency) : <span className="opacity-0">—</span>}
+
+                {/* Volitelné hodnocení pod názvem */}
+                {product.rating !== undefined && (
+                  <div className="flex items-center gap-2 mt-2" aria-label={t("ratingAria", { rating: product.rating })}>
+                    <span className="flex">
+                      {[0, 1, 2, 3, 4].map((i) => (
+                        <Star
+                          key={i}
+                          size={15}
+                          className={i < Math.round(product.rating!) ? "text-amber-400" : "text-zinc-300"}
+                          fill="currentColor"
+                          aria-hidden="true"
+                        />
+                      ))}
                     </span>
-                    {currencyMounted && hasSale && (
-                      <>
-                        <span className="text-lg sm:text-xl font-medium text-text-subtle line-through leading-none">
-                          {formatPrice(originalTotalPrice, currency)}
-                        </span>
-                        <span className="text-xs font-bold text-white bg-rose-600 rounded-full px-2 py-1 leading-none">
-                          −{discountPercent}&nbsp;%
-                        </span>
-                      </>
+                    <span className="text-sm font-bold text-text-muted">{product.rating.toFixed(1)}</span>
+                    {product.reviewCount !== undefined && (
+                      <span className="text-sm text-text-subtle">({product.reviewCount}×)</span>
                     )}
+                  </div>
+                )}
+
+                {/* Cena — velká + přeškrtnutá původní na jednom řádku (jen 2 věci) */}
+                <div className="mt-4 flex items-end gap-3 flex-wrap">
+                  <span className="text-4xl sm:text-[2.75rem] font-extrabold text-primary-ink leading-none">
+                    {currencyMounted ? formatPrice(totalPrice, currency) : <span className="opacity-0">—</span>}
                   </span>
-                  {comboExtra > 0 && (
-                    <span className="text-xs text-text-subtle">
-                      {t("comboExtra", {
-                        base: formatPrice(basePrice, currency),
-                        extra: formatPrice(comboExtra, currency),
-                      })}
+                  {currencyMounted && hasSale && (
+                    <span className="text-xl font-medium text-text-subtle line-through leading-none pb-1">
+                      {formatPrice(originalTotalPrice, currency)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Chipy — „ušetříš" a sklad, každý jako samostatná pilulka */}
+                <div className="mt-3 flex items-center gap-2.5 flex-wrap">
+                  {currencyMounted && hasSale && savings > 0 && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 text-rose-700 text-xs font-bold px-3 py-1.5">
+                      <Tag size={13} aria-hidden="true" />
+                      {t("youSave", { amount: formatPrice(savings, currency), percent: discountPercent ?? 0 })}
                     </span>
                   )}
                   <StockBadge available={availableQty} anyInStock={anyInStock} />
                 </div>
+
+                {comboExtra > 0 && (
+                  <p className="mt-2.5 text-xs text-text-subtle">
+                    {t("comboExtra", {
+                      base: formatPrice(basePrice, currency),
+                      extra: formatPrice(comboExtra, currency),
+                    })}
+                  </p>
+                )}
               </div>
 
               <div className="h-px bg-border" />
@@ -1147,27 +1187,46 @@ export default function ProduktClient({
             <div>
               <h2 className="text-lg sm:text-xl font-bold text-text-base mb-5">{t("related")}</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                {related.map((p) => (
-                  <a
-                    key={p.slug}
-                    href={`/produkt/${p.slug}`}
-                    className="group flex flex-col bg-white border border-border rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-md transition-all duration-200"
-                  >
-                    <div className="relative aspect-square bg-surface">
-                      <Image
-                        src={p.img}
-                        alt=""
-                        fill
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        className="object-contain p-4 transition-transform duration-300 group-hover:scale-[1.04]"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1 p-3 sm:p-4 border-t border-border">
-                      <p className="text-text-base text-xs sm:text-sm font-semibold leading-snug group-hover:text-primary-ink transition-colors line-clamp-2">{getProductName(p, locale)}</p>
-                      <p className="text-primary-ink font-bold text-sm sm:text-base mt-0.5">{formatPrice(getPrice(p.price, currency), currency)}</p>
-                    </div>
-                  </a>
-                ))}
+                {related.map((p) => {
+                  const relSale = !!p.discountPercent && !!p.originalPrice;
+                  return (
+                    <a
+                      key={p.slug}
+                      href={`/produkt/${p.slug}`}
+                      className="group flex flex-col bg-white border border-border rounded-2xl overflow-hidden hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                    >
+                      <div className="relative aspect-square overflow-hidden" style={TILE_STYLE}>
+                        {p.discountPercent && (
+                          <span className="absolute top-2.5 left-2.5 z-10 text-[11px] leading-none text-white bg-rose-600 rounded-lg px-2 py-1 shadow-sm">
+                            −{p.discountPercent}&nbsp;%
+                          </span>
+                        )}
+                        <Image
+                          src={p.img}
+                          alt=""
+                          fill
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                          className="object-contain p-4 transition-transform duration-300 group-hover:scale-[1.04]"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5 p-3 sm:p-4 border-t border-border">
+                        <p className="text-text-base text-xs sm:text-sm font-semibold leading-snug group-hover:text-primary-ink transition-colors line-clamp-2 min-h-[2.5rem]">{getProductName(p, locale)}</p>
+                        {relSale ? (
+                          <span className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-extrabold text-white bg-rose-600 rounded-lg px-2 py-1 leading-none">
+                              {formatPrice(getPrice(p.price, currency), currency)}
+                            </span>
+                            <span className="text-xs font-medium text-text-subtle line-through">
+                              {formatPrice(getPrice(p.originalPrice!, currency), currency)}
+                            </span>
+                          </span>
+                        ) : (
+                          <p className="text-primary-ink font-extrabold text-base mt-0.5">{formatPrice(getPrice(p.price, currency), currency)}</p>
+                        )}
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
             </div>
           )}

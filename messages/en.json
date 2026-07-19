@@ -113,6 +113,8 @@
     "emailPlaceholder": "you@email.com",
     "emailLabel": "Your e-mail",
     "comboExtra": "({base} + {extra} for mixed colours)",
+    "youSave": "You save {amount} (−{percent}%)",
+    "ratingAria": "Rated {rating} out of 5",
     "comboSurcharge": "(+{extra} for mixed colours)",
     "trustShipping": "Shipping",
     "trustShippingSub": "within 24 hours",
