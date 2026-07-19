@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import type { Review } from '@/lib/reviews';
 import type { PublicAccount } from '@/lib/accounts';
@@ -244,10 +245,16 @@ export default function AdminDashboard({
       >
         <div>
           <div className="h-16 flex items-center justify-between px-6 border-b border-white/[0.05]">
-            <div className="flex items-baseline font-bold tracking-tight text-lg">
-              <span>Hack</span>
-              <span className="text-primary">Pack</span>
-              <span className="ml-1.5 text-[9px] font-mono font-medium bg-white/10 text-zinc-400 px-1 py-0.5 rounded uppercase tracking-wider">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/images/main/logo-white.png"
+                alt="SLINGR"
+                width={500}
+                height={150}
+                className="h-8 w-auto object-contain"
+                priority
+              />
+              <span className="text-[9px] font-mono font-medium bg-white/10 text-zinc-400 px-1 py-0.5 rounded uppercase tracking-wider">
                 Admin
               </span>
             </div>

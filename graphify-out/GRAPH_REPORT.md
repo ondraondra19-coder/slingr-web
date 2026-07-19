@@ -1,7 +1,7 @@
 # Graph Report - Slingr  (2026-07-19)
 
 ## Corpus Check
-- 171 files · ~225,257 words
+- 171 files · ~225,265 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `da43c653`
+- Built from commit: `b7379e6d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

@@ -49,8 +49,6 @@
   "47": "getProductBySlug",
   "48": "posthog-node",
   "49": "PostCSS Config",
-  "50": "react",
-  "51": "resend",
   "53": "app/page.tsx (entry page)",
   "54": "create-next-app (bootstrap tool)",
   "55": "Geist (Vercel font family)",
