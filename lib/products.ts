@@ -52,6 +52,12 @@ export type ProductSize = {
   value: string;
 };
 
+// Položka setu — odkaz na jiný produkt a kolik jeho kusů set obsahuje.
+export type BundleItem = {
+  slug: string;
+  quantity: number;
+};
+
 export type Product = {
   slug: string;
   name: string;
@@ -89,6 +95,11 @@ export type Product = {
   // a `discountPercent` zaokrouhlené procento pro odznak „−X %".
   originalPrice?: PriceValue;
   discountPercent?: number;
+  // Vyplněné = produkt je SET poskládaný z jiných produktů. Set nemá vlastní
+  // skladovost: dopočítává se z komponent (viz getBundleStock) a v Redisu pro
+  // něj žádné pole neexistuje. Odečet při objednávce se rozpadne na komponenty
+  // (viz deductStockForItems v lib/stock.ts).
+  bundle?: BundleItem[];
 };
 
 // ─── Produkty ───────────────────────────────────────
@@ -158,6 +169,87 @@ export const products: Product[] = [
     stock: 0,
     tags: ["plechovky", "pěnové", "sestřelení", "terč", "cíl", "příslušenství", "prak", "slingr", "trénink", "přesnost"],
     related: ["prak-x1", "micky-do-praku", "terc"],
+  },
+
+  // ─── Sety ─────────────────────────────────────────
+  // Skladovost se NEVYPLŇUJE — dopočítá se z komponent (viz `bundle`).
+  // `stock: 0` / `inStock: true` jsou jen statické fallbacky jako u ostatních
+  // produktů; reálné číslo dodá lib/stock.ts.
+  //
+  // Obrázky zatím ukazují hlavní komponentu setu — až budou nafocené balíčky,
+  // vyměnit za vlastní fotky v /public/images/products/<slug>/.
+  {
+    slug: "set-startovaci",
+    name: "Startovací set SLINGR",
+    price: { CZK: 799 },
+    categories: ["vyhodne-sety"],
+    img: "/images/products/prak-x1/main.png",
+    description:
+      "Všechno, co potřebuješ na první bitvu, v jednom balení. Prak, náhradní míčky a skládací terč — stačí vybalit a jde se střílet. Nejlevnější způsob, jak začít: dohromady ušetříš skoro stovku oproti nákupu po kusech.",
+    inStock: true,
+    stock: 0,
+    tags: ["set", "balíček", "výhodný", "startovací", "prak", "míčky", "terč", "dárek", "začátečník"],
+    related: ["set-vodni-bitva", "set-duel", "prak-x1"],
+    bundle: [
+      { slug: "prak-x1", quantity: 1 },
+      { slug: "micky-do-praku", quantity: 1 },
+      { slug: "terc", quantity: 1 },
+    ],
+  },
+  {
+    slug: "set-vodni-bitva",
+    name: "Set Vodní bitva",
+    price: { CZK: 599 },
+    categories: ["vyhodne-sety"],
+    img: "/images/products/vodni-balonky/main.png",
+    description:
+      "Letní balíček na horké dny. Prak a dvojitá zásoba vodních balónků, ať ti munice nedojde uprostřed války na zahradě. Nabij, zamiř, střílej — a pak znovu, dokud nejste všichni mokří.",
+    inStock: true,
+    stock: 0,
+    tags: ["set", "balíček", "výhodný", "voda", "vodní balónky", "léto", "prak", "zahrada", "bitva"],
+    related: ["set-startovaci", "vodni-balonky", "prak-x1"],
+    bundle: [
+      { slug: "prak-x1", quantity: 1 },
+      { slug: "vodni-balonky", quantity: 2 },
+    ],
+  },
+  {
+    slug: "set-duel",
+    name: "Set Duel pro dva",
+    price: { CZK: 1349 },
+    categories: ["vyhodne-sety"],
+    img: "/images/products/prak-x1/main.png",
+    description:
+      "Dva praky, dvojitá munice a jeden terč — souboj může začít. Ideální pro sourozence, kamarády nebo rodiče proti dítěti. Každý má svůj prak, takže se nikdo nemusí střídat a čekat.",
+    inStock: true,
+    stock: 0,
+    tags: ["set", "balíček", "výhodný", "duel", "dva hráči", "souboj", "prak", "míčky", "terč", "dárek"],
+    related: ["set-startovaci", "set-arzenal", "prak-x1"],
+    bundle: [
+      { slug: "prak-x1", quantity: 2 },
+      { slug: "micky-do-praku", quantity: 2 },
+      { slug: "terc", quantity: 1 },
+    ],
+  },
+  {
+    slug: "set-arzenal",
+    name: "Set Kompletní arzenál",
+    price: { CZK: 1149 },
+    categories: ["vyhodne-sety"],
+    img: "/images/products/terc/main.png",
+    description:
+      "Úplně všechno z naší nabídky v jednom balení. Prak, míčky, vodní balónky, terč i pěnové plechovky — na trénink mušky, na vodní válku i na souboj o nejvyšší skóre. Kdo chce mít doma kompletní výbavu, bere tenhle.",
+    inStock: true,
+    stock: 0,
+    tags: ["set", "balíček", "výhodný", "kompletní", "arzenál", "všechno", "prak", "munice", "terč", "plechovky", "dárek"],
+    related: ["set-duel", "set-startovaci", "penove-plechovky"],
+    bundle: [
+      { slug: "prak-x1", quantity: 1 },
+      { slug: "micky-do-praku", quantity: 1 },
+      { slug: "vodni-balonky", quantity: 1 },
+      { slug: "terc", quantity: 1 },
+      { slug: "penove-plechovky", quantity: 1 },
+    ],
   },
 ];
 
@@ -241,6 +333,57 @@ export function getProductCombinations(product: Product): ProductCombination[] {
 
 export function getProductBySlug(slug: string): Product | undefined {
   return products.find((p) => p.slug === slug);
+}
+
+// ─── Sety ───────────────────────────────────────────
+
+export function isBundle(product: Product): boolean {
+  return Array.isArray(product.bundle) && product.bundle.length > 0;
+}
+
+export const bundles: Product[] = products.filter(isBundle);
+
+/**
+ * Kolikrát set poskládáme z toho, co je na skladě.
+ *
+ * Limituje ho vždycky ta nejhůř zásobená komponenta, a to VŮČI SVÉMU MNOŽSTVÍ
+ * v setu: když set bere 2 ks míčků a skladem jich je 3, sety z nich složíme
+ * jen jeden (floor(3 / 2)), ne tři.
+ *
+ * `stockOf` dostane slug komponenty a vrací její volné kusy — díky tomu je
+ * tahle funkce čistá a nezávislá na Redisu, takže jde volat i z klienta.
+ * Komponenty se nesčítají přes varianty: dnes žádný produkt v setu varianty
+ * nemá, a kdyby měl, „5 kusů dohromady" by stejně neznamenalo, že jde složit
+ * 5 setů v jedné barvě — v tu chvíli musí `bundle` nést i konkrétní variantu.
+ */
+export function getBundleStock(
+  product: Product,
+  stockOf: (slug: string) => number,
+): number {
+  if (!product.bundle || product.bundle.length === 0) return 0;
+
+  let limit = Infinity;
+  for (const part of product.bundle) {
+    const perSet = Math.max(1, Math.floor(part.quantity));
+    limit = Math.min(limit, Math.floor(stockOf(part.slug) / perSet));
+  }
+  return Number.isFinite(limit) ? Math.max(0, limit) : 0;
+}
+
+/**
+ * Rozpad setu na skutečné skladové položky — set sám žádné skladové pole nemá.
+ * Vrací dvojice slug + celkové množství pro `count` kusů setu.
+ * Produkt, který set není, vrátí sám sebe (volající tak nemusí větvit).
+ */
+export function expandBundle(slug: string, count: number): BundleItem[] {
+  const product = getProductBySlug(slug);
+  if (!product?.bundle || product.bundle.length === 0) {
+    return [{ slug, quantity: count }];
+  }
+  return product.bundle.map((part) => ({
+    slug: part.slug,
+    quantity: part.quantity * count,
+  }));
 }
 
 export function getRelatedProducts(product: Product, limit = 4): Product[] {

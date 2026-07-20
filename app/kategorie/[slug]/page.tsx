@@ -44,7 +44,7 @@ export default async function KategoriePage({
       }
     }
   } catch (e) {
-    // Sheets nedostupné — fallback na products.ts inStock/stock
+    // Redis nedostupný — fallback na products.ts inStock/stock
     console.warn("Stock fetch failed, using fallback:", e);
   }
 

@@ -8,67 +8,64 @@
 // snadněji než odmítnout, není podle GDPR svobodný. Nedávejte odmítnutí do
 // modálu, neschovávejte ho do odkazu ani mu nedávejte bledší styl.
 //
-// Lišta záměrně nabízí jen tyhle dvě volby. Podrobné nastavení po kategoriích
+// Lišta má jeden vzhled pro všechny návštěvy — spodní pruh přes celou šířku,
+// bez překryvu a bez blokování stránky. (Dřív byl první zobrazení modálnější:
+// vycentrovaná karta nad ztmavlým pozadím.)
+//
+// Lišta záměrně nabízí jen dvě volby. Podrobné nastavení po kategoriích
 // (analytika / marketing zvlášť) žije na /cookies, kam vede odkaz "Zobrazit
 // detaily" — dřív to samé duplikoval modál za tlačítkem "Upravit".
 // POZOR: až se nasadí druhá reálná volitelná kategorie (dnes je jediná
 // analytika, marketing se nikde nečte — viz hasMarketingConsent), přestane
 // binární volba stačit. GDPR chce souhlas konkrétní pro každý účel, takže
 // v tu chvíli musí granulární volba zpátky i do lišty.
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { ChevronRight } from "lucide-react";
 import { useT } from "@/lib/useT";
 import { useRouter, usePathname } from "next/navigation";
-import {
-  acceptAll,
-  hasDecided,
-  hasVisitedDetails as readVisitedDetails,
-  markDetailsVisited,
-  rejectAll,
-} from "@/lib/consent";
+import { acceptAll, hasDecided, rejectAll, CONSENT_CHANGED_EVENT } from "@/lib/consent";
+
+// Souhlas je externí stav (localStorage), takže se čte přes useSyncExternalStore,
+// ne přes useState+useEffect. Odběr zachytí i odvolání souhlasu ze stránky
+// /cookies (CONSENT_CHANGED_EVENT) a změnu z jiného panelu (storage).
+function subscribeConsent(onChange: () => void) {
+  window.addEventListener(CONSENT_CHANGED_EVENT, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(CONSENT_CHANGED_EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
 
 export default function CookieBanner() {
   const t = useT("cookieBanner");
   const router = useRouter();
   const pathname = usePathname();
 
-  type State = "idle" | "blocking" | "visible" | "leaving" | "gone";
-  const [state, setState] = useState<State>("idle");
+  // Na serveru se tváříme, že návštěvník rozhodl — lišta se tak nevykreslí do
+  // HTML a nevzniká hydration mismatch. Po mountu se přečte skutečná hodnota.
+  const decided = useSyncExternalStore(subscribeConsent, hasDecided, () => true);
 
-  const [hasVisitedDetails, setHasVisitedDetails] = useState(false);
+  const [entered, setEntered] = useState(false); // vstupní animace zdola
+  const [leaving, setLeaving] = useState(false); // odchozí animace po kliknutí
+  const [gone, setGone] = useState(false);       // po doběhnutí odchodu
 
+  // Na /cookies je plné nastavení, tam by lišta překážela. V adminu se nic
+  // netrackuje (viz PostHogProvider), takže tam nedává smysl.
+  const suppressed = pathname === "/cookies" || !!pathname?.startsWith("/admin");
+  const hidden = suppressed || decided || gone;
+
+  // První snímek vykreslíme zasunutou a hned poté ji pustíme nahoru, ať je
+  // vidět animace. setState je v callbacku timeru, ne v těle efektu.
   useEffect(() => {
-    if (readVisitedDetails()) {
-      // Stav souhlasu čteme až po mountu (localStorage není na serveru).
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setHasVisitedDetails(true);
-    }
-
-    if (pathname === "/cookies") {
-      markDetailsVisited();
-      setHasVisitedDetails(true);
-      setState("gone");
-      return;
-    }
-
-    // V adminu se nic netrackuje (viz PostHogProvider), takže tam lišta nedává smysl.
-    if (pathname?.startsWith("/admin")) {
-      setState("gone");
-      return;
-    }
-
-    if (hasDecided()) {
-      setState("gone");
-      return;
-    }
-    setState("blocking");
-    const t = setTimeout(() => setState("visible"), 50);
-    return () => clearTimeout(t);
-  }, [pathname]);
+    if (hidden || entered) return;
+    const timer = setTimeout(() => setEntered(true), 50);
+    return () => clearTimeout(timer);
+  }, [hidden, entered]);
 
   function dismiss() {
-    setState("leaving");
-    setTimeout(() => setState("gone"), 500);
+    setLeaving(true);
+    setTimeout(() => setGone(true), 500);
   }
 
   function handleAcceptAll() {
@@ -81,116 +78,74 @@ export default function CookieBanner() {
     dismiss();
   }
 
-  if (state === "idle" || state === "gone") return null;
+  if (hidden) return null;
 
-  const isLeaving = state === "leaving";
-  const isBlocking = state === "blocking";
+  const isHidden = leaving || !entered;
 
   return (
-    <>
-      {/* Dynamic Overlay pozadí */}
-      <div
-        aria-hidden="true"
-        onClick={(e) => e.stopPropagation()}
-        className={`fixed inset-0 z-[199] transition-all duration-500 ${
-          isLeaving
-            ? "opacity-0 pointer-events-none"
-            : isBlocking
-            ? "opacity-0 pointer-events-auto"
-            : "opacity-100"
-        } ${
-          hasVisitedDetails
-            ? "pointer-events-none"
-            : "pointer-events-auto"
-        }`}
-        style={{
-          background: hasVisitedDetails ? "rgba(0,0,0,0)" : "rgba(0,0,0,0.6)",
-          backdropFilter: hasVisitedDetails ? "none" : "blur(4px)"
-        }}
-      />
+    <div
+      role="dialog"
+      aria-modal="false"
+      aria-label={t("dialogLabel")}
+      className={`fixed bottom-0 left-0 w-full z-[200] transition-all duration-500 ease-out ${
+        isHidden ? "translate-y-full opacity-0" : "translate-y-0 opacity-100"
+      }`}
+    >
+      {/* Do řádku (text | detaily | tlačítka) se přepíná až na xl. Tři sloupce
+          vedle sebe potřebují ~1200 px; na užším desktopu se textový sloupec
+          smrskl na ~180 px, popis se zalomil do 8 řádků a lišta zabrala 74 %
+          výšky okna. Ve sloupci má text celou šířku a lišta je nižší. */}
+      <div className="bg-[#121212] shadow-2xl border-t border-white/10 w-full p-6 md:py-7 md:px-10 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 xl:gap-10">
 
-      {/* DYNAMICKÝ VNĚJŠÍ KONTEJNER */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("dialogLabel")}
-        className={`fixed z-[200] transition-all duration-500 ease-out ${
-          hasVisitedDetails
-            ? "bottom-0 left-0 w-full"
-            : "bottom-6 left-1/2 -translate-x-1/2 w-full max-w-6xl px-4"
-        } ${
-          isLeaving || isBlocking
-            ? hasVisitedDetails ? "translate-y-full opacity-0" : "translate-y-12 opacity-0"
-            : "translate-y-0 opacity-100"
-        }`}
-      >
-        {/* DYNAMICKÉ TĚLO BANNERU */}
-        <div
-          className={`bg-[#121212] shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between transition-all duration-300 ${
-            hasVisitedDetails
-              ? "border-t border-white/10 w-full p-4 md:py-4 md:px-8 gap-4 md:gap-8 rounded-none"
-              : "border border-white/5 rounded-2xl p-6 md:p-8 gap-6 md:gap-12"
-          }`}
-        >
-
-          {/* Levá textová část */}
-          <div className={`flex-1 min-w-0 flex flex-col justify-between h-full ${hasVisitedDetails ? "md:flex-row md:items-center gap-2 md:gap-6" : ""}`}>
-            <div>
-              <h2 className={`text-white font-bold tracking-wide ${hasVisitedDetails ? "text-sm mb-0.5" : "text-base md:text-lg mb-1.5"}`}>
-                {t("title")}
-              </h2>
-              <p className={`text-[#a3a3a3] leading-relaxed ${hasVisitedDetails ? "text-[11px] md:text-xs max-w-5xl" : "text-xs md:text-sm max-w-4xl"}`}>
-                {t("desc")}
-                {!hasVisitedDetails && ` ${t("descExtra")}`}
-              </p>
-            </div>
-
-            {/* Odkaz Zobrazit detaily */}
-            <div className={`shrink-0 ${hasVisitedDetails ? "mt-1 md:mt-0" : "mt-4 md:mt-6"}`}>
-              <button
-                onClick={() => router.push('/cookies')}
-                className={`text-primary hover:text-primary/80 font-medium inline-flex items-center transition-colors duration-200 bg-transparent border-none p-0 cursor-pointer whitespace-nowrap ${
-                  hasVisitedDetails ? "text-xs gap-1" : "text-xs md:text-sm gap-1.5"
-                }`}
-              >
-                {t("showDetails")}
-                <ChevronRight size={hasVisitedDetails ? 12 : 14} className="stroke-[2.5]" />
-              </button>
-            </div>
+        {/* Levá textová část */}
+        <div className="w-full xl:flex-1 min-w-0 flex flex-col xl:flex-row xl:items-center justify-between gap-3 xl:gap-8">
+          {/* flex-1 min-w-0 tu musí zůstat: bez něj se textový sloupec smrskne
+              na šířku obsahu, popis se zalomí do ~11 řádků a lišta vyroste přes
+              půl obrazovky — pak přeteče i uvítací popup, který si pod sebe
+              rezervuje jen pevných md:pb-56 (viz WelcomeDiscountPopup). */}
+          <div className="flex-1 min-w-0">
+            <h2 className="text-white font-bold tracking-wide text-lg md:text-xl mb-1.5">
+              {t("title")}
+            </h2>
+            <p className="text-[#a3a3a3] leading-relaxed text-sm md:text-base max-w-5xl">
+              {t("desc")} {t("descExtra")}
+            </p>
           </div>
 
-          {/* Pravá tlačítková část */}
-          <div className={`shrink-0 flex items-center ${
-            hasVisitedDetails
-              ? "flex-row gap-2 w-full md:w-auto justify-end"
-              : "flex-col gap-3 w-full md:w-auto min-w-[200px]"
-          }`}>
-
-            {/* Obě tlačítka MUSÍ vypadat stejně — ne jen být stejně blízko.
-                Souhlas, který je vizuálně nápadnější než odmítnutí, je podle
-                GDPR nátlakový (dřív: "Povolit" plné růžové, "Odmítnout" bledý
-                obrys). Když sáhneš na styl jednoho, sáhni i na druhý. */}
-            {([
-              { label: t("acceptAll"), onClick: handleAcceptAll },
-              { label: t("rejectAll"), onClick: handleRejectAll },
-            ] as const).map(btn => (
-              <button
-                key={btn.label}
-                onClick={btn.onClick}
-                className={`bg-primary hover:bg-primary/80 text-on-primary font-bold tracking-wide transition-colors duration-200 cursor-pointer text-center whitespace-nowrap ${
-                  hasVisitedDetails
-                    ? "flex-1 md:flex-none py-2 px-5 rounded-lg text-xs"
-                    : "w-full md:w-48 py-3 px-6 rounded-xl text-sm"
-                }`}
-              >
-                {btn.label}
-              </button>
-            ))}
+          {/* Odkaz Zobrazit detaily */}
+          <div className="shrink-0">
+            <button
+              onClick={() => router.push('/cookies')}
+              className="text-primary hover:text-primary/80 font-medium inline-flex items-center gap-1.5 text-sm md:text-base transition-colors duration-200 bg-transparent border-none p-0 cursor-pointer whitespace-nowrap"
+            >
+              {t("showDetails")}
+              <ChevronRight size={18} className="stroke-[2.5]" />
+            </button>
           </div>
-
         </div>
-      </div>
 
-    </>
+        {/* Pravá tlačítková část */}
+        <div className="shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+
+          {/* Obě tlačítka MUSÍ vypadat stejně — ne jen být stejně blízko.
+              Souhlas, který je vizuálně nápadnější než odmítnutí, je podle
+              GDPR nátlakový (dřív: "Povolit" plné růžové, "Odmítnout" bledý
+              obrys). Když sáhneš na styl jednoho, sáhni i na druhý. */}
+          {([
+            { label: t("acceptAll"), onClick: handleAcceptAll },
+            { label: t("rejectAll"), onClick: handleRejectAll },
+          ] as const).map(btn => (
+            <button
+              key={btn.label}
+              onClick={btn.onClick}
+              className="border-2 border-primary text-primary bg-transparent hover:bg-primary hover:text-on-primary font-bold tracking-wide transition-colors duration-200 cursor-pointer text-center whitespace-nowrap py-3 px-8 rounded-xl text-sm md:text-base"
+            >
+              {btn.label}
+            </button>
+          ))}
+        </div>
+
+      </div>
+    </div>
   );
 }

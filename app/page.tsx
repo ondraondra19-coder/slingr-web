@@ -18,7 +18,7 @@ export default async function Home() {
 
   // Reálná dostupnost pro odznaky „Poslední kusy" / „Zbývá N skladem" na
   // kartách. Agregujeme na produkt jako max dostupných kusů napříč variantami
-  // (stejná logika jako maxStock v kategorii). Když Sheets/Redis selže, karty
+  // (stejná logika jako maxStock v kategorii). Když Redis selže, karty
   // spadnou zpět na statické product.inStock.
   const availability: Record<string, number> = {};
   try {

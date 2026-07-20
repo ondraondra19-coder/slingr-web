@@ -9,11 +9,11 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getAllReviews, addReview, checkAndSetCooldown, toPublicReview } from "@/lib/reviews";
 import { sendReviewThankYouEmail } from "@/lib/email";
+import { isValidEmail } from "@/lib/emailValidation";
 
 const MAX_TEXT_LENGTH = 600;
 const MAX_NAME_LENGTH = 80;
 const MAX_EMAIL_LENGTH = 150;
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export type ReviewErrorCode =
   | "invalid_name"
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     let emailValue: string | undefined;
     if (typeof email === "string" && email.trim()) {
       const trimmed = email.trim();
-      if (trimmed.length > MAX_EMAIL_LENGTH || !EMAIL_REGEX.test(trimmed)) {
+      if (trimmed.length > MAX_EMAIL_LENGTH || !isValidEmail(trimmed)) {
         return fail("invalid_email", "Neplatný email.", 400);
       }
       emailValue = trimmed;

@@ -29,7 +29,7 @@ export default async function AdminPage() {
   const products = await getProductsWithPriceOverrides();
   const productDiscounts = await getProductDiscounts();
 
-  // Načtení real-time skladu z Google Sheets a konverze Mapy na čistý JSON objekt
+  // Načtení real-time skladu z Redisu a konverze Mapy na čistý JSON objekt
   const stockMap = await getStockMap();
   const serializedStock = Object.fromEntries(stockMap.entries());
 

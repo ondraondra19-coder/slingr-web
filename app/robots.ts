@@ -2,7 +2,7 @@
 // Next.js z tohoto souboru vygeneruje /robots.txt.
 import type { MetadataRoute } from "next";
 
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://hackpack-web.vercel.app").replace(/\/$/, "");
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://slingr.vercel.app").replace(/\/$/, "");
 
 export default function robots(): MetadataRoute.Robots {
   return {

@@ -1,7 +1,16 @@
 // lib/stock.ts
 // Skladovost uložená v Upstash Redis — spravovaná přímo z admin panelu.
+//
+// SETY: produkt s vyplněným `bundle` (viz lib/products.ts) vlastní skladové
+// pole v Redisu NEMÁ. Jeho dostupnost se dopočítá z komponent a do mapy se
+// vloží jako virtuální pole `set-slug|-|-` — díky tomu všechna čtecí místa
+// (homepage, kategorie, detail produktu, /api/stock, košík, admin) vidí set
+// jako běžný produkt se skladem a nemusela se kvůli setům měnit.
+// Zápis jde opačnou cestou: sklad setu se ukládat nedá (setStock ho odmítne)
+// a objednaný set se při odečtu rozpadne na komponenty.
 import { getRedis } from "./redis";
 import { getWatchersForFields, notifyAndRemove } from "./stockWatch";
+import { bundles, getBundleStock, getProductBySlug, isBundle, expandBundle } from "./products";
 
 export type StockKey = {
   slug: string;
@@ -36,11 +45,27 @@ async function fetchFromRedis(): Promise<StockMap> {
   return map;
 }
 
+/**
+ * Doplní do mapy virtuální skladová pole setů, dopočítaná z komponent.
+ *
+ * Komponenta se hledá pod svým bezvariantním klíčem `slug|-|-`. Kdyby někdy
+ * do setu šel produkt s barvami/velikostmi, vyjde tenhle lookup na 0 a set se
+ * bude tvářit jako vyprodaný — tedy raději neprodáme, než abychom slíbili
+ * kombinaci, kterou nemáme. V takovou chvíli musí `bundle` nést i variantu.
+ */
+function withBundleStock(map: StockMap): StockMap {
+  for (const bundle of bundles) {
+    const available = getBundleStock(bundle, (slug) => map.get(makeKey(slug)) ?? 0);
+    map.set(makeKey(bundle.slug), available);
+  }
+  return map;
+}
+
 export async function getStockMap(): Promise<StockMap> {
   const now = Date.now();
   if (cache && now - cacheTime < CACHE_TTL) return cache;
 
-  cache = await fetchFromRedis();
+  cache = withBundleStock(await fetchFromRedis());
   cacheTime = now;
   return cache;
 }
@@ -101,7 +126,18 @@ async function notifyRestocked(restockedFields: string[]): Promise<void> {
 
 // ── Zápis skladu z admin panelu ──────────────────────────────────────────────
 
+/** Sklad setu je dopočítaný z komponent — uložit ho nejde. */
+function isBundleSlug(slug: string): boolean {
+  const product = getProductBySlug(slug);
+  return !!product && isBundle(product);
+}
+
 export async function setStock(key: StockKey, value: number): Promise<void> {
+  if (isBundleSlug(key.slug)) {
+    console.warn(`Sklad setu ${key.slug} se neukládá — dopočítává se z komponent.`);
+    return;
+  }
+
   const redis = getRedis();
   const field = makeKey(key.slug, key.color, key.size);
   const safeValue = Math.max(0, Math.floor(value));
@@ -113,7 +149,9 @@ export async function setStock(key: StockKey, value: number): Promise<void> {
 
   await redis.hset(HASH_KEY, { [field]: safeValue });
 
-  if (cache) cache.set(field, safeValue);
+  // Celá cache pryč, ne jen dotčené pole: změna komponenty mění i dopočítaný
+  // sklad každého setu, který ji obsahuje.
+  cache = null;
 
   if (previous === 0 && safeValue > 0) await notifyRestocked([field]);
 }
@@ -129,22 +167,21 @@ export async function setStockBulk(
   const fields: Record<string, number> = {};
 
   for (const { key, value } of entries) {
+    if (isBundleSlug(key.slug)) continue; // sklad setu se nedopisuje, dopočítá se
     const field = makeKey(key.slug, key.color, key.size);
     fields[field] = Math.max(0, Math.floor(value));
   }
 
   const names = Object.keys(fields);
+  if (names.length === 0) return;
 
   // Staré hodnoty jedním HMGET — kvůli rozpoznání přechodu 0 → N, viz setStock.
   const previous = await redis.hmget<Record<string, number | string>>(HASH_KEY, ...names);
 
   await redis.hset(HASH_KEY, fields);
 
-  if (cache) {
-    for (const [field, value] of Object.entries(fields)) {
-      cache.set(field, value);
-    }
-  }
+  // Viz setStock — dopočítaný sklad setů se mohl posunout, cache musí pryč celá.
+  cache = null;
 
   const restocked = names.filter(
     (field) => (Number(previous?.[field]) || 0) === 0 && fields[field] > 0,
@@ -164,6 +201,30 @@ export type StockDeductionItem = {
   quantity: number;
   stockKey?: string | string[]; // "color|size" — stejný formát jako CartItem.stockKey
 };
+
+/**
+ * Nahradí objednané sety jejich komponentami. Set žádné skladové pole nemá,
+ * takže bez tohohle kroku by se odečet pokusil sáhnout na `set-slug|-|-`,
+ * našel by nulu a objednávku by označil jako nedostatkovou.
+ *
+ * Množství se násobí: 2 ks setu, který obsahuje 2 balení míčků, odečtou 4
+ * balení. Komponenty dnes varianty nemají, proto pevný klíč "-|-".
+ */
+function expandBundlesForStock(items: StockDeductionItem[]): StockDeductionItem[] {
+  const expanded: StockDeductionItem[] = [];
+
+  for (const item of items) {
+    if (!isBundleSlug(item.slug)) {
+      expanded.push(item);
+      continue;
+    }
+    for (const part of expandBundle(item.slug, item.quantity)) {
+      expanded.push({ slug: part.slug, quantity: part.quantity, stockKey: "-|-" });
+    }
+  }
+
+  return expanded;
+}
 
 // Atomický check-and-decrement: buď mají všechna pole dost skladu a všechna se
 // odečtou, nebo se nesáhne na nic a vrátí se seznam nedostatkových polí.
@@ -197,7 +258,7 @@ export async function restockItems(items: StockDeductionItem[]): Promise<void> {
   const redis = getRedis();
   const totals = new Map<string, number>();
 
-  for (const item of items) {
+  for (const item of expandBundlesForStock(items)) {
     if (!item.stockKey) continue;
     const keys = Array.isArray(item.stockKey) ? item.stockKey : [item.stockKey];
     for (const keyPart of keys) {
@@ -238,7 +299,7 @@ export async function deductStockForItems(
   // barvu s jinou — proto agregujeme přes Map, ne jen naivně pushujeme).
   const totals = new Map<string, number>();
 
-  for (const item of items) {
+  for (const item of expandBundlesForStock(items)) {
     if (!item.stockKey) continue; // produkt bez variant nemá sklad podle klíče — nic neodečítáme
     const keys = Array.isArray(item.stockKey) ? item.stockKey : [item.stockKey];
     for (const keyPart of keys) {

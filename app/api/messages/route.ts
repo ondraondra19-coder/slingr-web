@@ -10,11 +10,11 @@ import { NextResponse } from "next/server";
 import { addMessage, checkAndSetCooldown, type MessageSource } from "@/lib/messages";
 import { sendNewMessageAdminEmail } from "@/lib/email";
 import { getClientIp } from "@/lib/clientIp";
+import { isValidEmail } from "@/lib/emailValidation";
 
 const MAX_TEXT_LENGTH = 1000;
 const MAX_NAME_LENGTH = 80;
 const MAX_EMAIL_LENGTH = 150;
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export type MessagesErrorCode =
   | "invalid_name"
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       typeof email !== "string" ||
       !email.trim() ||
       email.trim().length > MAX_EMAIL_LENGTH ||
-      !EMAIL_REGEX.test(email.trim())
+      !isValidEmail(email.trim())
     ) {
       return fail("invalid_email", "Neplatný email.", 400);
     }

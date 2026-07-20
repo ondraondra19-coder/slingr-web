@@ -178,7 +178,7 @@
     "claims": "Reklamace",
     "shippingPayment": "Doprava a platba",
     "faq": "FAQ",
-    "aboutHackpack": "O nás",
+    "aboutUs": "O nás",
     "blog": "Blog",
     "contact": "Kontakt",
     "trustExpedition": "Expedice do 24 h",
@@ -229,43 +229,10 @@
     "stockLow": "Poslední kusy",
     "stockOk": "Skladem"
   },
-  "featured": {
-    "eyebrow": "Výběr pro vás",
-    "title": "Nejvýhodnější produkty",
-    "prev": "Předchozí produkty",
-    "next": "Další produkty",
-    "pagination": "Stránkování produktů",
-    "showGroup": "Zobrazit produkty {n}. skupiny z {total}"
-  },
   "videohero": {
     "headline": "Nabij a spusť palbu",
     "sub": "Praky na míčky i vodní balónky, zábava pro jednoho i více dětí.",
     "cta": "Prohlédnout zbraně"
-  },
-  "slider": {
-    "prev": "Předchozí slide",
-    "next": "Další slide",
-    "chooseSlide": "Výběr slidu",
-    "s1Label": "Bestseller",
-    "s1Headline": "Silikonové pouzdro",
-    "s1Accent": "na Apple Pencil",
-    "s1Sub": "Pro i USB-C verze. Výběr ze 7 barev, vlastní barevná kombinace.",
-    "s1Cta": "Vybrat barvu",
-    "s2Label": "Novinka",
-    "s2Headline": "MagSafe",
-    "s2Accent": "peněženka",
-    "s2Sub": "Prémiová kůže. Silné magnety. Pojme až 3 karty.",
-    "s2Cta": "Koupit nyní",
-    "s3Label": "Doporučujeme",
-    "s3Headline": "Magnetická folie",
-    "s3Accent": "na iPad",
-    "s3Sub": "Simuluje pocit psaní na papír. Kompatibilní s Apple Pencil.",
-    "s3Cta": "Prozkoumat",
-    "s4Label": "Tip na dárek",
-    "s4Headline": "Silikonový řemínek",
-    "s4Accent": "na Apple Watch",
-    "s4Sub": "Sportovní design. 5 barev. Velikosti 38–45 mm.",
-    "s4Cta": "Vybrat velikost"
   },
   "chat": {
     "title": "Máš dotaz?",
@@ -888,5 +855,28 @@
     "showDetails": "Zobrazit detaily",
     "acceptAll": "Povolit vše",
     "rejectAll": "Odmítnout vše"
+  },
+  "welcomeDiscount": {
+    "dialogLabel": "Uvítací sleva",
+    "title": "Získej {percent} % slevu!",
+    "desc": "Nech nám e-mail a slevový kód na první nákup ti hned pošleme.",
+    "emailPlaceholder": "tvuj@email.cz",
+    "emailLabel": "E-mail pro zaslání slevového kódu",
+    "submit": "Chci slevu",
+    "sending": "Odesílám…",
+    "consent": "Zadáním e-mailu souhlasíš s odběrem novinek. Odhlásit se můžeš kdykoliv.",
+    "privacyLink": "Ochrana osobních údajů",
+    "successTitle": "Kód je na cestě!",
+    "successDesc": "Slevový kód jsme právě poslali na tvůj e-mail. Uplatníš ho v košíku.",
+    "startShopping": "Jdu nakupovat",
+    "bubble": "Sleva {percent} %",
+    "close": "Zavřít",
+    "errorInvalidEmail": "Zadejte platný e-mail",
+    "errorRateLimited": "Příliš mnoho pokusů. Zkuste to prosím později.",
+    "errorUnavailable": "Akce zatím není k dispozici.",
+    "errorFailed": "Nepodařilo se slevu přidělit. Zkuste to prosím znovu.",
+    "errorNetwork": "Nepodařilo se slevu přidělit. Zkontrolujte připojení.",
+    "successSpamNote": "Nepřišel do pár minut? Mrkni do spamu nebo hromadné pošty.",
+    "errorSendFailed": "E-mail se nepodařilo odeslat. Zkontroluj adresu a zkus to znovu."
   }
 }

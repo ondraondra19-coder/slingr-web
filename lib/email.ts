@@ -17,7 +17,7 @@ const SUPPORT_EMAIL = UDAJE.email;
 // Kam chodí interní upozornění (nová zpráva, nová reklamace). Zatím shodné se
 // SUPPORT_EMAIL — až bude potřeba jiná adresa, stačí sáhnout sem.
 const ADMIN_EMAIL = SUPPORT_EMAIL;
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://hackpack-web.vercel.app").replace(/\/$/, "");
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://slingr.vercel.app").replace(/\/$/, "");
 // Jasný tyrkys — pozadí tlačítek (s tmavým textem) a akcenty na tmavém pozadí.
 const BRAND_COLOR = "#28bfa6";
 // Tmavý tyrkys — text na SVĚTLÉM pozadí (odkazy, částky). Jasný tyrkys má na
@@ -505,6 +505,49 @@ export async function sendBackInStockEmail(params: {
 }): Promise<boolean> {
   const { to, ...rest } = params;
   const { subject, html } = renderBackInStockEmail(rest);
+  return send(to, subject, html);
+}
+
+// ── 5c) Uvítací sleva za e-mail ─────────────────────────────────────────────
+// Posílá se z /api/welcome-discount po zadání e-mailu v uvítacím popupu.
+// Kód zákazník vidí i rovnou v popupu — tenhle mail je záloha, aby mu
+// nezmizel se zavřením okna.
+
+export function renderWelcomeDiscountEmail(params: { code: string; percent: number }): {
+  subject: string;
+  html: string;
+} {
+  const { code, percent } = params;
+
+  const html = layout(
+    `Tvůj slevový kód na ${percent} %`,
+    `
+    ${h1(`Tady je tvoje sleva ${percent} %! 🎯`)}
+    ${p("Díky, že jsi u toho s námi. Kód níže platí na celý nákup a uplatníš ho v košíku.")}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+      <tr><td align="center" style="background:${BRAND_COLOR};border-radius:12px;padding:20px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${DARK};opacity:0.7;">Slevový kód</div>
+        <div style="font-size:30px;font-weight:800;letter-spacing:0.08em;color:${DARK};padding-top:6px;">${esc(code)}</div>
+      </td></tr>
+    </table>
+    <p style="margin:0 0 20px;">
+      <a href="${SITE_URL}" style="display:inline-block;background:${DARK};color:#ffffff;font-weight:800;font-size:13px;padding:12px 20px;border-radius:10px;text-decoration:none;">Jdu nakupovat</a>
+    </p>
+    <p style="margin:0;font-size:11px;color:#9ca3af;line-height:1.6;">
+      Kód zadáš v košíku do pole „Slevový kód“. Zároveň jsme tě přihlásili k odběru novinek — odhlásit se můžeš kdykoliv odkazem v patičce každého newsletteru.
+    </p>
+    `,
+  );
+  return { subject: `Tvůj slevový kód na ${percent} % — SLINGR`, html };
+}
+
+export async function sendWelcomeDiscountEmail(params: {
+  to: string;
+  code: string;
+  percent: number;
+}): Promise<boolean> {
+  const { to, ...rest } = params;
+  const { subject, html } = renderWelcomeDiscountEmail(rest);
   return send(to, subject, html);
 }
 

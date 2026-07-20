@@ -33,8 +33,8 @@ export default async function ProduktPage({
     ? product.related.map((s) => products.find((p) => p.slug === s)).filter((p): p is typeof product => !!p).slice(0, 4)
     : products.filter((p) => p.slug !== product.slug && p.categories.some((c) => product.categories.includes(c))).slice(0, 4);
 
-  // Fetchni skladovost pro tento produkt ze Sheets
-  // Vrátí objekt jako: { "black|airpods-1-2": 12, "grey|-": 0, ... }
+  // Fetchni skladovost pro tento produkt z Redisu
+  // Vrátí objekt jako: { "black|-": 12, "red|-": 0, ... }
   const stockData = await getProductStock(slug);
 
   return (

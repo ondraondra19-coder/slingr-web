@@ -54,7 +54,7 @@ export default function Footer() {
     {
       heading: t("headingAbout"),
       links: [
-        { label: t("aboutHackpack"), href: "/o-nas"   },
+        { label: t("aboutUs"), href: "/o-nas"   },
         { label: t("blog"),          href: "/blog"    },
         { label: t("contact"),       href: "/kontakt" },
       ],

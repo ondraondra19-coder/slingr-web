@@ -515,9 +515,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1784536261.5203807,
-    "ast_hash": "453ef74902fb4a57294f2af55e18c815",
-    "semantic_hash": ""
+    "mtime": 1773679504.9211333,
+    "ast_hash": "f15aaa42d5d299d091b1171097ea56ad",
+    "semantic_hash": "f15aaa42d5d299d091b1171097ea56ad"
   },
   ".claude/settings.json": {
     "mtime": 1783856257.5112374,

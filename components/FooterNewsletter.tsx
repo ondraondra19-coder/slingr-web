@@ -10,6 +10,7 @@
 import { useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import { useT } from "@/lib/useT";
+import { isValidEmail } from "@/lib/emailValidation";
 
 export default function Newsletter() {
   const t = useT("footer");
@@ -34,7 +35,7 @@ export default function Newsletter() {
 
   async function handleSubmit() {
     if (loading) return;
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!isValidEmail(email)) {
       setError(t("emailError"));
       return;
     }

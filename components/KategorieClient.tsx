@@ -32,7 +32,7 @@ const TILE_STYLE: React.CSSProperties = {
 
 function anyInStock(product: Product, stockData: Record<string, Record<string, number>>): boolean {
   const sd = stockData[product.slug];
-  // Pokud máme Sheets data pro tento produkt
+  // Pokud máme skladová data pro tento produkt
   if (sd && Object.keys(sd).length > 0) {
     return Object.values(sd).some(v => v > 0);
   }

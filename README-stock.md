@@ -1,149 +1,123 @@
-# Skladovost přes Google Sheets — návod k nastavení
+# Skladovost — jak funguje
 
-## 1. Vytvoř Google Sheet
+Skladové zásoby žijí v **Upstash Redis** a spravují se z **admin panelu**
+(`/admin` → Produkty). Žádný externí sheet ani ruční import — hodnoty se edituji
+přímo ve webovém rozhraní a projeví se okamžitě.
 
-Název listu musí být přesně: **Sklad**
-
-### Struktura (první řádek = hlavička, data od řádku 2):
-
-| A — slug | B — color | C — size | D — stock |
-|---|---|---|---|
-| pouzdro-airpods | black | airpods-1-2 | 12 |
-| pouzdro-airpods | black | airpods-3 | 8 |
-| pouzdro-airpods | black | airpods-4 | 3 |
-| pouzdro-airpods | black | airpods-pro-2 | 0 |
-| pouzdro-airpods | grey | airpods-1-2 | 5 |
-| pouzdro-airpods | grey | airpods-3 | 11 |
-| silikonovy-reminek-apple-watch | darkblue | watch-small | 7 |
-| silikonovy-reminek-apple-watch | darkblue | watch-large | 4 |
-| silikonovy-reminek-apple-watch | pink | watch-small | 2 |
-| cistič-displeje | bila | - | 9 |
-| organizer-kabely | - | - | 14 |
-
-### Pravidla pro hodnoty:
-- **slug** = přesně jako v `products.ts`
-- **color** = value z `colors[]` v products.ts (např. `black`, `bila`, `darkblue`)
-- **size** = value z `sizes[]` v products.ts (např. `watch-small`, `airpods-1-2`)
-- Pokud produkt **nemá barvy** → B = `-`
-- Pokud produkt **nemá velikosti** → C = `-`
-- **stock** = číslo (0 = není skladem)
+> Dřív tenhle projekt tahal sklad z Google Sheets. Ta cesta je pryč, v kódu po ní
+> nezůstalo nic. Pokud v nějakém starším návodu narazíš na `GOOGLE_SHEET_ID`,
+> je to neplatné.
 
 ---
 
-## 2. Google Sheets API klíč (pro veřejný sheet)
+## 1. Kde jsou data
 
-Nejjednodušší varianta — sheet je veřejně čitelný:
+Vše sedí v jediném Redis hashi `stock:map`. Klíč jednoho pole má tvar:
 
-1. Jdi na [console.cloud.google.com](https://console.cloud.google.com)
-2. Vytvoř projekt (nebo vyber existující)
-3. Povol **Google Sheets API**: APIs & Services → Enable APIs → "Google Sheets API"
-4. Vytvoř API klíč: APIs & Services → Credentials → Create Credentials → API key
-5. Sheet nasdílej jako "Anyone with the link can view"
-
----
-
-## 3. (Alternativa) Service Account pro soukromý sheet
-
-Pokud nechceš sheet sdílet veřejně:
-
-1. APIs & Services → Credentials → Create Credentials → **Service account**
-2. Stáhni JSON klíč
-3. Sheet nasdílej s e-mailem service accountu (ten vypadá jako `xxx@projekt.iam.gserviceaccount.com`)
-4. V kódu `stock.ts` nahraď fetch za autentizaci přes `google-auth-library`:
-
-```bash
-npm install google-auth-library
+```
+slug|color|size
 ```
 
-```typescript
-import { GoogleAuth } from "google-auth-library";
+Pokud produkt nemá barvy nebo velikosti, dá se na dané místo `-`:
 
-const auth = new GoogleAuth({
-  credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON!),
-  scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
-});
+| klíč | význam | množství |
+|---|---|---|
+| `prak-x1\|black\|-` | prak X1, černý, bez velikostí | 12 |
+| `prak-x1\|red\|-` | prak X1, červený | 3 |
+| `micky-do-praku\|-\|-` | mičky, bez variant | 140 |
+| `terc\|-\|-` | terč | 0 |
 
-const client = await auth.getClient();
-const token = await client.getAccessToken();
-
-const res = await fetch(url, {
-  headers: { Authorization: `Bearer ${token.token}` },
-});
-```
+Klíč se nikdy neskládá ručně — na to je `makeKey(slug, color, size)`.
 
 ---
 
-## 4. Environment variables
+## 2. Sety (bundly)
 
-Přidej do `.env.local`:
+Produkt s vyplněným `bundle` v `lib/products.ts` **vlastní skladové pole nemá**.
+Jeho dostupnost se dopočítá z komponent a do mapy se vloží jako virtuální pole
+`set-slug|-|-`.
+
+Díky tomu všechna čtecí místa (homepage, kategorie, detail produktu,
+`/api/stock`, košík, admin) vidí set jako běžný produkt se skladem a nemusela se
+kvůli setům nijak upravovat.
+
+Zápis jde opačnou cestou:
+
+- sklad setu se uložit **nedá** — `setStock()` ho odmítne
+- objednaný set se při odečtu **rozpadne na komponenty**
+
+---
+
+## 3. Environment variables
+
+Do `.env.local` patří přístup k Upstash Redis:
 
 ```env
-GOOGLE_SHEET_ID=1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms
-GOOGLE_SHEETS_API_KEY=AIzaSy...
-```
-
-Sheet ID najdeš v URL sheetu:
-`https://docs.google.com/spreadsheets/d/`**`[TOTO JE SHEET_ID]`**`/edit`
-
----
-
-## 5. Soubory do projektu
-
-Zkopíruj tyto soubory:
-
-```
-lib/stock.ts                    ← hlavní logika (fetch + cache)
-app/produkt/[slug]/page.tsx     ← server component s getProductStock()
-app/api/stock/route.ts          ← API endpoint (volitelné, pro client refresh)
-components/ProduktClient.tsx    ← přijímá stockData prop
+UPSTASH_REDIS_REST_URL=https://....upstash.io
+UPSTASH_REDIS_REST_TOKEN=...
 ```
 
 ---
 
-## 6. Jak to funguje
+## 4. API (`lib/stock.ts`)
+
+### Čtení
+
+| funkce | k čemu |
+|---|---|
+| `getStockMap()` | celá mapa skladu jako `Map<string, number>` |
+| `getStock(key)` | množství pro jednu kombinaci `{ slug, color?, size? }` |
+| `getProductStock(slug)` | všechna pole jednoho produktu: `{ "black\|-": 12, ... }` |
+| `lookupStock(stockData, color, size)` | vytáhne číslo z výsledku `getProductStock` na klientu |
+
+### Zápis
+
+| funkce | k čemu |
+|---|---|
+| `setStock(key, value)` | nastaví jedno pole (sety odmítne) |
+| `setStockBulk(...)` | hromadná změna z admin panelu |
+| `deductStockForItems(items)` | odečte po zaplacení objednávky; sety rozpadne na komponenty |
+| `restockItems(items)` | vrátí zpět při stornu / vrácení |
+
+---
+
+## 5. Cache
+
+`lib/stock.ts` drží krátkou in-memory cache s `CACHE_TTL = 30 s`. Je to jen
+vyhlazení v rámci jedné serverless instance — na Vercelu se mezi jednotlivými
+invokacemi spolehnout nedá, ale v rámci jednoho běhu ušetří opakované dotazy.
+
+Zápisové funkce cache samy invalidují, takže změna z adminu je vidět hned.
+
+---
+
+## 6. Tok dat
 
 ```
 Zákazník otevře stránku produktu
         ↓
-Next.js Server Component (page.tsx)
+Next.js Server Component (app/produkt/[slug]/page.tsx)
         ↓
-getProductStock("pouzdro-airpods")
+getProductStock("prak-x1")
         ↓
-Google Sheets API (cachováno 3 min)
+Upstash Redis  (hash stock:map, cache 30 s)
         ↓
-{ "black|airpods-1-2": 12, "grey|-": 0, ... }
+{ "black|-": 12, "red|-": 0, ... }
         ↓
 ProduktClient (client component)
         ↓
-lookupStock(stockData, "black", "airpods-1-2") → 12
+lookupStock(stockData, "black", undefined) → 12
         ↓
-StockBadge zobrazí "Skladem (5+ ks)" / "Poslední 3 kusy" / "Není skladem"
+StockBadge → "Skladem" / "Poslední kusy" / "Není skladem"
 ```
 
 ---
 
-## 7. Jak editovat skladovost
+## 7. Hlídací pes (`lib/stockWatch.ts`)
 
-Jednoduše otevřeš Google Sheet a změníš číslo ve sloupci D.
-Změna se projeví na webu do **3 minut** (cache TTL).
+Když je produkt vyprodaný, zákazník si může nechat poslat e-mail, až naskladníš.
+Zájemci se ukládají k danému skladovému poli; jakmile se pole dostane nad nulu,
+`setStock` / `setStockBulk` je zavolá přes `notifyAndRemove()` a po odeslání
+smaže.
 
-Pro okamžitou aktualizaci bez čekání na cache:
-- V `stock.ts` změň `CACHE_TTL = 0` (vypne cache)
-- Nebo nastav `revalidate = 0` v `page.tsx`
-
----
-
-## 8. Přidání nového produktu / kombinace
-
-Přidej nový řádek do sheetu. Pořadí řádků nehraje roli.
-
-Příklad — nový produkt "Silikonový kryt na iPhone" s 3 barvami a 2 modely = 6 řádků:
-
-| slug | color | size | stock |
-|---|---|---|---|
-| kryt-iphone-silikon | black | iphone15 | 8 |
-| kryt-iphone-silikon | black | iphone15pro | 5 |
-| kryt-iphone-silikon | blue | iphone15 | 3 |
-| kryt-iphone-silikon | blue | iphone15pro | 0 |
-| kryt-iphone-silikon | pink | iphone15 | 12 |
-| kryt-iphone-silikon | pink | iphone15pro | 7 |
+Endpoint pro přihlášení k hlídání: `app/api/stock/notify`.

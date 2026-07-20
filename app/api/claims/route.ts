@@ -15,13 +15,13 @@ import {
 } from "@/lib/claims";
 import { sendClaimAdminEmail, sendClaimConfirmationEmail } from "@/lib/email";
 import { getClientIp } from "@/lib/clientIp";
+import { isValidEmail } from "@/lib/emailValidation";
 
 const MAX_NAME_LENGTH = 80;
 const MAX_EMAIL_LENGTH = 150;
 const MAX_PHONE_LENGTH = 40;
 const MAX_ORDER_LENGTH = 40;
 const MAX_DESC_LENGTH = 2000;
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export type ClaimsErrorCode =
   | "invalid_name"
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     if (!isFilled(jmeno, MAX_NAME_LENGTH)) {
       return fail("invalid_name", "Neplatné jméno.", 400);
     }
-    if (!isFilled(email, MAX_EMAIL_LENGTH) || !EMAIL_REGEX.test(email.trim())) {
+    if (!isFilled(email, MAX_EMAIL_LENGTH) || !isValidEmail(email.trim())) {
       return fail("invalid_email", "Neplatný e-mail.", 400);
     }
     if (!isFilled(telefon, MAX_PHONE_LENGTH)) {

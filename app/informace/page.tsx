@@ -18,6 +18,7 @@ import { DOBIRKA_FEE } from "@/lib/fees";
 import { trackEvent } from "@/lib/analytics";
 import { COUNTRY_CZECHIA, COUNTRY_SLOVAKIA } from "@/lib/shipping/pricing";
 import { useT } from "@/lib/useT";
+import { isValidEmail } from "@/lib/emailValidation";
 import { shippingLabel } from "@/lib/shippingLabels";
 import CheckoutStepper from "@/components/CheckoutStepper";
 
@@ -629,7 +630,7 @@ export default function InformacePage() {
     if (!form.jmeno.trim()) e.jmeno = t("errName");
     else if (!isCorrectNameFormat(form.jmeno)) e.jmeno = t("errNameFormat");
     if (!form.email.trim()) e.email = t("errEmail");
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = t("errEmailFormat");
+    else if (!isValidEmail(form.email)) e.email = t("errEmailFormat");
     if (form.telefon.replace(/\D/g, "").length !== 9) e.telefon = t("errPhone");
 
     // Fakturační adresa — RÚIAN confirmed NENÍ povinné, stačí vyplnit pole

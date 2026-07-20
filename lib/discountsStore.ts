@@ -13,18 +13,28 @@ import {
   type DiscountCartItem,
   type ResolvedDiscount,
 } from "./discounts";
+import {
+  WELCOME_DISCOUNT_CODE,
+  WELCOME_DISCOUNT_LABEL,
+  WELCOME_DISCOUNT_PERCENT,
+} from "./welcomeDiscount";
 
 const LIST_KEY = "discounts:list";
 
 // Kódy, které dřív žily natvrdo v kódu — naplní se do Redisu při prvním
 // čtení, ať přechodem na Redis nezmizí z fungujícího webu.
+//
+// POZOR: slugy v `active` musí existovat v lib/products.ts, jinak kód nikdy
+// neprojde — způsobilé položky se nikdy nenajdou a sleva tiše vyjde na nulu.
+// (VITEJ10 takhle mířil na `nahradni-hroty-apple-pencil` z původního tech
+// e-shopu, který v katalogu praků už neexistuje.)
 const DEFAULT_DISCOUNTS: Omit<Discount, "id" | "createdAt">[] = [
   {
     code: "VITEJ10",
     type: "percent",
     value: 10,
     label: "Uvítací sleva 10 %",
-    active: ["nahradni-hroty-apple-pencil"],
+    active: ["prak-x1"],
   },
   {
     code: "LETO2025",
@@ -76,6 +86,30 @@ export async function findDiscount(code: string | null | undefined): Promise<Dis
   const discounts = await getAllDiscounts();
   const target = code.trim().toUpperCase();
   return discounts.find((d) => d.code.toUpperCase() === target && isActive(d));
+}
+
+/**
+ * Zajistí, že kód uvítací slevy z popupu (lib/welcomeDiscount.ts) v Redisu
+ * existuje — jinak by popup rozdával kód, který v košíku neprojde.
+ *
+ * Zakládá se jen když kód ÚPLNĚ chybí. Hledá se napříč všemi kódy, ne přes
+ * findDiscount(), protože ten vrací jen aktivní: kdyby se kód v adminu vypnul,
+ * findDiscount by ho neviděl a tahle funkce by ho založila znovu jako duplicit.
+ * Vypnutý kód se tedy vrátí tak jak je — kdo ho v adminu vypne, musí vypnout
+ * i popup, jinak bude rozdávat neplatnou slevu.
+ */
+export async function ensureWelcomeDiscount(): Promise<Discount> {
+  const all = await getAllDiscounts();
+  const existing = all.find((d) => d.code.toUpperCase() === WELCOME_DISCOUNT_CODE.toUpperCase());
+  if (existing) return existing;
+
+  return addDiscount({
+    code: WELCOME_DISCOUNT_CODE,
+    type: "percent",
+    value: WELCOME_DISCOUNT_PERCENT,
+    label: WELCOME_DISCOUNT_LABEL,
+    active: true,
+  });
 }
 
 export type NewDiscountInput = {

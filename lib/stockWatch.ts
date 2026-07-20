@@ -14,6 +14,7 @@
 import { createHash } from "crypto";
 import { getRedis } from "./redis";
 import { getProductBySlug } from "./products";
+import { isValidEmail } from "./emailValidation";
 import { sendBackInStockEmail } from "./email";
 
 export type StockWatcher = {
@@ -51,7 +52,7 @@ export function isValidWatchEmail(email: unknown): email is string {
     typeof email === "string" &&
     email.trim().length > 0 &&
     email.trim().length <= 150 &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+    isValidEmail(email.trim())
   );
 }
 

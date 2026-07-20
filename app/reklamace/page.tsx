@@ -10,6 +10,7 @@ import {
     HelpCircle, Banknote, Send, AlertCircle,
 } from "lucide-react";
 import { useT, type T } from "@/lib/useT";
+import { isValidEmail } from "@/lib/emailValidation";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
@@ -159,7 +160,7 @@ export default function ReklamaceAVraceniPage() {
         const e: Partial<Record<keyof FormState, string>> = {};
         if (!form.jmeno.trim()) e.jmeno = t("errName");
         if (!form.email.trim()) e.email = t("errEmail");
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = t("errEmailFormat");
+        else if (!isValidEmail(form.email)) e.email = t("errEmailFormat");
         if (!form.telefon.trim()) e.telefon = t("errPhone");
         if (!form.cisloObjednavky.trim()) e.cisloObjednavky = t("errOrderNumber");
         if (!form.typZadosti) e.typZadosti = t("errRequestType");

@@ -1,15 +1,14 @@
 "use client";
 
-import React, { useState, Fragment } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { getProductCombinations, type Product, type PriceValue } from "@/lib/products";
-
-function formatPrice(price: Product["price"]): string {
-  if (typeof price === "number") {
-    return `${price} Kč`;
-  }
-  return `${price.CZK} Kč`;
-}
+import {
+  getProductBySlug,
+  getProductCombinations,
+  isBundle,
+  type Product,
+  type PriceValue,
+} from "@/lib/products";
 
 // Sjednotí PriceValue (může to být holé číslo NEBO objekt {CZK,EUR,USD})
 // do plného objektu, ať se s tím v editoru pracuje jednotně.
@@ -95,8 +94,6 @@ export default function ProductsAdminList({ products, stock, discounts, initialQ
   const [currentSale, setCurrentSale] = useState<Record<string, number>>(buildInitialSale);
   const [savedSale, setSavedSale] = useState<Record<string, number>>(buildInitialSale);
 
-  const [expandedSlugs, setExpandedSlugs] = useState<Record<string, boolean>>({});
-  const [expandedSubKeys, setExpandedSubKeys] = useState<Record<string, boolean>>({});
   const [savingAll, setSavingAll] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(initialQuery ?? "");
@@ -105,14 +102,6 @@ export default function ProductsAdminList({ products, stock, discounts, initialQ
   const changedPriceKeys = Object.keys(currentPrices).filter((k) => !priceEquals(currentPrices[k], savedPrices[k]));
   const changedSaleKeys = Object.keys(currentSale).filter((k) => (currentSale[k] ?? 0) !== (savedSale[k] ?? 0));
   const changedCount = changedStockKeys.length + changedPriceKeys.length + changedSaleKeys.length;
-
-  const toggleExpand = (slug: string) => {
-    setExpandedSlugs((prev) => ({ ...prev, [slug]: !prev[slug] }));
-  };
-
-  const toggleSubExpand = (subKey: string) => {
-    setExpandedSubKeys((prev) => ({ ...prev, [subKey]: !prev[subKey] }));
-  };
 
   const handleStockChange = (key: string, value: number) => {
     setCurrentStock((prev) => ({
@@ -220,6 +209,26 @@ export default function ProductsAdminList({ products, stock, discounts, initialQ
   const renderVariantControls = (comboKey: string) => {
     const currentQty = currentStock[comboKey] ?? 0;
     const hasChanged = currentQty !== (savedStock[comboKey] ?? 0);
+
+    // Sklad setu se needituje — dopočítává se z komponent (lib/stock.ts).
+    // Ukazujeme ho jen pro čtení, ať je vidět, kolik setů zrovna jde složit;
+    // server by zápis stejně zahodil a editovatelné pole by jen mátlo.
+    const slug = comboKey.split("|")[0];
+    const product = getProductBySlug(slug);
+    if (product && isBundle(product)) {
+      const parts = product.bundle!.map((b) => `${b.quantity}× ${b.slug}`).join(" + ");
+      return (
+        <div className="flex items-center space-x-4" onClick={(e) => e.stopPropagation()}>
+          <div
+            title={`Dopočítáno ze skladu komponent: ${parts}`}
+            className="flex items-center gap-1.5 border border-dashed border-zinc-300 rounded-lg px-2.5 py-1 bg-zinc-50"
+          >
+            <span className="text-xs font-bold font-mono text-zinc-700">{currentQty}</span>
+            <span className="text-[10px] text-zinc-400 font-medium">ze setu</span>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="flex items-center space-x-4" onClick={(e) => e.stopPropagation()}>
@@ -371,270 +380,69 @@ export default function ProductsAdminList({ products, stock, discounts, initialQ
           <thead>
             <tr className="border-b border-[#e5e7eb] text-[10px] uppercase tracking-wider font-bold text-zinc-400 font-mono">
               <th className="pb-3 pl-2">Produkt</th>
-              <th className="pb-3 hidden md:table-cell">Základní cena</th>
-              <th className="pb-3 text-center w-36">Počet variant</th>
-              <th className="pb-3 text-center w-36">Vyprodané var.</th>
-              <th className="pb-3 text-right pr-2">Správa</th>
+              <th className="pb-3 text-right">Cena / sleva</th>
+              <th className="pb-3 text-right pr-2 w-40">Skladem</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#e5e7eb]/60">
             {filteredProducts.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-xs text-zinc-400 font-mono">
+                <td colSpan={3} className="py-8 text-center text-xs text-zinc-400 font-mono">
                   Žádné produkty neodpovídají vyhledávání.
                 </td>
               </tr>
             ) : (
               filteredProducts.map((product) => {
-                const combos = getProductCombinations(product);
-                const isExpanded = !!expandedSlugs[product.slug];
+                // Katalog praků nemá barvy, velikosti ani modely — každý produkt
+                // je jediná skladová položka pod klíčem `slug|-|-`, takže se cena
+                // i sklad edituje rovnou v řádku a nic se nerozklikává.
+                const comboKey = `${product.slug}|-|-`;
+                const qty = currentStock[comboKey] ?? 0;
 
-                const emptyVariantsCount = combos.reduce((count, c) => {
-                  const key = `${product.slug}|${c.color ?? "-"}|${c.size ?? "-"}`;
-                  return (currentStock[key] ?? 0) === 0 ? count + 1 : count;
-                }, 0);
+                // Pojistka pro případ, že by někdo do katalogu vrátil varianty:
+                // řádek by editoval jen první kombinaci a zbytek by tiše zmizel,
+                // proto radši řekneme rovnou, že na tenhle produkt tabulka nestačí.
+                const hasVariants = getProductCombinations(product).length > 1;
 
                 return (
-                  <Fragment key={product.slug}>
-                    <tr 
-                      onClick={() => toggleExpand(product.slug)}
-                      className={`group cursor-pointer transition-colors ${isExpanded ? "bg-[#fcfbf9]" : "hover:bg-[#fcfbf9]/60"}`}
-                    >
-                      <td className="py-4 pl-2 flex items-center space-x-3">
+                  <tr key={product.slug} className="group hover:bg-[#fcfbf9]/60 transition-colors">
+                    <td className="py-3 pl-2">
+                      <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 rounded-lg bg-[#f1f1f3] border border-[#e5e7eb] overflow-hidden flex-shrink-0 relative">
                           <Image src={product.img} alt={product.name} fill className="object-cover" unoptimized />
                         </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-[#0f0f10] leading-tight group-hover:text-primary-ink transition-colors">
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-[#0f0f10] leading-tight truncate">
                             {product.name}
                           </h4>
-                          <span className="text-[10px] font-mono text-zinc-400 block mt-0.5">{product.slug}</span>
+                          <span className="text-[10px] font-mono text-zinc-400 block mt-0.5 truncate">
+                            {product.slug}
+                          </span>
                         </div>
-                      </td>
+                      </div>
+                    </td>
 
-                      <td className="py-4 text-xs font-semibold text-[#0f0f10] hidden md:table-cell">
-                        {formatPrice(product.price)}
-                      </td>
+                    <td className="py-3">
+                      {hasVariants ? (
+                        <div className="text-right text-[10px] font-mono text-amber-700">
+                          produkt má varianty — uprav v kódu
+                        </div>
+                      ) : (
+                        renderPriceControls(product.slug)
+                      )}
+                    </td>
 
-                      <td className="py-4 text-center text-xs font-mono font-medium text-zinc-600">
-                        {combos.length}x
-                      </td>
-
-                      <td className="py-4 text-center">
-                        <span className={`text-xs font-bold font-mono px-2 py-0.5 rounded ${
-                          emptyVariantsCount === combos.length
-                            ? "bg-rose-50 text-rose-700" 
-                            : emptyVariantsCount > 0
-                            ? "bg-amber-50 text-amber-700" 
-                            : "bg-zinc-100 text-zinc-400 font-normal" 
-                        }`}>
-                          {emptyVariantsCount} {emptyVariantsCount === 1 ? "varianta" : emptyVariantsCount >= 2 && emptyVariantsCount <= 4 ? "varianty" : "variant"}
-                        </span>
-                      </td>
-
-                      <td className="py-4 text-right pr-2">
-                        <button
-                          type="button"
-                          className="px-2.5 py-1.5 rounded-lg border border-[#e5e7eb] bg-white text-[11px] font-semibold text-zinc-600 hover:bg-[#f1f1f3] hover:text-[#0f0f10] transition-all flex items-center space-x-1 ml-auto"
-                        >
-                          <span>{isExpanded ? "Zavřít" : "Upravit sklad a cenu"}</span>
-                          <svg 
-                            className={`w-3 h-3 transform transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} 
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-
-                    {isExpanded && (
-                      <tr>
-                        <td colSpan={5} className="bg-[#fdfdfd] border-l-2 border-[#1c1c1c] p-0">
-                          <div className="px-4 py-4 bg-[#fcfbf9]/40 border-b border-[#e5e7eb]/60 space-y-4">
-
-                            {(!product.models || product.models.length === 0) && (
-                              <div className="border border-[#e5e7eb] rounded-xl bg-white shadow-sm p-3 flex items-center justify-between">
-                                <span className="text-xs font-bold text-[#0f0f10]">Základní cena</span>
-                                {renderPriceControls(product.slug)}
-                              </div>
-                            )}
-
-                            {product.models && product.models.length > 0 ? (
-                              product.models.map((model) => (
-                                <div key={model.id} className="border border-[#e5e7eb] rounded-xl bg-white overflow-hidden shadow-sm">
-                                  <div className="bg-[#f1f1f3]/50 px-3 py-2 border-b border-[#e5e7eb] flex items-center justify-between gap-3">
-                                    <span className="text-[10px] font-bold text-[#0f0f10] font-mono uppercase tracking-wider">
-                                      {model.label}
-                                    </span>
-                                    {renderPriceControls(`${product.slug}::${model.id}`)}
-                                  </div>
-                                  
-                                  <div className="divide-y divide-[#e5e7eb]/50">
-                                    {model.colors?.map((color) => {
-                                      if (model.layered) {
-                                        const subKey = `${product.slug}|${model.id}|${color.value}`;
-                                        const isSubExpanded = !!expandedSubKeys[subKey];
-                                        const bodyKey = `${product.slug}|${color.value}__body|${model.id}`;
-                                        const capKey = `${product.slug}|${color.value}__cap|${model.id}`;
-                                        
-                                        // Využití Math.min pro reálnou sestavitelnost kompletního produktu
-                                        const colorAvailable = Math.min(
-                                          currentStock[bodyKey] ?? 0,
-                                          currentStock[capKey] ?? 0
-                                        );
-
-                                        return (
-                                          <div key={color.value} className="flex flex-col">
-                                            <div 
-                                              onClick={() => toggleSubExpand(subKey)}
-                                              className="flex items-center justify-between p-3 cursor-pointer hover:bg-[#faf9f6]/40 transition-colors"
-                                            >
-                                              <div className="flex items-center space-x-2.5">
-                                                {color.hex && <span className="w-3 h-3 rounded-full border border-zinc-200" style={{ backgroundColor: color.hex }} />}
-                                                <span className="text-xs font-bold text-[#0f0f10]">{color.label}</span>
-                                              </div>
-                                              <div className="flex items-center space-x-2">
-                                                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold ${
-                                                  colorAvailable === 0 ? "bg-rose-50 text-rose-600" : "bg-zinc-100 text-zinc-600"
-                                                }`}>
-                                                  {colorAvailable} ks
-                                                </span>
-                                                <svg 
-                                                  className={`w-3 h-3 text-zinc-400 transform transition-transform duration-150 ${isSubExpanded ? "rotate-180" : ""}`} 
-                                                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}
-                                                >
-                                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                                </svg>
-                                              </div>
-                                            </div>
-
-                                            {isSubExpanded && (
-                                              <div className="bg-[#fcfbf9]/60 border-t border-[#e5e7eb]/40 divide-y divide-[#e5e7eb]/40 pl-8 pr-3 py-0.5">
-                                                <div className="flex flex-wrap items-center justify-between gap-2 py-2.5">
-                                                  <div className="space-y-0.5">
-                                                    <div className="text-xs font-semibold text-zinc-700">{color.label} — Tělo</div>
-                                                    <div className="text-[9px] font-mono text-zinc-400">{bodyKey}</div>
-                                                  </div>
-                                                  {renderVariantControls(bodyKey)}
-                                                </div>
-                                                <div className="flex flex-wrap items-center justify-between gap-2 py-2.5">
-                                                  <div className="space-y-0.5">
-                                                    <div className="text-xs font-semibold text-zinc-700">{color.label} — Hlava</div>
-                                                    <div className="text-[9px] font-mono text-zinc-400">{capKey}</div>
-                                                  </div>
-                                                  {renderVariantControls(capKey)}
-                                                </div>
-                                              </div>
-                                            )}
-                                          </div>
-                                        );
-                                      } else {
-                                        const comboKey = `${product.slug}|${color.value}|${model.id}`;
-                                        return (
-                                          <div key={color.value} className="flex flex-wrap items-center justify-between gap-2 p-3 hover:bg-[#faf9f6]/30 transition-colors">
-                                            <div className="flex items-center space-x-2.5">
-                                              {color.hex && <span className="w-3 h-3 rounded-full border border-zinc-200" style={{ backgroundColor: color.hex }} />}
-                                              <div>
-                                                <span className="text-xs font-bold text-[#0f0f10]">{color.label}</span>
-                                                <span className="text-[9px] font-mono text-zinc-400 block">{comboKey}</span>
-                                              </div>
-                                            </div>
-                                            {renderVariantControls(comboKey)}
-                                          </div>
-                                        );
-                                      }
-                                    })}
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              (() => {
-                                const hasColors = product.colors && product.colors.length > 0;
-                                const hasSizes = product.sizes && product.sizes.length > 0;
-
-                                if (hasColors && hasSizes) {
-                                  return product.sizes!.map((size) => (
-                                    <div key={size.value} className="border border-[#e5e7eb] rounded-xl bg-white overflow-hidden shadow-sm">
-                                      <div className="bg-[#f1f1f3]/50 px-3 py-2 border-b border-[#e5e7eb] text-[10px] font-bold text-[#0f0f10] font-mono uppercase tracking-wider">
-                                        {size.label}
-                                      </div>
-                                      <div className="divide-y divide-[#e5e7eb]/50">
-                                        {product.colors!.map((color) => {
-                                          const comboKey = `${product.slug}|${color.value}|${size.value}`;
-                                          return (
-                                            <div key={color.value} className="flex flex-wrap items-center justify-between gap-2 p-3 hover:bg-[#faf9f6]/30 transition-colors">
-                                              <div className="flex items-center space-x-2.5">
-                                                {color.hex && <span className="w-3 h-3 rounded-full border border-zinc-200" style={{ backgroundColor: color.hex }} />}
-                                                <div>
-                                                  <span className="text-xs font-bold text-[#0f0f10]">{color.label}</span>
-                                                  <span className="text-[9px] font-mono text-zinc-400 block">{comboKey}</span>
-                                                </div>
-                                              </div>
-                                              {renderVariantControls(comboKey)}
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
-                                  ));
-                                } else if (hasColors) {
-                                  return (
-                                    <div className="border border-[#e5e7eb] rounded-xl bg-white overflow-hidden shadow-sm divide-y divide-[#e5e7eb]/50">
-                                      {product.colors!.map((color) => {
-                                        const comboKey = `${product.slug}|${color.value}|-`;
-                                        return (
-                                          <div key={color.value} className="flex flex-wrap items-center justify-between gap-2 p-3 hover:bg-[#faf9f6]/30 transition-colors">
-                                            <div className="flex items-center space-x-2.5">
-                                              {color.hex && <span className="w-3 h-3 rounded-full border border-zinc-200" style={{ backgroundColor: color.hex }} />}
-                                              <div>
-                                                <span className="text-xs font-bold text-[#0f0f10]">{color.label}</span>
-                                                <span className="text-[9px] font-mono text-zinc-400 block">{comboKey}</span>
-                                              </div>
-                                            </div>
-                                            {renderVariantControls(comboKey)}
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  );
-                                } else if (hasSizes) {
-                                  return (
-                                    <div className="border border-[#e5e7eb] rounded-xl bg-white overflow-hidden shadow-sm divide-y divide-[#e5e7eb]/50">
-                                      {product.sizes!.map((size) => {
-                                        const comboKey = `${product.slug}|-|${size.value}`;
-                                        return (
-                                          <div key={size.value} className="flex flex-wrap items-center justify-between gap-2 p-3 hover:bg-[#faf9f6]/30 transition-colors">
-                                            <div>
-                                              <span className="text-xs font-bold text-[#0f0f10]">{size.label}</span>
-                                              <span className="text-[9px] font-mono text-zinc-400 block">{comboKey}</span>
-                                            </div>
-                                            {renderVariantControls(comboKey)}
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  );
-                                } else {
-                                  const comboKey = `${product.slug}|-|-`;
-                                  return (
-                                    <div className="border border-[#e5e7eb] rounded-xl bg-white overflow-hidden shadow-sm p-3 flex flex-wrap items-center justify-between gap-2">
-                                      <div>
-                                        <span className="text-xs font-bold text-[#0f0f10]">Základní varianta</span>
-                                        <span className="text-[9px] font-mono text-zinc-400 block">{comboKey}</span>
-                                      </div>
-                                      {renderVariantControls(comboKey)}
-                                    </div>
-                                  );
-                                }
-                              })()
-                            )}
-
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
+                    <td className="py-3 pr-2">
+                      <div className="flex items-center justify-end gap-2">
+                        {!hasVariants && qty === 0 && (
+                          <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 uppercase tracking-wider">
+                            Vyprodáno
+                          </span>
+                        )}
+                        {!hasVariants && renderVariantControls(comboKey)}
+                      </div>
+                    </td>
+                  </tr>
                 );
               })
             )}

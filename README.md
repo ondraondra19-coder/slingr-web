@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SLINGR
 
-## Getting Started
+E-shop s praky a outdoorovým battle vybavením. Next.js (App Router) +
+TypeScript + Tailwind, data v Upstash Redis, platby přes Stripe, doprava
+Zásilkovnou.
 
-First, run the development server:
+---
+
+## Spuštění
 
 ```bash
+npm install
+cp .env.local.example .env.local   # a vyplnit klíče
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Web běží na [http://localhost:3000](http://localhost:3000),
+admin na [/admin](http://localhost:3000/admin).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Které proměnné jsou povinné a co se stane bez nich je popsané přímo
+v `.env.local.example` — ten soubor je zároveň dokumentace, ne jen šablona.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Struktura
 
-To learn more about Next.js, take a look at the following resources:
+| složka | co v ní je |
+|---|---|
+| `app/` | stránky (App Router) a API routy |
+| `app/admin/` | administrace — objednávky, produkty, sklad, slevy, magazín |
+| `components/` | sdílené klientské komponenty |
+| `lib/` | doménová logika (produkty, sklad, slevy, e-maily, objednávky) |
+| `messages/` | překlady cs / en / sk |
+| `content/legal/` | obchodní podmínky, cookies, ochrana osobních údajů |
+| `graphify-out/` | vygenerovaný znalostní graf projektu (viz CLAUDE.md) |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Katalog a sklad
 
-## Deploy on Vercel
+Produkty jsou staticky v `lib/products.ts`, ceny a skladovost se přepisují
+z Redisu (admin panel). Skladová logika včetně setů/bundlů je popsaná
+v [README-stock.md](README-stock.md).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Jazyky
+
+Web běží ve třech jazycích (cs / en / sk) přes `next-intl`. Klíče musí
+existovat ve všech třech souborech v `messages/` — výjimkou jsou tvary
+`*_few`, které mají jen čeština a slovenština (množné číslo pro 2–4).
+
+---
+
+## Kontrola před nasazením
+
+```bash
+npx tsc --noEmit             # typy
+npx eslint . --ext .ts,.tsx  # lint
+npx next build               # produkční build
+```
+
+Po zásahu do kódu je dobré osvěžit znalostní graf:
+
+```bash
+graphify update .
+```

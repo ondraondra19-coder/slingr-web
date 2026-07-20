@@ -683,7 +683,7 @@ export default function ProduktClient({
     }, 0);
   }
 
-  // Polling skladu ze Sheets — jednoduchý, bez Redis, bez rezervací
+  // Polling skladu z /api/stock — jednoduchý, bez rezervací
   const { stockData: liveStockData, loading: stockLoading } = useStockPolling(product.slug);
 
   // Skutečný celkový strop pro tuto variantu = reálný sklad minus to, co si

@@ -107,19 +107,7 @@ export function clearConsent(): void {
   notifyChanged();
 }
 
-// ── Zobrazení lišty ─────────────────────────────────────────────────────────
-
-export function markDetailsVisited(): void {
-  try {
-    sessionStorage.setItem(CONSENT_SESSION_KEY, "true");
-  } catch {}
-}
-
-export function hasVisitedDetails(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return sessionStorage.getItem(CONSENT_SESSION_KEY) === "true";
-  } catch {
-    return false;
-  }
-}
+// CONSENT_SESSION_KEY je pozůstatek po dvojím vzhledu lišty (jinak vypadala
+// před návštěvou /cookies a jinak po ní). Lišta má dnes jeden vzhled, klíč se
+// už nikde nezapisuje — mažeme ho jen proto, aby po vracejících se
+// návštěvnících nezůstával viset v sessionStorage.

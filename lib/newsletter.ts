@@ -6,9 +6,7 @@
 // Odhlašování neřešíme tady: Resend do každého Broadcastu vloží unsubscribe
 // odkaz/hlavičky a odhlášené kontakty z rozesílky sám vynechá.
 import { Resend } from "resend";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MAX_EMAIL_LENGTH = 150;
+import { isValidEmail } from "./emailValidation";
 
 // Přidávání kontaktů (contacts API) vyžaduje klíč s "Full access" — odesílací
 // (sending-only) klíč Resend odmítne s 401 "restricted_api_key". Proto tu
@@ -35,11 +33,9 @@ export type SubscribeResult =
   | { ok: true }
   | { ok: false; reason: "invalid" | "not_configured" | "error" };
 
-export function isValidNewsletterEmail(email: unknown): email is string {
-  if (typeof email !== "string") return false;
-  const trimmed = email.trim();
-  return trimmed.length > 0 && trimmed.length <= MAX_EMAIL_LENGTH && EMAIL_REGEX.test(trimmed);
-}
+// Zůstává jako jméno používané API routami; pravidla žijí v lib/emailValidation.ts,
+// aby klient i server posuzovaly adresu úplně stejně.
+export const isValidNewsletterEmail = isValidEmail;
 
 export async function subscribeToNewsletter(rawEmail: string): Promise<SubscribeResult> {
   const email = rawEmail.trim().toLowerCase();

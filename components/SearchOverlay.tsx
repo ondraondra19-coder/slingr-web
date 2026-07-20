@@ -147,7 +147,8 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
     return Array.from(set).slice(0, 6);
   }, [results, locale]);
 
-  // Fokus do inputu při otevření; zamknout scroll pozadí.
+  // Fokus do inputu při otevření; zamknout scroll pozadí. Úklid po zavření
+  // vyprázdní i dotaz, ať příště overlay startuje čistě.
   useEffect(() => {
     if (!open) return;
     const id = requestAnimationFrame(() => inputRef.current?.focus());
@@ -156,11 +157,9 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
     return () => {
       cancelAnimationFrame(id);
       document.body.style.overflow = prev;
+      setQuery("");
     };
   }, [open]);
-
-  // Po zavření vyprázdnit dotaz, ať příště startuje čistě.
-  useEffect(() => { if (!open) setQuery(""); }, [open]);
 
   const handleClose = useCallback(() => onClose(), [onClose]);
 

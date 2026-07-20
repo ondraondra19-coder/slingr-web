@@ -5,6 +5,7 @@ import { CartProvider } from "@/lib/cart";
 import { CurrencyProvider } from "@/lib/CurrencyContext";
 import ChatWidget from "@/components/ChatWidget";
 import CookieBanner from "@/components/CookieBanner";
+import WelcomeDiscountPopup from "@/components/WelcomeDiscountPopup";
 import PostHogProvider from "@/components/PostHogProvider";
 import { LangProvider } from "@/lib/LangContext";
 
@@ -20,7 +21,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "SLINGR",
-  description: "Originální Apple příslušenství",
+  description:
+    "Praky, měkká munice, vodní balónky a terče na venkovní bitvy. Rozjeď vodní válku nebo souboj o nejlepší mušku — expedice do 24 hodin.",
 };
 
 // OPRAVA: Exportujeme nastavení viewportu, které iPhonu povolí roztáhnout web pod notch/Dynamic Island
@@ -44,17 +46,23 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/* CurrencyProvider je vně, aby CartProvider mohl reagovat na změnu měny */}
+        {/* CurrencyProvider je vně, aby CartProvider mohl reagovat na změnu měny.
+            ChatWidget/CookieBanner/WelcomeDiscountPopup musí být UVNITŘ
+            LangProvideru — všechny tři překládají přes useT() a mimo provider
+            by jim useLang() vracelo výchozí kontext, takže by zůstaly česky
+            i po přepnutí jazyka. */}
         <LangProvider>
           <CurrencyProvider>
             <CartProvider>
               {children}
             </CartProvider>
           </CurrencyProvider>
+
+          <ChatWidget />
+          <CookieBanner />
+          <WelcomeDiscountPopup />
         </LangProvider>
 
-        <ChatWidget />
-        <CookieBanner />
         <PostHogProvider />
       </body>
     </html>

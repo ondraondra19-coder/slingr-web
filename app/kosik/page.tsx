@@ -32,10 +32,12 @@ function getProductImgs(slug: string, variants?: Record<string, string>): { img:
   return null;
 }
 
+// Kurátorské pořadí bestsellerů. Slugy musí existovat v lib/products.ts —
+// neexistující se tiše zahodí, proto se seznam níž doplňuje zbytkem katalogu,
+// ať řada nikdy nezůstane prázdná (viz `bestsellers`).
 const BESTSELLER_SLUGS = [
-  "pouzdro-apple-pencil", "magsafe-penezenka", "paperfeel-ipad",
-  "silikonovy-reminek", "pouzdro-airpods", "cistic-displeje",
-  "hroty-apple-pencil", "organizer-kabely",
+  "set-startovaci", "prak-x1", "micky-do-praku", "vodni-balonky",
+  "terc", "set-duel", "penove-plechovky", "set-vodni-bitva",
 ];
 
 
@@ -169,9 +171,15 @@ export default function KosikPage() {
   const discountAmount = getDiscountAmount(currency);
   const finalPrice = getFinalPrice(currency);
 
-  const bestsellers = BESTSELLER_SLUGS
-    .map(slug => products.find(p => p.slug === slug))
-    .filter(Boolean) as typeof products;
+  // Kurátorské pořadí napřed, zbytek katalogu za ním — kdyby se slugy výš
+  // rozešly s katalogem, řada se pořád má čím naplnit.
+  const bestsellers = (() => {
+    const curated = BESTSELLER_SLUGS
+      .map(slug => products.find(p => p.slug === slug))
+      .filter(Boolean) as typeof products;
+    const rest = products.filter(p => !curated.some(c => c.slug === p.slug));
+    return [...curated, ...rest].slice(0, 8);
+  })();
 
   const singleProduct = items.length === 1 ? products.find(p => p.slug === items[0].slug) : null;
 
