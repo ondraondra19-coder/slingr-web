@@ -24,7 +24,7 @@ function formatDate(iso: string, locale: Locale): string {
 
 function StarRating({ rating }: { rating: number }) {
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-0.5 shrink-0">
       {Array.from({ length: 5 }).map((_, i) => (
         <Star
           key={i}
@@ -56,8 +56,8 @@ function ReviewCard({ review }: { review: Review }) {
           <span className="text-primary-ink text-xs font-bold">{review.initials}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-text-base text-sm font-semibold leading-none">{review.name}</p>
-          <p className="text-text-subtle text-xs mt-0.5">{formatDate(review.date, t.locale)}</p>
+          <p className="text-text-base text-sm font-semibold leading-tight truncate">{review.name}</p>
+          <p className="text-text-subtle text-xs mt-0.5 truncate">{formatDate(review.date, t.locale)}</p>
         </div>
         <StarRating rating={review.rating} />
       </div>
@@ -136,7 +136,7 @@ export default function Reviews() {
           </div>
           <div className="flex items-center justify-between lg:justify-end gap-5 lg:gap-6 shrink-0">
             <div className="flex items-center gap-3">
-              <span className="text-3xl lg:text-4xl font-extrabold text-text-base leading-none">{avg}</span>
+              <span className="text-2xl lg:text-4xl font-extrabold text-text-base leading-none">{avg}</span>
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => {

@@ -19,7 +19,7 @@ export default function TrustBar() {
   return (
     <section className="bg-accent py-14 lg:py-16">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 sm:gap-x-10 gap-y-12">
           {items.map((item) => (
             <div key={item.title} className="flex flex-col items-center text-center gap-4">
               {/* Velká ikona v bílém čtverci — vynikne na malinovém pozadí, žádné

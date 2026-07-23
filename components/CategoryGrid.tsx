@@ -22,11 +22,11 @@ export default function CategoryGrid() {
 
             {/* Velká jemná ikona místo dřívějšího AI panáka — dekorace k tématu
                 (záruka = štít), laděná do stylu zbytku webu (lucide). */}
-            <ShieldCheck aria-hidden="true" strokeWidth={1.25} className="absolute -bottom-8 -right-6 w-56 h-56 text-on-primary/15 pointer-events-none" />
+            <ShieldCheck aria-hidden="true" strokeWidth={1.25} className="hidden sm:block absolute -bottom-8 -right-6 w-56 h-56 text-on-primary/15 pointer-events-none" />
 
             {/* Tyrkys #28bfa6 je světlý — bílý text na něm má 2.32:1. Tmavý
                 text-on-primary dává 8.07:1 a pozadí zůstává značkově tyrkysové. */}
-            <div className="relative z-10 max-w-[55%]">
+            <div className="relative z-10 max-w-[85%] sm:max-w-[55%]">
               <h3 className="text-on-primary text-2xl font-extrabold leading-tight">
                 {t("warrantyTitle")}
               </h3>
@@ -48,9 +48,9 @@ export default function CategoryGrid() {
 
             {/* Velká jemná ikona místo panáka — doprava = kamion, tyrkys pro
                 barevný akcent na tmavém pozadí. */}
-            <Truck aria-hidden="true" strokeWidth={1.25} className="absolute -bottom-8 -left-6 w-56 h-56 text-primary/25 pointer-events-none" />
+            <Truck aria-hidden="true" strokeWidth={1.25} className="hidden sm:block absolute -bottom-8 -left-6 w-56 h-56 text-primary/25 pointer-events-none" />
 
-            <div className="relative z-10 ml-auto text-right max-w-[55%]">
+            <div className="relative z-10 ml-auto text-right max-w-[85%] sm:max-w-[55%]">
               <h3 className="text-white text-2xl font-extrabold leading-tight">
                 {t("deliveryTitle")}<br />
                 <span className="text-primary">{t("deliveryHighlight")}</span>
