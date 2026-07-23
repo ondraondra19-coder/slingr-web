@@ -16,16 +16,16 @@ export const revalidate = 180;
 export default async function Home() {
   const products = await getProductsForDisplay();
 
-  // Reálná dostupnost pro odznaky „Poslední kusy" / „Zbývá N skladem" na
-  // kartách. Agregujeme na produkt jako max dostupných kusů napříč variantami
-  // (stejná logika jako maxStock v kategorii). Když Redis selže, karty
-  // spadnou zpět na statické product.inStock.
+  // Reálná dostupnost pro odznaky „Poslední kusy" / „Zbývá N skladem" a pro
+  // skrytí quick-add „+" u vyprodaných. Klíč = slug produktu (jeden sklad na
+  // produkt, viz lib/stock.ts). Nenaskladněný produkt = 0 (ne fallback na
+  // statické inStock), takže bez skladu se nedá rovnou hodit do košíku. Jen
+  // když Redis spadne, necháme availability prázdné a karty použijí product.inStock.
   const availability: Record<string, number> = {};
   try {
     const stockMap = await getStockMap();
-    for (const [key, count] of stockMap.entries()) {
-      const slug = key.split("|")[0];
-      availability[slug] = Math.max(availability[slug] ?? 0, count);
+    for (const product of products) {
+      availability[product.slug] = stockMap.get(product.slug) ?? 0;
     }
   } catch (e) {
     console.warn("Stock fetch for homepage failed:", e);

@@ -138,15 +138,25 @@ function ProductCard({
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") quickAdd(e);
             }}
-            className={`absolute bottom-3 right-3 z-10 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 cursor-pointer opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 hover:brightness-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/40 ${
-              added ? "bg-emerald-600 text-white" : "bg-primary text-on-primary"
-            }`}
+            className={`absolute bottom-3 right-3 z-10 w-10 h-10 rounded-full flex items-center justify-center shadow-lg bg-primary text-on-primary transition-all duration-200 cursor-pointer opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 hover:brightness-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/40`}
           >
-            {added ? (
-              <Check size={20} strokeWidth={2.5} aria-hidden="true" />
-            ) : (
-              <Plus size={20} strokeWidth={2.5} aria-hidden="true" />
-            )}
+            {/* Minimalistická potvrzovací animace: „+" jemně vyplyne, „✓" naplyne. */}
+            <span className="relative w-5 h-5" aria-hidden="true">
+              <Plus
+                size={20}
+                strokeWidth={2}
+                className={`absolute inset-0 transition-all duration-200 ease-out ${
+                  added ? "opacity-0 scale-75" : "opacity-100 scale-100"
+                }`}
+              />
+              <Check
+                size={20}
+                strokeWidth={2}
+                className={`absolute inset-0 transition-all duration-200 ease-out ${
+                  added ? "opacity-100 scale-100" : "opacity-0 scale-75"
+                }`}
+              />
+            </span>
           </span>
         ) : null}
       </div>
@@ -163,17 +173,20 @@ function ProductCard({
           </div>
         )}
 
-        {/* Cena — zlevněná v barevné pilulce + přeškrtnutá původní */}
-        <div className="mt-2 flex items-center gap-2 flex-wrap">
-          {hasSale ? (
-            <>
-              <span className="text-sm font-extrabold text-white bg-rose-600 rounded-lg px-2 py-1 leading-none">
-                {current}
-              </span>
-              <span className="text-sm font-medium text-text-subtle line-through">{original}</span>
-            </>
-          ) : (
-            <span className="text-lg font-normal text-text-base leading-none">{current}</span>
+        {/* Cena — současná vždy stejný řez/velikost (sleva už je vidět v odznaku
+            na fotce), u slevy jen růžová + přeškrtnutá původní vedle ní. */}
+        <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+          <span
+            className={`text-lg font-bold tabular-nums tracking-tight leading-none ${
+              hasSale ? "text-rose-600" : "text-text-base"
+            }`}
+          >
+            {current}
+          </span>
+          {hasSale && (
+            <span className="text-sm font-medium text-text-subtle line-through tabular-nums leading-none">
+              {original}
+            </span>
           )}
         </div>
 
