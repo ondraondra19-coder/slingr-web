@@ -144,6 +144,24 @@ export default function AnalyticsPanel() {
             />
           </SectionCard>
 
+          {/* Vyhledávání — co lidi hledají a co nenajdou. Nulové dotazy jsou
+              zlato: každý častý řádek je kandidát na synonymum (viz
+              lib/productSearch.ts) nebo signál chybějícího produktu. */}
+          <div className="grid md:grid-cols-2 gap-3">
+            <SectionCard title="Nejčastější hledání" subtitle={`Co lidi hledají na webu — za ${days} dní`}>
+              <RankedTable
+                rows={data.topSearches.map((s) => ({ label: s.query, value: s.count }))}
+                emptyLabel="Zatím žádná hledání — nebo nikdo nesouhlasil s cookies."
+              />
+            </SectionCard>
+            <SectionCard title="Hledání bez výsledku" subtitle={`Dotazy, na které web nic nenašel — za ${days} dní`}>
+              <RankedTable
+                rows={data.zeroSearches.map((s) => ({ label: s.query, value: s.count }))}
+                emptyLabel="Zatím žádné hledání bez výsledku. 🎉"
+              />
+            </SectionCard>
+          </div>
+
           {/* Tržby all-time */}
           <SectionCard title="Celkové tržby" subtitle="Od spuštění sledování, po měnách">
             <div className="flex gap-4 flex-wrap">

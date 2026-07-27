@@ -27,6 +27,14 @@ export type ClientAnalyticsEventMap = {
   product_clicked: { slug: string; name: string; price: number; currency: string };
   add_to_cart: { slug: string; name: string; price: number; currency: string; quantity: number };
   checkout_step_completed: { step: 1 | 2 | 3 };
+  // Vyhledávání — `query` je normalizovaný (malá písmena, bez diakritiky), ať
+  // se v reportu neroztříští „Prak/prak/prák" na tři řádky. `search_performed`
+  // se posílá až po krátké prodlevě v psaní (ne po každém stisku), aby jeden
+  // dotaz = jeden event. `results` je počet nalezených produktů; nula navíc
+  // vyvolá `search_zero_results` (zdroj pro doplňování synonym).
+  search_performed: { query: string; results: number };
+  search_zero_results: { query: string };
+  search_result_clicked: { query: string; slug: string; position: number };
 };
 
 export type ClientAnalyticsEventName = keyof ClientAnalyticsEventMap;

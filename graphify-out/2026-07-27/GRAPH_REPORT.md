@@ -1,7 +1,7 @@
-# Graph Report - Slingr  (2026-07-27)
+# Graph Report - Slingr  (2026-07-26)
 
 ## Corpus Check
-- 182 files · ~291,997 words
+- 182 files · ~291,764 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary

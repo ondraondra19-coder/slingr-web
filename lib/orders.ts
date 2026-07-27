@@ -229,6 +229,20 @@ export async function getOrderByNumber(orderNumber: string): Promise<Order | nul
   return match ? getOrder(match) : null;
 }
 
+/** Dohledá objednávku pro VEŘEJNOU stavovou stránku (/objednavky): musí sedět
+ *  ČÍSLO OBJEDNÁVKY (variabilní symbol) i E-MAIL. Když cokoli nesedí, vrací
+ *  null — a to i pro neexistující objednávku i pro špatný e-mail, aby přes
+ *  stránku nešlo zjišťovat, která čísla objednávek existují (VS je jen 8 číslic,
+ *  jde uhodnout — e-mail je druhý faktor). */
+export async function getOrderForStatus(orderNumber: string, email: string): Promise<Order | null> {
+  const order = await getOrderByNumber(orderNumber);
+  if (!order) return null;
+  const stored = (order.customer?.email ?? "").trim().toLowerCase();
+  const given = (email ?? "").trim().toLowerCase();
+  if (!stored || stored !== given) return null;
+  return order;
+}
+
 export async function updateOrderStatus(id: string, status: OrderStatus): Promise<Order | null> {
   const order = await getOrder(id);
   if (!order) return null;

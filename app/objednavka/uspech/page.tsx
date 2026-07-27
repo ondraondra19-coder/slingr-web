@@ -95,6 +95,26 @@ function CopyButton({ value }: { value: string }) {
     );
 }
 
+// Kompaktní kopírovací mini-ikonka pro světlé karty (menší než CopyButton,
+// vejde se vedle hodnoty v řádku souhrnu). Kopíruje předanou hodnotu.
+function InlineCopy({ value }: { value: string }) {
+    const t = useT("success");
+    const [copied, setCopied] = useState(false);
+    return (
+        <button
+            type="button"
+            onClick={() => { navigator.clipboard.writeText(value).catch(() => {}); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+            title={t("copyShort")}
+            aria-label={copied ? t("copied", { value }) : t("copy", { value })}
+            className="inline-flex items-center justify-center w-6 h-6 rounded-md text-text-subtle hover:text-text-base hover:bg-border/50 transition-colors shrink-0"
+        >
+            {copied
+                ? <Check size={12} aria-hidden="true" className="text-primary-ink" />
+                : <Copy size={12} aria-hidden="true" />}
+        </button>
+    );
+}
+
 function BankovniPrevod({ totalStr, vsymbol, amount, currencyCode }: { totalStr: string; vsymbol: string; amount: number; currencyCode: string }) {
     const t = useT("success");
     const accountDisplay = process.env.NEXT_PUBLIC_BANK_ACCOUNT_DISPLAY;
@@ -265,15 +285,18 @@ function KartaStripe({ totalStr, orderId }: { totalStr: string; orderId: string 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-surface rounded-2xl border border-border p-6">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-4">{t("cardSummary")}</p>
-                    {[
+                    {([
                         { label: t("cardStatusLabel"), value: `✓ ${t("cardStatusPaid")}`, highlight: true },
                         { label: t("paymentMethodEyebrow"), value: t("cardMethod"), highlight: false },
-                        { label: t("orderNumber"), value: `#${orderId}`, highlight: false },
+                        { label: t("orderNumber"), value: `#${orderId}`, highlight: false, copyValue: orderId },
                         { label: t("totalAmount"), value: totalStr, highlight: true },
-                    ].map(({ label, value, highlight }) => (
-                        <div key={label} className="flex items-center justify-between py-3.5 border-b border-border last:border-0">
+                    ] as { label: string; value: string; highlight: boolean; copyValue?: string }[]).map(({ label, value, highlight, copyValue }) => (
+                        <div key={label} className="flex items-center justify-between gap-2 py-3.5 border-b border-border last:border-0">
                             <span className="text-xs font-bold uppercase tracking-wider text-text-subtle">{label}</span>
-                            <span className={`text-sm font-bold ${highlight ? "text-primary-ink" : "text-text-base"}`}>{value}</span>
+                            <span className="flex items-center gap-1.5">
+                                <span className={`text-sm font-bold ${highlight ? "text-primary-ink" : "text-text-base"}`}>{value}</span>
+                                {copyValue && <InlineCopy value={copyValue} />}
+                            </span>
                         </div>
                     ))}
                     <div className="mt-5 flex items-center gap-2 justify-center">
@@ -724,9 +747,6 @@ function SuccessContent() {
                     <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link href="/" className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-primary text-on-primary font-extrabold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/10">
                             <ShoppingBag size={16} aria-hidden="true" /> {tcart("continueShopping")}
-                        </Link>
-                        <Link href="/reklamace" className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-border text-text-muted font-bold text-sm hover:bg-white hover:text-text-base transition-all flex items-center justify-center gap-2">
-                            {t("complaintsLink")}
                         </Link>
                     </div>
                 </div>

@@ -61,6 +61,12 @@ export type AnalyticsSummary = {
   revenueByCurrency: Record<string, number>;
   revenueAllTimeByCurrency: Record<string, number>;
   topProducts: { slug: string; name: string; quantity: number }[];
+  // Vyhledávání na webu (search_performed / search_zero_results z overlaye i
+  // /hledani). `topSearches` = co lidi hledají nejčastěji; `zeroSearches` =
+  // dotazy BEZ výsledku — přímý zdroj pro doplňování synonym a odhalování děr
+  // v katalogu (viz lib/productSearch.ts).
+  topSearches: { query: string; count: number }[];
+  zeroSearches: { query: string; count: number }[];
   totalVisits: number;
   totalUniqueVisitors: number;
   totalOrders: number;
@@ -87,6 +93,8 @@ export async function getAnalyticsSummary(rangeDays: number = 30): Promise<Analy
     pages,
     devices,
     products,
+    topSearches,
+    zeroSearches,
   ] = await Promise.all([
     runHogQL<[string, number, number]>(`
       SELECT toDate(timestamp) AS day, count() AS pageviews, count(DISTINCT distinct_id) AS visitors
@@ -143,6 +151,20 @@ export async function getAnalyticsSummary(rangeDays: number = 30): Promise<Analy
       WHERE event = 'product_purchased'
       GROUP BY slug ORDER BY quantity DESC LIMIT 10
     `),
+    runHogQL<[string, number]>(`
+      SELECT properties.query AS query, count() AS count
+      FROM events
+      WHERE event = 'search_performed' AND timestamp >= now() - INTERVAL ${rangeDays} DAY
+        AND properties.query IS NOT NULL AND properties.query != ''
+      GROUP BY query ORDER BY count DESC LIMIT 10
+    `),
+    runHogQL<[string, number]>(`
+      SELECT properties.query AS query, count() AS count
+      FROM events
+      WHERE event = 'search_zero_results' AND timestamp >= now() - INTERVAL ${rangeDays} DAY
+        AND properties.query IS NOT NULL AND properties.query != ''
+      GROUP BY query ORDER BY count DESC LIMIT 10
+    `),
   ]);
 
   const visitsByDay = new Map(dailyVisits.map(([day, pageviews, visitors]) => [day, { pageviews, visitors }]));
@@ -184,6 +206,8 @@ export async function getAnalyticsSummary(rangeDays: number = 30): Promise<Analy
     revenueByCurrency,
     revenueAllTimeByCurrency,
     topProducts: products.map(([slug, name, quantity]) => ({ slug, name: name || slug, quantity })),
+    topSearches: topSearches.map(([query, count]) => ({ query, count })),
+    zeroSearches: zeroSearches.map(([query, count]) => ({ query, count })),
     totalVisits: visits.reduce((s, v) => s + v.pageviews, 0),
     totalUniqueVisitors: visits.reduce((s, v) => s + v.visitors, 0),
     totalOrders: orders.reduce((s, o) => s + o.count, 0),

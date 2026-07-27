@@ -305,8 +305,8 @@
     "semantic_hash": ""
   },
   "components/KategorieClient.tsx": {
-    "mtime": 1785152649.394552,
-    "ast_hash": "82c209005579b2704bf7ce6002fe1372",
+    "mtime": 1785077003.1526532,
+    "ast_hash": "928ed6136365f7234506e28e958bd603",
     "semantic_hash": ""
   },
   "components/PostHogProvider.tsx": {
@@ -895,8 +895,8 @@
     "semantic_hash": ""
   },
   "components/SearchOverlay.tsx": {
-    "mtime": 1785152377.0766637,
-    "ast_hash": "3392b798a9dbbffc2e69fa39077cf984",
+    "mtime": 1785077006.7010138,
+    "ast_hash": "7f907addb6528be36cfe3f7bcab8ca13",
     "semantic_hash": ""
   },
   "app/api/welcome-discount/route.ts": {
@@ -970,8 +970,8 @@
     "semantic_hash": ""
   },
   "components/HledaniClient.tsx": {
-    "mtime": 1785152659.1314147,
-    "ast_hash": "c7f8743505468792878a5aa0952b986c",
+    "mtime": 1785076832.210308,
+    "ast_hash": "70bd6887ddb966d03ca10731144c4be0",
     "semantic_hash": ""
   },
   "lib/productSearch.ts": {

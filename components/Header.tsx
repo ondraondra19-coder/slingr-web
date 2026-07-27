@@ -44,15 +44,25 @@ export default function Header() {
   const [langOpen, setLangOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const utilityRef = useRef<HTMLDivElement>(null);
 
-  // Mega menu — otevře se hned při najetí na kategorii, zavře s malým zpožděním
-  // (ať se dá myší přejet z položky dolů do panelu, aniž by zmizel).
+  // Mega menu — otevře se AŽ po krátké prodlevě (0,5 s) od najetí na kategorii.
+  // Brání to náhodnému rozbalení při pouhém přejetí myší přes hlavičku: zákazník
+  // musí nad kategorií chvíli zůstat. Zavírá se s malým zpožděním (ať se dá myší
+  // přejet z položky dolů do panelu, aniž by zmizel).
+  const OPEN_DELAY_MS = 250;
   function openMega(label: string) {
     if (closeTimeout.current) clearTimeout(closeTimeout.current);
-    setOpenMenu(label);
+    if (openTimeout.current) clearTimeout(openTimeout.current);
+    openTimeout.current = setTimeout(() => setOpenMenu(label), OPEN_DELAY_MS);
+  }
+  // Myš odjela z kategorie dřív, než uplynula prodleva — čekající otevření zrušíme.
+  function cancelOpenMega() {
+    if (openTimeout.current) clearTimeout(openTimeout.current);
   }
   function scheduleCloseMega() {
+    if (openTimeout.current) clearTimeout(openTimeout.current); // zruš i čekající otevření
     if (closeTimeout.current) clearTimeout(closeTimeout.current);
     closeTimeout.current = setTimeout(() => setOpenMenu(null), 120);
   }
@@ -79,6 +89,12 @@ export default function Header() {
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // Úklid časovačů mega menu při odmountování.
+  useEffect(() => () => {
+    if (openTimeout.current) clearTimeout(openTimeout.current);
+    if (closeTimeout.current) clearTimeout(closeTimeout.current);
   }, []);
 
   const navRight = [
@@ -130,6 +146,7 @@ export default function Header() {
               <li
                 key={item.label}
                 onMouseEnter={() => { if (item.children.length > 0) openMega(item.label); }}
+                onMouseLeave={cancelOpenMega}
               >
                 <a
                   href={item.href}

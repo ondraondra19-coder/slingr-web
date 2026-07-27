@@ -1,12 +1,12 @@
-# Graph Report - Slingr  (2026-07-27)
+# Graph Report - Slingr  (2026-07-26)
 
 ## Corpus Check
-- 182 files · ~291,997 words
+- 177 files · ~287,435 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1093 nodes · 2797 edges · 67 communities (36 shown, 31 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 29 edges (avg confidence: 0.69)
+- 1076 nodes · 2698 edges · 71 communities (40 shown, 31 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 25 edges (avg confidence: 0.68)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
@@ -20,6 +20,7 @@
 - Blog / Magazine CMS
 - Products, Categories & Stock
 - TypeScript Config & Refs
+- getClientIp
 - Address Autocomplete Form
 - Root Layout & Consent Tracking
 - Admin Analytics Dashboard
@@ -29,6 +30,7 @@
 - messages.ts
 - Category Listing & Featured Products
 - Dev Tooling Dependencies
+- Product Detail Client
 - AdminDashboard.tsx
 - Address Lookup API (RUIAN)
 - Static Info Pages & Footer
@@ -49,11 +51,13 @@
 - route.ts
 - Terms & Conditions Page
 - browserslist
+- index.ts
 - i18n Request/Routing Config
 - Next.js Config
 - ReviewsAdminList.tsx
 - ESLint Config
 - next-intl Dependency
+- ProductsAdminList.tsx
 - PostCSS Config
 - app/page.tsx (entry page)
 - create-next-app (bootstrap tool)
@@ -79,28 +83,28 @@
 - page.tsx
 
 ## God Nodes (most connected - your core abstractions)
-1. `useT()` - 93 edges
+1. `useT()` - 91 edges
 2. `getRedis()` - 67 edges
 3. `formatPrice()` - 39 edges
 4. `getCurrentSession()` - 39 edges
-5. `useLang()` - 32 edges
-6. `p()` - 26 edges
-7. `useCurrency()` - 25 edges
-8. `getPrice()` - 23 edges
+5. `useLang()` - 30 edges
+6. `useCurrency()` - 23 edges
+7. `p()` - 23 edges
+8. `getPrice()` - 21 edges
 9. `esc()` - 21 edges
-10. `SearchOverlay()` - 20 edges
+10. `getClientIp()` - 19 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `AdminSearch()` --indirect_call--> `p()`  [INFERRED]
   app/admin/AdminSearch.tsx → lib/email.ts
 - `ProductsAdminList()` --indirect_call--> `czk()`  [INFERRED]
   app/admin/ProductsAdminList.tsx → content/legal/terms.tsx
-- `AdminPage()` --indirect_call--> `toPublicAccount()`  [INFERRED]
-  app/admin/page.tsx → lib/accounts.ts
 - `isTypickaUlice()` --indirect_call--> `p()`  [INFERRED]
   app/api/adresa/route.ts → lib/email.ts
 - `POST()` --indirect_call--> `p()`  [INFERRED]
   app/api/checkout/route.ts → lib/email.ts
+- `POST()` --indirect_call--> `p()`  [INFERRED]
+  app/api/orders/route.ts → lib/email.ts
 
 ## Import Cycles
 - None detected.
@@ -110,35 +114,39 @@
 - **Alternative Google Sheets authentication strategies** — readme_stock_google_sheets_api, readme_stock_service_account, readme_stock_google_auth_library [INFERRED 0.85]
 - **Environment variables required for stock integration** — readme_stock_env_local, readme_stock_google_sheet_id, readme_stock_google_sheets_api_key [EXTRACTED 1.00]
 
-## Communities (67 total, 31 thin omitted)
+## Communities (71 total, 31 thin omitted)
 
 ### Community 0 - "Orders & Checkout Pipeline"
 Cohesion: 0.13
-Nodes (21): calcStats(), formatDate(), RecenzePage(), Review, ReviewCard(), Window, calcAvg(), formatDate() (+13 more)
+Nodes (22): calcStats(), formatDate(), RecenzePage(), Review, ReviewCard(), Window, calcAvg(), formatDate() (+14 more)
 
 ### Community 1 - "Admin Accounts & Permissions"
-Cohesion: 0.36
-Nodes (5): anyInStock(), KategorieClient(), maxStock(), TILE_STYLE, trackEvent()
+Cohesion: 0.33
+Nodes (9): buildFuse(), expandQuery(), getCategoryLabel(), highlightMatch(), normalize(), SEARCH_SYNONYMS, SearchOverlay(), searchProducts() (+1 more)
 
 ### Community 2 - "Blog / Magazine CMS"
-Cohesion: 0.06
-Nodes (44): AdminSearch(), AdminSearchProps, CURRENCY_SYMBOLS, formatMoney(), ContentPreview(), czechDateToInputValue(), EMPTY_FORM, FormState (+36 more)
+Cohesion: 0.10
+Nodes (34): AdminSearch(), AdminSearchProps, CURRENCY_SYMBOLS, formatMoney(), ContentPreview(), czechDateToInputValue(), EMPTY_FORM, FormState (+26 more)
 
 ### Community 3 - "Products, Categories & Stock"
-Cohesion: 0.09
-Nodes (35): ClaimCard(), ClaimsAdminList(), ClaimsAdminListProps, money(), nextActions(), refundTotals(), STATUS_LABELS, statusClasses() (+27 more)
+Cohesion: 0.13
+Nodes (24): ClaimCard(), ClaimsAdminList(), ClaimsAdminListProps, money(), nextActions(), refundTotals(), STATUS_LABELS, statusClasses() (+16 more)
 
 ### Community 4 - "TypeScript Config & Refs"
 Cohesion: 0.06
 Nodes (30): ./*, dom, dom.iterable, esnext, **/*.mts, .next/dev/types/**/*.ts, next-env.d.ts, .next/types/**/*.ts (+22 more)
 
+### Community 5 - "getClientIp"
+Cohesion: 0.13
+Nodes (17): geistMono, geistSans, metadata, viewport, CartContext, CartCtx, CartItem, CartProvider() (+9 more)
+
 ### Community 6 - "Address Autocomplete Form"
-Cohesion: 0.15
-Nodes (28): CategoryProductRows(), anyInStock(), getCZK(), HledaniClient(), maxStock(), TILE_STYLE, featuredProducts(), getCategoryLabel() (+20 more)
+Cohesion: 0.14
+Nodes (14): CategoryProductRows(), Footer(), socialLinks, HomeLink(), ProductRow(), ProductRowT, TILE_STYLE, BundleItem (+6 more)
 
 ### Community 7 - "Root Layout & Consent Tracking"
 Cohesion: 0.06
-Nodes (54): AccountsAdminPanelProps, PERMISSION_LABELS, AdminDashboard(), AdminDashboardProps, getInitials(), CampaignSummary, Context, DELETE() (+46 more)
+Nodes (49): AccountsAdminPanelProps, PERMISSION_LABELS, AdminDashboard(), AdminDashboardProps, getInitials(), CampaignSummary, Context, DELETE() (+41 more)
 
 ### Community 8 - "Admin Analytics Dashboard"
 Cohesion: 0.12
@@ -149,44 +157,48 @@ Cohesion: 0.12
 Nodes (23): metadata, metadata, LegalLayout(), Section(), PrivacyPage(), TermsPage(), PRIVACY_BODY, PRIVACY_SUBTITLE (+15 more)
 
 ### Community 11 - "Admin Authentication"
-Cohesion: 0.10
-Nodes (25): ACTIVE_STATUSES, CURRENCY_SYMBOLS, formatDate(), formatMoney(), OrdersAdminList(), OrdersAdminListProps, PAYMENT_METHOD_LABELS, SHIPPING_PROVIDER_LABELS (+17 more)
+Cohesion: 0.08
+Nodes (43): ACTIVE_STATUSES, CURRENCY_SYMBOLS, formatDate(), formatMoney(), OrdersAdminList(), OrdersAdminListProps, PAYMENT_METHOD_LABELS, SHIPPING_PROVIDER_LABELS (+35 more)
 
 ### Community 12 - "messages.ts"
-Cohesion: 0.05
-Nodes (44): MessagesAdminListProps, ReviewsAdminList(), ReviewsAdminListProps, POST(), requireAccess(), DELETE(), GET(), PATCH() (+36 more)
+Cohesion: 0.13
+Nodes (21): MessagesAdminListProps, POST(), requireAccess(), DELETE(), GET(), PATCH(), requireAccess(), fail() (+13 more)
 
 ### Community 13 - "Category Listing & Featured Products"
 Cohesion: 0.07
-Nodes (49): DiscountsAdminPanel(), DiscountsAdminPanelProps, isExpired(), GET(), POST(), requirePermission(), DELETE(), GET() (+41 more)
+Nodes (57): DiscountsAdminPanel(), DiscountsAdminPanelProps, isExpired(), DELETE(), GET(), POST(), requirePermission(), CheckoutItem (+49 more)
 
 ### Community 14 - "Dev Tooling Dependencies"
 Cohesion: 0.10
 Nodes (21): eslint, eslint-config-next, devDependencies, eslint, eslint-config-next, tailwindcss, @tailwindcss/postcss, @types/node (+13 more)
+
+### Community 15 - "Product Detail Client"
+Cohesion: 0.20
+Nodes (5): buildSteps(), defaultForm, FormState, ReklamaceContent(), returnDeadline()
 
 ### Community 17 - "Address Lookup API (RUIAN)"
 Cohesion: 0.29
 Nodes (14): AdresaResult, callRuian(), capitalize(), formatPsc(), GET(), isJunkLokalita(), isMultiPsc(), isSilnaUlice() (+6 more)
 
 ### Community 18 - "Static Info Pages & Footer"
-Cohesion: 0.07
-Nodes (46): normalizePrice(), percentFromSale(), priceEquals(), ProductsAdminList(), ProductsAdminListProps, saleFromPercent(), fail(), POST() (+38 more)
+Cohesion: 0.05
+Nodes (73): AdminPage(), ProductOrderPanel(), normalizePrice(), percentFromSale(), priceEquals(), ProductsAdminList(), ProductsAdminListProps, saleFromPercent() (+65 more)
 
 ### Community 19 - "Core NPM Dependencies"
-Cohesion: 0.11
-Nodes (53): PATCH(), VALID_PAYMENT_STATUSES, VALID_STATUSES, BankovniPrevod(), approxConvert(), addressBlock(), bankTransferBlock(), campaignBodyToHtml() (+45 more)
+Cohesion: 0.13
+Nodes (49): ClaimsErrorCode, fail(), isFilled(), isValidAccount(), isValidOrderFormat(), isValidPhone(), POST(), checkAndSetClaimCooldown() (+41 more)
 
 ### Community 20 - "page.tsx"
-Cohesion: 0.09
-Nodes (19): ApiOrderItem, CopyButton(), DeliveryAddressBlock(), Dobirka(), InlineCopy(), KartaStripe(), Snapshot, SnapshotInfo (+11 more)
+Cohesion: 0.06
+Nodes (33): ApiOrderItem, BankovniPrevod(), CopyButton(), DeliveryAddressBlock(), Dobirka(), InlineCopy(), KartaStripe(), Snapshot (+25 more)
 
 ### Community 21 - "package.json"
 Cohesion: 0.18
 Nodes (10): _comment_browserslist, name, private, scripts, build, check:messages, dev, lint (+2 more)
 
 ### Community 22 - "Product Search Bar"
-Cohesion: 0.08
-Nodes (27): CookiesPage(), ONasPage(), BlogPreviewList(), PreviewPost, CategoryGrid(), ChatWidget(), CheckoutStepper(), Footer() (+19 more)
+Cohesion: 0.07
+Nodes (32): CookiesPage(), KontaktPage(), ONasPage(), BlogList(), ListPost, BlogPreviewList(), PreviewPost, CategoryGrid() (+24 more)
 
 ### Community 23 - "dependencies"
 Cohesion: 0.09
@@ -205,12 +217,12 @@ Cohesion: 0.25
 Nodes (8): browserslist, chrome >= 108, edge >= 108, firefox >= 108, ios_saf >= 15.4, not dead, not op_mini all, safari >= 15.4
 
 ### Community 28 - "page.tsx"
-Cohesion: 0.07
-Nodes (50): geistMono, geistSans, metadata, viewport, CookieBanner(), subscribeConsent(), capturePageview(), clearPostHogStorage() (+42 more)
+Cohesion: 0.10
+Nodes (30): CookieBanner(), subscribeConsent(), WelcomeDiscountPopup(), BROWSER_HELP, COOKIES_CATEGORIES, COOKIES_CONSENT_INTRO, COOKIES_INTRO, COOKIES_SUBTITLE (+22 more)
 
 ### Community 30 - "package.json"
 Cohesion: 0.11
-Nodes (18): AddressBlock, AddressErrors, AdresaResult, cacheAdresa, cacheMesto, defaultForm(), emptyAddress(), formatPhone() (+10 more)
+Nodes (17): AddressBlock, AddressErrors, AdresaResult, cacheAdresa, cacheMesto, defaultForm(), emptyAddress(), formatPhone() (+9 more)
 
 ### Community 31 - "Product Export Script"
 Cohesion: 0.29
@@ -221,40 +233,48 @@ Cohesion: 0.29
 Nodes (6): notFound, productsContent, require, rows, workbook, xlsx
 
 ### Community 33 - "route.ts"
-Cohesion: 0.06
-Nodes (67): AdminPage(), ProductOrderPanel(), POST(), PriceEntry, GET(), POST(), requireProductsPermission(), CheckoutItem (+59 more)
+Cohesion: 0.17
+Nodes (24): POST(), capturePageview(), clearPostHogStorage(), isAdminRoute(), isAdminSession(), PostHogProvider(), startPostHog(), stopPostHog() (+16 more)
 
 ### Community 35 - "browserslist"
 Cohesion: 0.11
 Nodes (16): Jazyky, Katalog a sklad, Kontrola před nasazením, Slingr, Spuštění, 1. Kde jsou data, 2. Sety (bundly), 3. Environment variables (+8 more)
 
+### Community 37 - "index.ts"
+Cohesion: 0.25
+Nodes (12): GET(), POST(), requirePermission(), CampaignContext, campaignFrom(), CampaignSummary, getCampaignContext(), resolveSegmentId() (+4 more)
+
 ### Community 42 - "ReviewsAdminList.tsx"
-Cohesion: 0.19
-Nodes (23): BESTSELLER_SLUGS, KosikPage(), ProductCard(), DiscountWidget(), Header(), ProductPrice(), ProductCard(), ProductRow() (+15 more)
+Cohesion: 0.16
+Nodes (28): InformacePage(), BESTSELLER_SLUGS, KosikPage(), ProductCard(), buildDopravyOptions(), buildPlatbyOptions(), MOCK_ZBOXES, ObjednavkaPage() (+20 more)
+
+### Community 47 - "ProductsAdminList.tsx"
+Cohesion: 0.18
+Nodes (16): ReviewsAdminList(), ReviewsAdminListProps, fail(), GET(), POST(), ReviewErrorCode, sendReviewThankYouEmail(), parseUserAgent() (+8 more)
 
 ### Community 79 - "page.tsx"
-Cohesion: 0.10
-Nodes (23): buildCategories(), CategorySection(), FaqCategory, FaqPage(), buildDopravyOptions(), buildPlatbyOptions(), MOCK_ZBOXES, ObjednavkaPage() (+15 more)
+Cohesion: 0.16
+Nodes (10): metadata, buildCategories(), CategorySection(), FaqCategory, FaqPage(), buildPayment(), buildShipping(), DopravaClient() (+2 more)
 
 ## Knowledge Gaps
-- **268 isolated node(s):** `PERMISSION_LABELS`, `AccountsAdminPanelProps`, `AdminDashboardProps`, `AdminSearchProps`, `CURRENCY_SYMBOLS` (+263 more)
+- **266 isolated node(s):** `PERMISSION_LABELS`, `AccountsAdminPanelProps`, `AdminDashboardProps`, `AdminSearchProps`, `CURRENCY_SYMBOLS` (+261 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **31 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `dependencies` connect `dependencies` to `Cart Page (Kosik)`, `AdminDashboard.tsx`, `Core NPM Dependencies`, `package.json`, `priceOverrides.ts`, `lucide-react`?**
+- **Why does `qrcode` connect `page.tsx` to `Core NPM Dependencies`, `dependencies`?**
+  _High betweenness centrality (0.117) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `dependencies` to `Cart Page (Kosik)`, `AdminDashboard.tsx`, `page.tsx`, `package.json`, `priceOverrides.ts`, `lucide-react`?**
+  _High betweenness centrality (0.109) - this node is a cross-community bridge._
+- **Why does `useT()` connect `Product Search Bar` to `Orders & Checkout Pipeline`, `Admin Accounts & Permissions`, `Address Autocomplete Form`, `Reviews System`, `ReviewsAdminList.tsx`, `Category Listing & Featured Products`, `page.tsx`, `Product Detail Client`, `page.tsx`, `page.tsx`, `package.json`?**
   _High betweenness centrality (0.108) - this node is a cross-community bridge._
-- **Why does `useT()` connect `Product Search Bar` to `Orders & Checkout Pipeline`, `Admin Accounts & Permissions`, `Blog / Magazine CMS`, `Address Autocomplete Form`, `Reviews System`, `ReviewsAdminList.tsx`, `messages.ts`, `page.tsx`, `Core NPM Dependencies`, `page.tsx`, `page.tsx`, `package.json`?**
-  _High betweenness centrality (0.108) - this node is a cross-community bridge._
-- **Why does `qrcode` connect `Core NPM Dependencies` to `dependencies`?**
-  _High betweenness centrality (0.107) - this node is a cross-community bridge._
 - **What connects `PERMISSION_LABELS`, `AccountsAdminPanelProps`, `AdminDashboardProps` to the rest of the system?**
-  _268 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _266 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Orders & Checkout Pipeline` be split into smaller, more focused modules?**
-  _Cohesion score 0.12615384615384614 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12807881773399016 - nodes in this community are weakly interconnected._
 - **Should `Blog / Magazine CMS` be split into smaller, more focused modules?**
-  _Cohesion score 0.06201923076923077 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09898989898989899 - nodes in this community are weakly interconnected._
 - **Should `Products, Categories & Stock` be split into smaller, more focused modules?**
-  _Cohesion score 0.09358974358974359 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12962962962962962 - nodes in this community are weakly interconnected._

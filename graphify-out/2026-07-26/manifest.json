@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "app/admin/AnalyticsPanel.tsx": {
-    "mtime": 1785076944.1558108,
-    "ast_hash": "b0b86f16149a4ed0b347969f64273775",
+    "mtime": 1784308279.5086555,
+    "ast_hash": "0128e71555feceb51308896b02b6006c",
     "semantic_hash": ""
   },
   "app/admin/LogoutButton.tsx": {
@@ -295,8 +295,8 @@
     "semantic_hash": ""
   },
   "components/Header.tsx": {
-    "mtime": 1785075636.893436,
-    "ast_hash": "d67ea56737ad693a0da51e295903080c",
+    "mtime": 1785075547.501696,
+    "ast_hash": "9176ebee7dd72a57a6d8ae76db028d8a",
     "semantic_hash": ""
   },
   "components/InfoGrid.tsx": {
@@ -305,8 +305,8 @@
     "semantic_hash": ""
   },
   "components/KategorieClient.tsx": {
-    "mtime": 1785152649.394552,
-    "ast_hash": "82c209005579b2704bf7ce6002fe1372",
+    "mtime": 1784838219.858827,
+    "ast_hash": "9c7f932a14fa3772858b36fec4f0b848",
     "semantic_hash": ""
   },
   "components/PostHogProvider.tsx": {
@@ -410,8 +410,8 @@
     "semantic_hash": ""
   },
   "lib/posthog-query.ts": {
-    "mtime": 1785076928.9906867,
-    "ast_hash": "6164f799f2695d3d1daef4541e6e0a0b",
+    "mtime": 1784308279.589465,
+    "ast_hash": "deddb74bc5c1daab93681045135e0571",
     "semantic_hash": ""
   },
   "lib/posthog-server.ts": {
@@ -460,18 +460,18 @@
     "semantic_hash": ""
   },
   "messages/cs.json": {
-    "mtime": 1785076879.6133392,
-    "ast_hash": "eb70db728ee5f8a066718c871ff1d838",
+    "mtime": 1785074696.1894438,
+    "ast_hash": "c3524de89ad0dde30bcccf3378090119",
     "semantic_hash": ""
   },
   "messages/en.json": {
-    "mtime": 1785076879.6133392,
-    "ast_hash": "34d01b58b7d8b6a64f16b25c6fd2f414",
+    "mtime": 1785074696.1894438,
+    "ast_hash": "c8a770273224a47af46c7e9e368da037",
     "semantic_hash": ""
   },
   "messages/sk.json": {
-    "mtime": 1785076879.6133392,
-    "ast_hash": "00693717418b65bc2bc2d311fa7ede06",
+    "mtime": 1785074696.1894438,
+    "ast_hash": "499c26b45ba19f6e8059625d3266aa08",
     "semantic_hash": ""
   },
   "next.config.ts": {
@@ -645,8 +645,8 @@
     "semantic_hash": ""
   },
   "lib/analytics.ts": {
-    "mtime": 1785076299.0198545,
-    "ast_hash": "ad19cb4750eced3584e2f615ab236baf",
+    "mtime": 1784288340.2171755,
+    "ast_hash": "ec51f173ec2d96f4a0cc04c348ed4ce1",
     "semantic_hash": ""
   },
   "lib/pdf.ts": {
@@ -895,8 +895,8 @@
     "semantic_hash": ""
   },
   "components/SearchOverlay.tsx": {
-    "mtime": 1785152377.0766637,
-    "ast_hash": "3392b798a9dbbffc2e69fa39077cf984",
+    "mtime": 1784535322.7858205,
+    "ast_hash": "49284dc97f1097e80878102f19401b16",
     "semantic_hash": ""
   },
   "app/api/welcome-discount/route.ts": {
@@ -957,31 +957,6 @@
   "scripts/orders-admin.mjs": {
     "mtime": 1785072907.3958118,
     "ast_hash": "0346a4a7027d50ab42f53d29e7fac796",
-    "semantic_hash": ""
-  },
-  "app/hledani/page.tsx": {
-    "mtime": 1785076674.645422,
-    "ast_hash": "a993d2e0c1af28539cc97e139d437f42",
-    "semantic_hash": ""
-  },
-  "components/DualRangeSlider.tsx": {
-    "mtime": 1785076517.230751,
-    "ast_hash": "331cd3d3849cb90575282d9d604f5c99",
-    "semantic_hash": ""
-  },
-  "components/HledaniClient.tsx": {
-    "mtime": 1785152659.1314147,
-    "ast_hash": "c7f8743505468792878a5aa0952b986c",
-    "semantic_hash": ""
-  },
-  "lib/productSearch.ts": {
-    "mtime": 1785076279.815526,
-    "ast_hash": "8abd491fac6893983379a6d82ba28eff",
-    "semantic_hash": ""
-  },
-  "lib/recentSearches.ts": {
-    "mtime": 1785076365.4963834,
-    "ast_hash": "284089d411ac53df2a2a89756b9f4c2d",
     "semantic_hash": ""
   }
 }

@@ -325,6 +325,7 @@ export async function renderOrderConfirmationEmail(
     `
     ${h1("Děkujeme za objednávku!")}
     ${p(`Ahoj ${esc(order.customer.jmeno)}, potvrzujeme, že jsme objednávku <strong>#${vs}</strong> přijali a začínáme ji připravovat.`)}
+    ${p(`Stav objednávky můžeš kdykoli sledovat na <a href="${SITE_URL}/objednavky" style="color:${BRAND_INK};text-decoration:none;font-weight:700;">sledování objednávky</a> — stačí zadat číslo objednávky <strong>#${vs}</strong> a svůj e-mail.`)}
     ${paymentBlock}
     <p style="margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">Položky objednávky</p>
     ${itemsTable(order.items, currency)}

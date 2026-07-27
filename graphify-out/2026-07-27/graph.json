@@ -29004,7 +29004,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "components/SearchOverlay.tsx",
-      "source_location": "L450",
+      "source_location": "L426",
       "weight": 1.0,
       "source": "components_searchoverlay_searchoverlay",
       "target": "components_searchoverlay_highlightmatch",
@@ -29071,7 +29071,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "components/SearchOverlay.tsx",
-      "source_location": "L319",
+      "source_location": "L295",
       "weight": 1.0,
       "source": "components_searchoverlay_searchoverlay",
       "target": "lib_currency_formatprice"
@@ -29082,7 +29082,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "components/SearchOverlay.tsx",
-      "source_location": "L319",
+      "source_location": "L295",
       "weight": 1.0,
       "source": "components_searchoverlay_searchoverlay",
       "target": "lib_currency_getprice"
@@ -29104,7 +29104,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "components/SearchOverlay.tsx",
-      "source_location": "L287",
+      "source_location": "L263",
       "weight": 1.0,
       "source": "components_searchoverlay_searchoverlay",
       "target": "lib_email_p"
@@ -29203,7 +29203,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "components/SearchOverlay.tsx",
-      "source_location": "L258",
+      "source_location": "L234",
       "weight": 1.0,
       "source": "components_searchoverlay_searchoverlay",
       "target": "lib_recentsearches_clearrecentsearches"

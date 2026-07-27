@@ -3,7 +3,8 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
-import React, { useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import React, { Suspense, useRef, useState } from "react";
 import {
     ChevronRight, ShieldCheck, Clock, CheckCircle2, ArrowRight,
     HelpCircle, Banknote, Send, AlertCircle,
@@ -123,9 +124,13 @@ function Field({
 
 // ── Stránka ───────────────────────────────────────────────────────────────────
 
-export default function ReklamaceAVraceniPage() {
+function ReklamaceContent() {
     const t = useT("claims");
     const steps = buildSteps(t);
+    // Ze sledování objednávky (/objednavky) sem chodí odkaz s ?order=&email=,
+    // ať zákazník nemusí číslo objednávky a e-mail psát podruhé. Bereme je jen
+    // jako předvyplnění — formulář i server si je stejně znovu zvalidují.
+    const searchParams = useSearchParams();
     const [isSubmitted, setIsSubmitted] = useState(false);
     // Číslo případu přiděluje server (atomický INCR, viz lib/claims.ts) a vrací
     // ho v odpovědi. Dřív se tady losovalo přes Math.random(), takže se nikam
@@ -133,7 +138,11 @@ export default function ReklamaceAVraceniPage() {
     const [ticket, setTicket] = useState<string | null>(null);
     // Lhůta na odeslání zboží — dopočítaná z data oznámení (viz returnDeadline).
     const [deadline, setDeadline] = useState<{ date: Date; daysLeft: number } | null>(null);
-    const [form, setForm] = useState<FormState>(defaultForm);
+    const [form, setForm] = useState<FormState>(() => ({
+        ...defaultForm,
+        cisloObjednavky: searchParams.get("order") ?? "",
+        email: searchParams.get("email") ?? "",
+    }));
     const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
     const [sending, setSending] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
@@ -541,5 +550,19 @@ export default function ReklamaceAVraceniPage() {
             </main>
             <Footer />
         </>
+    );
+}
+
+// useSearchParams vyžaduje Suspense hranici (jinak spadne build na statické
+// generaci). Předvyplnění z /objednavky ji potřebuje.
+export default function ReklamaceAVraceniPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-surface flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            </div>
+        }>
+            <ReklamaceContent />
+        </Suspense>
     );
 }
