@@ -9,7 +9,7 @@ import { useRef } from "react";
 
 export default function DualRangeSlider({
   min, max, valueMin, valueMax, onChangeMin, onChangeMax, step = 10,
-  labelMin, labelMax,
+  labelMin, labelMax, formatValue,
 }: {
   min: number; max: number;
   valueMin: number; valueMax: number;
@@ -18,6 +18,10 @@ export default function DualRangeSlider({
   step?: number;
   labelMin: string;
   labelMax: string;
+  /** Vykreslení částky včetně měny. Dřív si slider psal „Kč" natvrdo, takže
+   *  zákazník s přepnutou měnou viděl u produktů eura, ale na posuvníku koruny.
+   *  Měnu zná jen rodič, proto formátování chodí zvenčí — stejně jako popisky. */
+  formatValue: (value: number) => string;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const range = Math.max(max - min, 1);
@@ -57,8 +61,8 @@ export default function DualRangeSlider({
   return (
     <div>
       <div className="flex items-center justify-between mb-3 text-sm font-bold text-text-base">
-        <span>{valueMin} Kč</span>
-        <span>{valueMax} Kč</span>
+        <span>{formatValue(valueMin)}</span>
+        <span>{formatValue(valueMax)}</span>
       </div>
       <div ref={trackRef} className="relative h-4 flex items-center">
         <div className="absolute inset-x-0 h-1.5 rounded-full bg-border" />
@@ -68,7 +72,7 @@ export default function DualRangeSlider({
         />
         {/* Úchyt: viditelný kroužek zůstává 16px (vnitřní <span>), ale samotný
             div je 32×32 a průhledný — dotykový cíl tak splní 24×24 minimum.
-            aria-valuetext říká čtečce "1290 Kč", ne holé číslo. */}
+            aria-valuetext říká čtečce "1 290 Kč" / "€23.90", ne holé číslo. */}
         <div
           role="slider"
           tabIndex={0}
@@ -76,7 +80,7 @@ export default function DualRangeSlider({
           aria-valuemin={min}
           aria-valuemax={max}
           aria-valuenow={valueMin}
-          aria-valuetext={`${valueMin} Kč`}
+          aria-valuetext={formatValue(valueMin)}
           className="absolute top-1/2 w-8 h-8 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none"
           style={{ left: `${pctMin}%` }}
           onPointerDown={startDrag(onChangeMin, clampMin, Math.floor)}
@@ -95,7 +99,7 @@ export default function DualRangeSlider({
           aria-valuemin={min}
           aria-valuemax={max}
           aria-valuenow={valueMax}
-          aria-valuetext={`${valueMax} Kč`}
+          aria-valuetext={formatValue(valueMax)}
           className="absolute top-1/2 w-8 h-8 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none"
           style={{ left: `${pctMax}%` }}
           onPointerDown={startDrag(onChangeMax, clampMax, Math.ceil)}

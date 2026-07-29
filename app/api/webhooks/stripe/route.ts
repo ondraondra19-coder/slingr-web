@@ -19,6 +19,7 @@ import { createPostHogServerClient, captureServerEvent } from "@/lib/posthog-ser
 import { confirmPendingOrder, markStockIssue } from "@/lib/orders";
 import { deductStockForItems } from "@/lib/stock";
 import { sendOrderConfirmationEmail } from "@/lib/email";
+import { subscribeToNewsletter } from "@/lib/newsletter";
 
 export async function POST(req: Request) {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -113,6 +114,14 @@ export async function POST(req: Request) {
             );
           }
           await sendOrderConfirmationEmail(confirmed);
+
+          // Novinky: adresu do seznamu odběratelů přidáváme TEPRVE TADY, po
+          // potvrzené platbě — zahájený a nedokončený checkout kontakt nedá.
+          // Zaškrtnuté „nechci newsletter" znamená, že se sem nedostane nic.
+          if (confirmed.newsletterOptIn && confirmed.customer.email) {
+            const sub = await subscribeToNewsletter(confirmed.customer.email);
+            if (!sub.ok) console.error(`Newsletter: kontakt z objednávky ${confirmed.id} se neuložil (${sub.reason}).`);
+          }
         }
       }
     } catch (err) {

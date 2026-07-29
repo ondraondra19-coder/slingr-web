@@ -16,6 +16,7 @@ import Image from "next/image";
 import { useT } from "@/lib/useT";
 import { useLang } from "@/lib/LangContext";
 import type { Locale } from "@/lib/locale";
+import { useModalBehavior } from "@/lib/useModalBehavior";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -106,17 +107,19 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
   useEffect(() => {
     if (!open) return;
     const id = requestAnimationFrame(() => inputRef.current?.focus());
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setRecent(getRecentSearches());
     return () => {
       cancelAnimationFrame(id);
-      document.body.style.overflow = prev;
       setQuery("");
       setActiveIndex(-1);
     };
   }, [open]);
+
+  // Zamknutí rolování (dřív rovnou tady) žije v lib/useModalBehavior.ts, ať se
+  // všechny překryvy chovají stejně. Escape si overlay řeší po svém níž —
+  // nejdřív maže rozepsaný dotaz a teprve prázdný zavírá.
+  useModalBehavior(open);
 
   // Analytika hledání — až po prodlevě v psaní (jeden dotaz = jeden event),
   // ne po každém stisku. `firedRef` brání dvojímu odeslání téhož dotazu, i když

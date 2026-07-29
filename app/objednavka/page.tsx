@@ -20,8 +20,9 @@ import { useT, type T } from "@/lib/useT";
 import { useLang } from "@/lib/LangContext";
 import { DOBIRKA_FEE } from "@/lib/fees";
 import { trackEvent } from "@/lib/analytics";
-import { isBankTransferEnabled } from "@/lib/featureFlags";
+import { isBankTransferEnabled, arePaymentsEnabled } from "@/lib/featureFlags";
 import CheckoutStepper from "@/components/CheckoutStepper";
+import { useModalBehavior } from "@/lib/useModalBehavior";
 
 declare global {
   interface Window {
@@ -75,6 +76,7 @@ const MOCK_ZBOXES: PacketaPoint[] = [
 ];
 
 function MockZboxModal({ onPick, onClose }: { onPick: (point: PacketaPoint) => void; onClose: () => void }) {
+  useModalBehavior(true, onClose);
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
@@ -111,6 +113,9 @@ export default function ObjednavkaPage() {
   const { items, getTotalPrice, getItemPrice, appliedDiscount, getDiscountAmount, getFinalPrice } = useCart();
   const { currency } = useCurrency();
   const t = useT("checkout");
+  // Hláška o pozastavených objednávkách žije v namespace `cart`, ať je na všech
+  // krocích košíku stejná a nemusí se psát dvakrát.
+  const tcart = useT("cart");
   const { locale } = useLang();
   const dopravyOptions = buildDopravyOptions(t);
   const platbyOptions = buildPlatbyOptions(t);
@@ -415,12 +420,23 @@ export default function ObjednavkaPage() {
                   <DiscountWidget />
                 </div>
 
+                {/* Vypnuté platby (PLATBY_ZAPNUTE v featureFlags.ts) — sem se
+                    zákazník dostane jen odkazem, košík ho zastaví dřív. */}
                 <div className="px-5 pb-5">
-                  <button onClick={handleSubmit}
-                    className="w-full py-4 rounded-2xl bg-primary text-on-primary font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-                    {t("continueToInfo")} <ChevronRight size={15} aria-hidden="true" />
-                  </button>
-                  <p className="text-text-subtle text-xs text-center mt-3">{t("securePayment")}</p>
+                  {arePaymentsEnabled() ? (
+                    <>
+                      <button onClick={handleSubmit}
+                        className="w-full py-4 rounded-2xl bg-primary text-on-primary font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                        {t("continueToInfo")} <ChevronRight size={15} aria-hidden="true" />
+                      </button>
+                      <p className="text-text-subtle text-xs text-center mt-3">{t("securePayment")}</p>
+                    </>
+                  ) : (
+                    <div className="rounded-2xl border border-border bg-surface p-5 text-center">
+                      <p className="text-text-base font-bold text-sm">{tcart("paused")}</p>
+                      <p className="text-text-muted text-xs leading-relaxed mt-1.5">{tcart("pausedDesc")}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

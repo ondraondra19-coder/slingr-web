@@ -154,7 +154,9 @@ export default function KontaktPage() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Pod sm: pod sebou — dvě pole vedle sebe mají na 360px
+                      displeji po ~116 px, do kterých se e-mail nevejde. */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-text-muted text-xs font-medium mb-1.5">{t("nameLabel")}</label>
                       <input value={name} onChange={e => setName(e.target.value)} placeholder={t("namePlaceholder")} aria-label={t("nameLabel")}

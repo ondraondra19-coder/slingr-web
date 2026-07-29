@@ -20,6 +20,7 @@ import { COUNTRY_CZECHIA } from "@/lib/shipping/pricing";
 import { useT } from "@/lib/useT";
 import { isValidEmail } from "@/lib/emailValidation";
 import { shippingLabel } from "@/lib/shippingLabels";
+import { arePaymentsEnabled } from "@/lib/featureFlags";
 import CheckoutStepper from "@/components/CheckoutStepper";
 
 const ORDER_KEY = "slingr-order";
@@ -495,19 +496,21 @@ function NameField({ value, onChange, error }: { value: string; onChange: (v: st
   );
 }
 
+// Předvolba je PEVNÁ (+420), ne rozbalovací. Dřív tu byl <select> s +420/+421,
+// který ale neměl `value` ani `onChange` a jeho hodnotu nikdo nikdy nepřečetl —
+// kdo vybral +421, uložil si číslo stejně jako české. Doručujeme zatím jen po
+// ČR (viz COUNTRIES v lib/shipping/pricing.ts), takže volba nemá co nabízet.
+// Až přidáš Slovensko: předvolbu vytáhni do stavu formuláře (FormState) a ulož
+// ji s číslem, jinak se chyba vrátí.
 function TelefonField({ value, onChange, error }: { value: string; onChange: (v: string) => void; error?: string }) {
   const t = useT("info");
   return (
     <div data-field="telefon">
       <label htmlFor="telefon" className="block text-text-muted text-xs font-medium mb-1.5">{t("phone")} <span className="text-red-400" aria-hidden="true">*</span></label>
       <div className={`flex items-center border rounded-xl overflow-hidden transition-colors ${error ? "border-red-400" : "border-border focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10"}`}>
-        <div className="relative shrink-0">
-          <select defaultValue="+420" className="appearance-none bg-secondary border-r border-border px-3 py-2.5 text-sm text-text-muted focus:outline-none pr-7 cursor-pointer">
-            <option value="+420">🇨🇿 +420</option>
-            <option value="+421">🇸🇰 +421</option>
-          </select>
-          <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-subtle pointer-events-none" />
-        </div>
+        <span className="shrink-0 bg-secondary border-r border-border px-3 py-2.5 text-sm text-text-muted select-none">
+          🇨🇿 +420
+        </span>
         <input id="telefon" name="telefon" type="tel" value={formatPhone(value)} onChange={e => onChange(e.target.value.replace(/\D/g, "").slice(0, 9))}
           placeholder="777 123 456" maxLength={11} autoComplete="tel-national"
           className="flex-1 bg-surface px-4 py-2.5 text-sm text-text-base placeholder-text-subtle focus:outline-none" />
@@ -568,6 +571,8 @@ export default function InformacePage() {
   const { currency } = useCurrency();
   const t = useT("info");
   const tc = useT("checkout");
+  // Hláška o pozastavených objednávkách je společná pro celý košík.
+  const tcart = useT("cart");
 
   // Hodnota je česká a kanonická (ukládá se do objednávky), popisek přeložený.
   // Zatím doručujeme jen po ČR (viz lib/shipping/pricing.ts COUNTRIES).
@@ -584,8 +589,17 @@ export default function InformacePage() {
   const [nakupNaFirmu, setNakupNaFirmu] = useState(false);
   const [jineDorucenoAdresa, setJineDorucenoAdresa] = useState(false);
   const [zadatPoznamku, setZadatPoznamku] = useState(false);
+  // Odhlašovací (opt-out) zaškrtávátko: nezaškrtnuté = e-mail přidáme do
+  // seznamu odběratelů, zaškrtnuté = neuložíme ho tam vůbec. Rozhodnutí letí
+  // na server jako `newsletterOptIn` a přihlášení dělá AŽ SERVER po vzniku
+  // objednávky — u karty teprve po zaplacení (Stripe webhook), ať se nesbírají
+  // adresy z nedokončených platieb. Právní opora je v § 7 odst. 3 zákona
+  // č. 480/2004 Sb.: vlastnímu zákazníkovi smíme nabízet obdobné zboží, pokud
+  // má možnost to odmítnout při sběru (tady) i v každém e-mailu (odhlašovací
+  // odkaz vkládá Resend). Kdyby se sem někdy přidala reklama na cizí zboží
+  // nebo sběr adres mimo objednávku, tenhle základ přestane platit a musí
+  // z toho být klasický souhlas (nezaškrtnuté „chci dostávat").
   const [noNewsletter, setNoNewsletter] = useState(false);
-  const [registrace, setRegistrace] = useState(false);
   // Data objednávky uložená v localStorage z předchozích kroků. Dynamický
   // objekt — typujeme jen pole, která tady reálně čteme.
   type OrderFormData = {
@@ -684,12 +698,21 @@ export default function InformacePage() {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             items, currency: currency.code,
-            orderData: { ...dataToSave, doprava: parsedOrder?.doprava ?? null, dopravaName: parsedOrder?.dopravaName || "Doprava", dopravaPrice: parsedOrder?.dopravaPrices || 0, isDobirka: parsedOrder?.isDobirka || false, discountCode: appliedDiscount?.code ?? null, discountLabel: appliedDiscount?.label ?? null, discountAmountCZK: discountAmountCZK > 0 ? discountAmountCZK : 0, zbox: parsedOrder?.zbox ?? null },
+            orderData: { ...dataToSave, doprava: parsedOrder?.doprava ?? null, dopravaName: parsedOrder?.dopravaName || "Doprava", dopravaPrice: parsedOrder?.dopravaPrices || 0, isDobirka: parsedOrder?.isDobirka || false, discountCode: appliedDiscount?.code ?? null, discountLabel: appliedDiscount?.label ?? null, discountAmountCZK: discountAmountCZK > 0 ? discountAmountCZK : 0, zbox: parsedOrder?.zbox ?? null, newsletterOptIn: !noNewsletter },
           }),
         });
-        const d = await res.json();
+        const d = await res.json().catch(() => ({}));
         if (d.url) { clearCart(); removeDiscount(); window.location.href = d.url; return; }
-        else alert("Stripe chyba: " + d.error);
+
+        // Platba se nespustila — TADY MUSÍ FUNKCE SKONČIT. Bez `return` kód
+        // propadl dolů, vyprázdnil košík a poslal zákazníka na
+        // /objednavka/uspech se zelenou hláškou „Zaplaceno", přitom
+        // objednávka nevznikla ani u nás, ani ve Stripe. Košík i vyplněné
+        // údaje necháváme být, ať to jde zkusit znovu bez opisování.
+        // Technický důvod patří do konzole, ne do očí zákazníka.
+        console.error("Stripe checkout se nepodařilo spustit:", d.error);
+        alert(t("errPaymentStart"));
+        return;
       }
 
       // Dobírka / bankovní převod — žádný Stripe krok, objednávku uložíme
@@ -702,7 +725,7 @@ export default function InformacePage() {
           body: JSON.stringify({
             items, currency: currency.code,
             paymentMethod: metoda.includes("dobirka") ? "dobirka" : "prevod",
-            orderData: { ...dataToSave, doprava: parsedOrder?.doprava ?? null, dopravaName: parsedOrder?.dopravaName || "Doprava", dopravaPrice: parsedOrder?.dopravaPrices || 0, discountCode: appliedDiscount?.code ?? null, discountLabel: appliedDiscount?.label ?? null, discountAmountCZK: discountAmountCZK > 0 ? discountAmountCZK : 0, zbox: parsedOrder?.zbox ?? null },
+            orderData: { ...dataToSave, doprava: parsedOrder?.doprava ?? null, dopravaName: parsedOrder?.dopravaName || "Doprava", dopravaPrice: parsedOrder?.dopravaPrices || 0, discountCode: appliedDiscount?.code ?? null, discountLabel: appliedDiscount?.label ?? null, discountAmountCZK: discountAmountCZK > 0 ? discountAmountCZK : 0, zbox: parsedOrder?.zbox ?? null, newsletterOptIn: !noNewsletter },
           }),
         });
         const d = await res.json().catch(() => ({}));
@@ -782,8 +805,10 @@ export default function InformacePage() {
                   <h2 className="text-text-base font-semibold text-lg">{t("billingHeading")}</h2>
                   <CheckRow checked={nakupNaFirmu} onChange={() => setNakupNaFirmu(v => !v)}>{t("buyingAsCompany")}</CheckRow>
                 </div>
+                {/* IČ a DIČ vedle sebe až od sm — na úzkém displeji se do dvou
+                    sloupců nevejde ani osmimístné IČO. */}
                 {nakupNaFirmu && (
-                  <div className="px-6 pt-5 pb-2 grid grid-cols-2 gap-4 border-b border-border">
+                  <div className="px-6 pt-5 pb-2 grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-border">
                     <div className="col-span-2"><Field label={t("companyName")} name="firma" value={form.firma} onChange={e => setSimpleField("firma", e.target.value)} placeholder="Firma s.r.o." autoComplete="organization" /></div>
                     <Field label={t("companyId")} name="ic" value={form.ic} onChange={e => setSimpleField("ic", e.target.value)} placeholder="12345678" />
                     <Field label={t("vatId")} name="dic" value={form.dic} onChange={e => setSimpleField("dic", e.target.value)} placeholder="CZ12345678" />
@@ -848,7 +873,7 @@ export default function InformacePage() {
                 )}
                 <div className="h-px bg-border" />
                 <CheckRow checked={noNewsletter} onChange={() => setNoNewsletter(v => !v)}>{t("noNewsletter")}</CheckRow>
-                <CheckRow checked={registrace} onChange={() => setRegistrace(v => !v)}>{t("register")}</CheckRow>
+                <p className="text-text-subtle text-xs leading-relaxed pl-8 -mt-2">{t("newsletterNote")}</p>
               </div>
             </div>
 
@@ -926,13 +951,38 @@ export default function InformacePage() {
                   </div>
                 </div>
                 <div className="px-5 pb-4"><DiscountWidget /></div>
+                {/* Vypnuté platby (PLATBY_ZAPNUTE v featureFlags.ts) — poslední
+                    záchytný bod; server objednávku odmítne tak jako tak. */}
+                {!arePaymentsEnabled() ? (
+                  <div className="px-5 pb-5">
+                    <div className="rounded-2xl border border-border bg-surface p-5 text-center">
+                      <p className="text-text-base font-bold text-sm">{tcart("paused")}</p>
+                      <p className="text-text-muted text-xs leading-relaxed mt-1.5">{tcart("pausedDesc")}</p>
+                    </div>
+                  </div>
+                ) : (
                 <div className="px-5 pb-5 flex flex-col gap-3">
                   <button onClick={handleSubmit} disabled={loading || items.length === 0}
                     className="w-full py-4 rounded-2xl bg-primary text-on-primary font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                     {loading ? <Loader2 className="animate-spin" size={18} aria-hidden="true" /> : <><Check size={16} aria-hidden="true" /> {t("submit")}</>}
                   </button>
+                  {/* Obchodní podmínky musí být zákazníkovi dostupné DŘÍV, než
+                      objednávku odešle — do té doby na ně vedl odkaz jen
+                      z patičky, tedy nikde v objednávkovém procesu. */}
+                  <p className="text-text-subtle text-xs leading-relaxed text-center">
+                    {t("termsNotice").split(/(\{terms\}|\{privacy\})/).map((part, i) => {
+                      if (part === "{terms}") return (
+                        <Link key={i} href="/obchodni-podminky" className="text-primary-ink hover:underline">{t("termsLink")}</Link>
+                      );
+                      if (part === "{privacy}") return (
+                        <Link key={i} href="/ochrana-osobnich-udaju" className="text-primary-ink hover:underline">{t("privacyLink")}</Link>
+                      );
+                      return <span key={i}>{part}</span>;
+                    })}
+                  </p>
                   <p className="text-text-subtle text-xs text-center">{tc("securePayment")}</p>
                 </div>
+                )}
               </div>
             </div>
           </div>

@@ -7,6 +7,10 @@
 // údajů). Nikde jinde už kontakt nepiš natvrdo.
 //
 // Až budeš vyplňovat ostrá data, uprav jen hodnoty v objektu `UDAJE` níž.
+//
+// POZOR: zapínání a vypínání funkcí sem NEPATŘÍ — přepínače (platby, bankovní
+// převod, magazín) žijí pohromadě v `lib/featureFlags.ts`. Hlavní vypínač
+// plateb je tam hned nahoře jako `PLATBY_ZAPNUTE`.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const UDAJE = {
@@ -52,6 +56,18 @@ export const UDAJE = {
 
 /** Sídlo na jeden řádek — do právních textů a patičky. */
 export const adresaSidla = `${UDAJE.addressStreet}, ${UDAJE.addressCity}`;
+
+/** Sídlo včetně země — GPSR chce u výrobce plnou poštovní adresu. */
+export const adresaSidlaPlna = `${adresaSidla}, ${UDAJE.addressCountry}`;
+
+/**
+ * Jsme plátci DPH? Odvozeno z DIČ — prázdné DIČ = neplátce.
+ *
+ * Neplátce nesmí u ceny psát „včetně DPH" (žádnou neodvádí). Web proto podle
+ * tohohle přepíná popisek u ceny i větu v obchodních podmínkách. Až se plátcem
+ * staneš, stačí vyplnit `vatId` výš a obojí se přepne samo.
+ */
+export const isVatPayer = UDAJE.vatId.trim().length > 0;
 
 /** Telefon připravený do `href` (bez mezer). */
 export const telHref = `tel:${UDAJE.phone.replace(/\s/g, "")}`;

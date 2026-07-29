@@ -46,10 +46,11 @@ export default function RootLayout({
   return (
     <html lang="cs">
       <head>
-        {/* Vynucení černé barvy pro stavovou lištu v iOS a roztáhnutí viewportu */}
+        {/* Černá stavová lišta v iOS. Značku <meta name="viewport"> sem NEPIŠ —
+            generuje ji Next z exportu `viewport` výš. Byla tu obojí, takže
+            stránka posílala dvě konkurenční definice téhož. */}
         <meta name="theme-color" content="#111111" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/* CurrencyProvider je vně, aby CartProvider mohl reagovat na změnu měny.

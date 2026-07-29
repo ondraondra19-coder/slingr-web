@@ -5,8 +5,10 @@ import type { Metadata } from "next";
 import { products as staticProducts } from "@/lib/products";
 import { getProductsForDisplay } from "@/lib/productDiscounts";
 import { getStock } from "@/lib/stock";
+import { descriptionLead } from "@/lib/description";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import ProduktClient from "@/components/ProduktClient";
 
 export function generateStaticParams() {
@@ -18,7 +20,9 @@ const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://slingr.vercel.app
 // Zkrátí popis na ~160 znaků na hranici slova — do <meta description> a náhledů
 // při sdílení. Delší text vyhledávače stejně oříznou.
 function metaDescription(text: string): string {
-  const clean = text.replace(/\s+/g, " ").trim();
+  // Jen úvodní odstavec — do výsledků vyhledávání nepatří emoji odrážky
+  // s vlastnostmi ani řádek s parametry (viz lib/description.ts).
+  const clean = descriptionLead(text).replace(/\s+/g, " ").trim();
   if (clean.length <= 160) return clean;
   return clean.slice(0, 157).replace(/\s+\S*$/, "") + "…";
 }
@@ -77,6 +81,7 @@ export default async function ProduktPage({
         related={related}
         stock={stock}
       />
+      <Footer />
     </>
   );
 }

@@ -12,15 +12,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, ArrowRight, Star, Truck, Plus } from "lucide-react";
 import type { Product } from "@/lib/products";
-import { getProductName } from "@/lib/products";
+import { getProductName, LOW_STOCK_THRESHOLD } from "@/lib/products";
 import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice, CURRENCIES } from "@/lib/currency";
 import { useCart } from "@/lib/cart";
 import { useLang } from "@/lib/LangContext";
 import { useT } from "@/lib/useT";
-
-// Do kolika kusů na skladě křičíme „Poslední kusy!" / „Zbývá N skladem".
-const LOW_STOCK_THRESHOLD = 10;
 
 // Brandová dlaždice pod fotkou — jemné diagonální šrafování ve dvou odstínech
 // naší teal barvy. Fotky (barevné blastery) na ní vyniknou líp než na bílé.

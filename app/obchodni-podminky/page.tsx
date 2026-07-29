@@ -4,8 +4,9 @@ import TermsPage from "@/components/legal/TermsPage";
 
 // Serverová stránka jen kvůli metadata — ta z klientské komponenty exportovat
 // nejdou. Text je klientský, protože se vybírá podle jazyka (viz lib/locale.ts).
+// Bez „| Slingr" — značku doplní `template` z app/layout.tsx.
 export const metadata = {
-  title: "Obchodní podmínky | Slingr",
+  title: "Obchodní podmínky",
 };
 
 export default function ObchodniPodminkyPage() {

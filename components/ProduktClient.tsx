@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart, Check, ChevronRight, RefreshCw, ChevronLeft, Bell, Play, X, Star, Truck } from "lucide-react";
+import { ShoppingCart, Check, ChevronRight, RefreshCw, ChevronLeft, Bell, Play, X, Star, Truck, AlertTriangle } from "lucide-react";
 import type { Product } from "@/lib/products";
+import { manufacturerFor, ageMinFor } from "@/lib/productSafety";
+import { isVatPayer } from "@/lib/udaje";
 import { useCart } from "@/lib/cart";
 import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice, CURRENCIES } from "@/lib/currency";
@@ -12,7 +14,9 @@ import { useStockPolling } from "@/lib/useStockPolling";
 import { trackEvent } from "@/lib/analytics";
 import { useT } from "@/lib/useT";
 import { useLang } from "@/lib/LangContext";
-import { getProductName, getProductDescription, getCategoryName, categories } from "@/lib/products";
+import { getProductName, getProductDescription, getCategoryName, categories, products, LOW_STOCK_THRESHOLD } from "@/lib/products";
+import { parseDescription, descriptionPreview } from "@/lib/description";
+import { useModalBehavior } from "@/lib/useModalBehavior";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,7 +35,7 @@ const TILE_STYLE: React.CSSProperties = {
 
 function StockBadge({ available }: { available: number }) {
   const t = useT("product");
-  const state = available <= 0 ? "none" : available >= 5 ? "plenty" : "low";
+  const state = available <= 0 ? "none" : available > LOW_STOCK_THRESHOLD ? "plenty" : "low";
   const chipClass =
     state === "plenty" ? "border-emerald-200 bg-emerald-50 text-emerald-700" :
     state === "low"    ? "border-amber-200 bg-amber-50 text-amber-700" :
@@ -154,6 +158,7 @@ function AddedModal({ productName, productImg, onClose }: {
   onClose: () => void;
 }) {
   const t = useT("product");
+  useModalBehavior(true, onClose);
   return (
     <div
       role="dialog"
@@ -209,6 +214,7 @@ function AddedModal({ productName, productImg, onClose }: {
 
 function NotifyModal({ onClose, slug }: { onClose: () => void; slug: string }) {
   const t = useT("product");
+  useModalBehavior(true, onClose);
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
@@ -322,6 +328,121 @@ function NotifyModal({ onClose, slug }: { onClose: () => void; slug: string }) {
   );
 }
 
+// ── Popis produktu ────────────────────────────────────────────────────────────
+
+// Vysází bloky z lib/description.ts. Když popis žádnou strukturu nemá, vyjdou
+// z něj obyčejné odstavce — starší popisy se tím nerozbijí.
+//
+// Všechno je v JEDNOM sloupci: panel je široký 448 px, ale `sm:` v Tailwindu
+// se řídí šířkou okna, ne panelu — dvousloupcová mřížka by se na monitoru
+// nacpala do dvou úzkých proužků.
+function DescriptionBody({
+  text, bundleItems, bundleTitle,
+}: {
+  text: string;
+  bundleItems: string[];
+  bundleTitle: string;
+}) {
+  const blocks = parseDescription(text);
+
+  return (
+    <div className="flex flex-col gap-8">
+      {blocks.map((block, i) => {
+        switch (block.kind) {
+          case "lead":
+            return (
+              <p key={i} className="text-text-base text-base leading-relaxed font-semibold">
+                {block.text}
+              </p>
+            );
+
+          case "paragraph":
+            return (
+              <p key={i} className="text-text-muted text-sm leading-relaxed">
+                {block.text}
+              </p>
+            );
+
+          case "features":
+            return (
+              <div key={i} className="flex flex-col gap-5">
+                {block.items.map((f) => (
+                  <div key={f.title} className="flex items-start gap-3.5">
+                    <span className="text-xl leading-none shrink-0 mt-0.5" aria-hidden="true">{f.icon}</span>
+                    <div className="min-w-0">
+                      <p className="text-text-base font-bold text-sm">{f.title}</p>
+                      {f.text && <p className="text-text-muted text-sm leading-relaxed mt-0.5">{f.text}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+
+          case "list":
+            return (
+              <div key={i} className="border-t border-border pt-5">
+                <p className="flex items-center gap-2 text-text-base font-bold text-sm mb-3">
+                  <span className="text-base leading-none" aria-hidden="true">{block.icon}</span>
+                  {block.title}
+                </p>
+                <ul className="flex flex-col gap-2">
+                  {block.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-text-muted text-sm">
+                      <Check size={14} className="text-primary-ink shrink-0 mt-0.5" aria-hidden="true" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+
+          case "note":
+            return (
+              <div key={i} className="rounded-xl bg-primary/8 p-4 flex items-start gap-3">
+                <span className="text-lg leading-none shrink-0" aria-hidden="true">{block.icon}</span>
+                <div className="min-w-0">
+                  <p className="text-text-base font-bold text-sm">{block.title}</p>
+                  <p className="text-text-muted text-sm leading-relaxed mt-0.5">{block.text}</p>
+                </div>
+              </div>
+            );
+
+          case "specs":
+            return (
+              <dl key={i} className="border-t border-border pt-2 divide-y divide-border">
+                {block.items.map((s) => (
+                  <div key={s.label} className="flex items-baseline justify-between gap-4 py-2.5">
+                    <dt className="text-text-subtle text-sm shrink-0">{s.label}</dt>
+                    <dd className="text-text-base text-sm font-semibold text-right">{s.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            );
+        }
+      })}
+
+      {/* Obsah setu se NEPÍŠE do popisu — čte se z `bundle`, ať se nerozejde
+          s tím, co se reálně odečítá ze skladu a posílá zákazníkovi. */}
+      {bundleItems.length > 0 && (
+        <div className="border-t border-border pt-5">
+          <p className="flex items-center gap-2 text-text-base font-bold text-sm mb-3">
+            <span className="text-base leading-none" aria-hidden="true">📦</span>
+            {bundleTitle}
+          </p>
+          <ul className="flex flex-col gap-2">
+            {bundleItems.map((item) => (
+              <li key={item} className="flex items-start gap-2.5 text-text-muted text-sm">
+                <Check size={14} className="text-primary-ink shrink-0 mt-0.5" aria-hidden="true" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function ProduktClient({
@@ -347,10 +468,28 @@ export default function ProduktClient({
   const extraMedia: MediaItem[] = product.media ?? [];
   const descriptionText = getProductDescription(product, locale);
 
+  // Obsah setu — jména komponent z `bundle`, ne opsaná v popisu.
+  const bundleItems = (product.bundle ?? []).map((part) => {
+    const component = products.find((p) => p.slug === part.slug);
+    const label = component ? getProductName(component, locale) : part.slug;
+    return part.quantity > 1 ? `${label} — ${part.quantity}×` : label;
+  });
+
+  // GPSR — údaje o výrobci a bezpečnosti (viz lib/productSafety.ts).
+  const manufacturer = manufacturerFor(product.safety);
+  const ageMin = ageMinFor(product.safety);
+  const safetyModel = product.safety?.model ?? productName;
+
   const [added, setAdded] = useState(false);
   const [qty, setQty] = useState(1);
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [descOpen, setDescOpen] = useState(false);
+
+  // Výsuvný popis je taky překryv — zamkne stránku pod sebou a jde zavřít
+  // Escapem. useCallback drží stejnou referenci, ať se posluchač klávesy
+  // nepřevěšuje při každém překreslení.
+  const closeDesc = useCallback(() => setDescOpen(false), []);
+  useModalBehavior(descOpen, closeDesc);
 
   const CZK = CURRENCIES.CZK;
   const totalPrice = getPrice(product.price, currency);
@@ -488,14 +627,14 @@ export default function ProduktClient({
                       <span className="text-xl font-medium text-text-subtle line-through leading-none">
                         {formatPrice(originalTotalPrice, currency)}
                       </span>
-                      <span className="text-sm text-text-subtle">{t("inclVat")}</span>
+                      <span className="text-sm text-text-subtle">{isVatPayer ? t("inclVat") : t("finalPrice")}</span>
                     </>
                   ) : (
                     <>
                       <span className="text-3xl sm:text-4xl font-extrabold text-primary-ink leading-none">
                         {formatPrice(totalPrice, currency)}
                       </span>
-                      <span className="text-sm text-text-subtle">{t("inclVat")}</span>
+                      <span className="text-sm text-text-subtle">{isVatPayer ? t("inclVat") : t("finalPrice")}</span>
                     </>
                   )}
                 </div>
@@ -508,10 +647,17 @@ export default function ProduktClient({
               <div className="h-px bg-border" />
 
               {/* ── Náhled popisku + „Číst dále" ── */}
+              {/* V náhledu jsou úvodní odstavce celé, nezkrácené. Vlastnosti
+                  a parametry se ukážou až po rozkliknutí — rozsekaná emoji
+                  uprostřed věty vypadají rozbitě. */}
               <div>
-                <p className="text-text-muted text-sm leading-relaxed">
-                  <span className="line-clamp-2">{descriptionText}</span>
-                </p>
+                <div className="flex flex-col gap-2.5">
+                  {descriptionPreview(descriptionText).map((paragraph, i) => (
+                    <p key={i} className={`text-sm leading-relaxed ${i === 0 ? "text-text-base font-medium" : "text-text-muted"}`}>
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
                 <button
                   type="button"
                   onClick={() => setDescOpen(true)}
@@ -599,6 +745,50 @@ export default function ProduktClient({
             </div>
           </div>
 
+          {/* ── Bezpečnost a výrobce (GPSR) ── */}
+          {/* Nařízení (EU) 2023/988 chce tyhle údaje přímo u nabídky výrobku,
+              ne schované v obchodních podmínkách. Viz lib/productSafety.ts. */}
+          <section className="border-t-2 border-text-base/25 pt-8 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 lg:gap-16">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-text-subtle mb-3">
+                {t("safetyEyebrow")}
+              </p>
+              <h2 className="text-2xl font-extrabold text-text-base tracking-tight leading-tight">
+                {t("safetyTitle")}
+              </h2>
+            </div>
+
+            <div className="min-w-0 flex flex-col gap-7">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-5">
+                <div>
+                  <p className="text-text-subtle text-xs font-semibold uppercase tracking-wide mb-1.5">{t("safetyManufacturer")}</p>
+                  <p className="text-text-base text-sm font-semibold">{manufacturer.name}</p>
+                  <p className="text-text-muted text-sm leading-relaxed mt-0.5">{manufacturer.address}</p>
+                  <a href={`mailto:${manufacturer.email}`} className="text-primary-ink text-sm hover:underline">
+                    {manufacturer.email}
+                  </a>
+                </div>
+                <div>
+                  <p className="text-text-subtle text-xs font-semibold uppercase tracking-wide mb-1.5">{t("safetyProduct")}</p>
+                  <p className="text-text-base text-sm font-semibold">{safetyModel}</p>
+                  <p className="text-text-muted text-sm mt-0.5">{t("safetyAgeValue", { age: ageMin })}</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-text-subtle text-xs font-semibold uppercase tracking-wide mb-2.5">{t("safetyWarningsTitle")}</p>
+                <ul className="flex flex-col gap-2">
+                  {[t("safetyWarn1", { age: ageMin }), t("safetyWarn2"), t("safetyWarn3"), t("safetyWarn4")].map((w) => (
+                    <li key={w} className="flex items-start gap-2.5 text-text-muted text-sm leading-relaxed">
+                      <AlertTriangle size={14} className="text-primary-ink shrink-0 mt-0.5" aria-hidden="true" />
+                      {w}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </section>
+
           {/* ── Related products ── */}
           {related.length > 0 && (
             <div>
@@ -675,8 +865,8 @@ export default function ProduktClient({
                   <X size={20} />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto px-6 py-5">
-                <p className="text-text-muted text-sm leading-relaxed whitespace-pre-line">{descriptionText}</p>
+              <div className="flex-1 overflow-y-auto px-6 py-6">
+                <DescriptionBody text={descriptionText} bundleItems={bundleItems} bundleTitle={t("inTheBox")} />
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ShoppingBag, Phone, ChevronDown, Menu, X, Globe, Coins, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import { useT } from "@/lib/useT";
 import { useLang } from "@/lib/LangContext";
 import { LOCALES, LOCALE_LABELS, type Locale } from "@/lib/locale";
 import { getCategoryName, getProductName } from "@/lib/products";
+import { useModalBehavior } from "@/lib/useModalBehavior";
 
 // Popisek, který se u ikonky rozbalí zleva doprava při najetí myší (nebo když
 // je `show` true — třeba když je otevřený její dropdown). Trik grid-cols
@@ -96,6 +97,11 @@ export default function Header() {
     if (openTimeout.current) clearTimeout(openTimeout.current);
     if (closeTimeout.current) clearTimeout(closeTimeout.current);
   }, []);
+
+  // Rozbalené mobilní menu zabírá většinu obrazovky — pod ním se nesmí rolovat
+  // stránka a musí jít zavřít Escapem (stejně jako ostatní překryvy).
+  const closeMobile = useCallback(() => { setMobileOpen(false); setMobileExpanded(null); }, []);
+  useModalBehavior(mobileOpen, closeMobile);
 
   const navRight = [
     { label: tn("contact"), href: "/kontakt" },
@@ -291,9 +297,11 @@ export default function Header() {
         );
       })()}
 
-      {/* ── MOBILE NAV ── */}
+      {/* ── MOBILE NAV ──
+          dvh: strop se dopočítá k tomu, co je z okna reálně vidět teď — s `vh`
+          mohlo menu vylézt pod adresní řádek a spodní položky byly nedostupné. */}
       {mobileOpen && (
-        <nav className="lg:hidden bg-header border-t border-white/10 max-h-[70vh] overflow-y-auto">
+        <nav className="lg:hidden bg-header border-t border-white/10 max-h-[70dvh] overflow-y-auto overscroll-contain">
           <ul className="divide-y divide-white/10">
             {navItems.map(item => (
               <li key={item.label}>

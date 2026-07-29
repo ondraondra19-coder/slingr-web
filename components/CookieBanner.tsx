@@ -95,7 +95,10 @@ export default function CookieBanner() {
           vedle sebe potřebují ~1200 px; na užším desktopu se textový sloupec
           smrskl na ~180 px, popis se zalomil do 8 řádků a lišta zabrala 74 %
           výšky okna. Ve sloupci má text celou šířku a lišta je nižší. */}
-      <div className="bg-[#121212] shadow-2xl border-t border-white/10 w-full p-6 md:py-7 md:px-10 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 xl:gap-10">
+      {/* Spodní odsazení nad gesto-lištu iPhonu — bez něj leželo tlačítko
+          „Odmítnout vše" v pruhu, který si systém bere pro vlastní gesto.
+          U souhlasu to je citlivé: hůř trefitelné odmítnutí není svobodné. */}
+      <div className="bg-[#121212] shadow-2xl border-t border-white/10 w-full p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:py-7 md:px-10 md:pb-[calc(1.75rem+env(safe-area-inset-bottom))] flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 xl:gap-10">
 
         {/* Levá textová část */}
         <div className="w-full xl:flex-1 min-w-0 flex flex-col xl:flex-row xl:items-center justify-between gap-3 xl:gap-8">

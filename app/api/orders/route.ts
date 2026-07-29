@@ -12,7 +12,8 @@ import { getShippingPrice } from "@/lib/shipping/pricing";
 import { getDobirkaFee } from "@/lib/fees";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { getClientIp } from "@/lib/clientIp";
-import { isBankTransferEnabled } from "@/lib/featureFlags";
+import { isBankTransferEnabled, arePaymentsEnabled } from "@/lib/featureFlags";
+import { subscribeToNewsletter } from "@/lib/newsletter";
 
 // Strop na množství jedné položky — brání zneužití (záporné/obří množství
 // rozbíjí cenu i odečet skladu, viz deductStockForItems).
@@ -25,6 +26,12 @@ type OrderReqItem = {
 };
 
 export async function POST(req: Request) {
+  // Hlavní vypínač plateb (lib/featureFlags.ts) — stejná pojistka jako
+  // v /api/checkout, ať se nedá objednat ani obejitím frontendu.
+  if (!arePaymentsEnabled()) {
+    return NextResponse.json({ error: "Objednávky jsou dočasně pozastaveny.", code: "payments_disabled" }, { status: 503 });
+  }
+
   try {
     const body = await req.json();
     const { items, currency, orderData, paymentMethod } = body;
@@ -131,6 +138,7 @@ export async function POST(req: Request) {
       subtotal,
       total: subtotal + shippingPrice + dobirkaFee - discountInCurrency,
       zboxId: orderData?.zbox?.id ?? null,
+      newsletterOptIn: orderData?.newsletterOptIn === true,
     };
 
     // Dobírka/převod nemá platební potvrzení jako karta — sklad si
@@ -157,6 +165,14 @@ export async function POST(req: Request) {
     // E-mail nesmí shodit vytvoření objednávky — sendOrderConfirmationEmail
     // chyby jen loguje, nikdy nevyhazuje.
     await sendOrderConfirmationEmail(order);
+
+    // Novinky: zákazník je při objednávce neodmítl → adresu přidáme do seznamu.
+    // Když zaškrtl „nechci", nesmí se sem dostat vůbec nic. Selhání Resendu
+    // objednávku neshodí — je to marketing, ne součást nákupu.
+    if (order.newsletterOptIn && order.customer.email) {
+      const sub = await subscribeToNewsletter(order.customer.email);
+      if (!sub.ok) console.error(`Newsletter: kontakt z objednávky ${order.id} se neuložil (${sub.reason}).`);
+    }
 
     return NextResponse.json({ ok: true, orderId: order.id });
   } catch (err: unknown) {

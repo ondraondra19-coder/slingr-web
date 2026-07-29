@@ -71,6 +71,11 @@ export type OrderInput = {
   subtotal: number;
   total: number;
   zboxId?: string | null;
+  /** Zákazník při objednávce NEodmítl novinky (zaškrtávátko „nechci newsletter"
+   *  zůstalo prázdné) → e-mail patří do seznamu odběratelů. Přihlášení dělá
+   *  server po vzniku objednávky: dobírka/převod v /api/orders, karta až po
+   *  zaplacení ve Stripe webhooku. */
+  newsletterOptIn?: boolean;
 };
 
 export type ShippingProviderId = "zasilkovna";

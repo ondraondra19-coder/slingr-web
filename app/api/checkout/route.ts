@@ -8,6 +8,7 @@ import { getShippingPrice } from '@/lib/shipping/pricing';
 import { getDobirkaFee } from '@/lib/fees';
 import { checkRateLimit } from '@/lib/rateLimit';
 import { getClientIp } from '@/lib/clientIp';
+import { arePaymentsEnabled } from '@/lib/featureFlags';
 
 // Strop na množství jedné položky — brání zneužití (záporné/obří množství
 // rozbíjí cenu i odečet skladu).
@@ -21,6 +22,12 @@ type CheckoutItem = {
 };
 
 export async function POST(req: Request) {
+  // Hlavní vypínač plateb (lib/featureFlags.ts). Kontrola musí být TADY, ne jen
+  // ve skrytém tlačítku — jinak by stačilo zavolat API přímo.
+  if (!arePaymentsEnabled()) {
+    return NextResponse.json({ error: "Objednávky jsou dočasně pozastaveny.", code: "payments_disabled" }, { status: 503 });
+  }
+
   const key = process.env.STRIPE_SECRET_KEY;
 
   if (!key || key.trim() === "") {
@@ -189,6 +196,10 @@ export async function POST(req: Request) {
       subtotal,
       total: subtotal + shippingPrice + dobirkaFee - discountInCurrency,
       zboxId: orderData?.zbox?.id ?? null,
+      // Jen si volbu zapamatujeme do pending objednávky. Do seznamu odběratelů
+      // se e-mail přidá teprve po ZAPLACENÍ (Stripe webhook) — z nedokončených
+      // platieb adresy sbírat nechceme.
+      newsletterOptIn: orderData?.newsletterOptIn === true,
     };
 
     const pendingOrderId = await createPendingOrder(orderInput);

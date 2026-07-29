@@ -46,16 +46,25 @@ function PrivacyCs() {
           <li><strong>Plnění smlouvy</strong> (čl. 6 odst. 1 písm. b) GDPR) — zpracování objednávky, doručení zboží, vyřízení reklamace</li>
           <li><strong>Plnění právních povinností</strong> (čl. 6 odst. 1 písm. c) GDPR) — vedení účetnictví, daňové doklady, povinnosti dle zákona o ochraně spotřebitele</li>
           <li><strong>Oprávněný zájem</strong> (čl. 6 odst. 1 písm. f) GDPR) — ochrana před podvody, zlepšování našich služeb, přímý marketing vůči stávajícím zákazníkům</li>
-          <li><strong>Souhlas</strong> (čl. 6 odst. 1 písm. a) GDPR) — zasílání newsletteru (pouze pokud jste se přihlásili k odběru)</li>
+          <li><strong>Souhlas</strong> (čl. 6 odst. 1 písm. a) GDPR) — zasílání novinek, pokud jste se přihlásili formulářem na webu</li>
         </ul>
+        <p>
+          <strong>Novinky a slevy po nákupu.</strong> Pokud u nás nakoupíte, můžeme vám na e-mail
+          z objednávky posílat nabídky vlastního obdobného zboží — to umožňuje § 7 odst. 3 zákona
+          č. 480/2004 Sb. i oprávněný zájem podle GDPR, bez samostatného souhlasu. Vždy k tomu ale
+          musíte mít možnost říct ne: přímo v objednávce zaškrtnutím políčka „Nechci e-mailem novinky
+          a slevy“ (pak vaši adresu do seznamu odběratelů vůbec nezařadíme) a potom kdykoli
+          odhlašovacím odkazem, který je v každém takovém e-mailu. Odhlášení nemá žádný vliv na
+          vyřízení objednávky ani na transakční e-maily (potvrzení objednávky, informace o odeslání) —
+          ty vám posíláme vždy, protože jsou součástí plnění smlouvy.
+        </p>
       </Section>
 
       <Section title="4. Doba uchování údajů">
         <p>Osobní údaje uchováváme po dobu nezbytnou pro splnění účelu zpracování:</p>
         <ul>
           <li><strong>Údaje z objednávek</strong> — 10 let od uskutečnění objednávky (daňová povinnost)</li>
-          <li><strong>Zákaznický účet</strong> — po dobu existence účtu, nejdéle 3 roky od poslední aktivity</li>
-          <li><strong>Newsletter</strong> — do odvolání souhlasu</li>
+          <li><strong>Seznam odběratelů novinek</strong> — do odhlášení (nebo do odvolání souhlasu, pokud jste se přihlásili formulářem)</li>
           <li><strong>Cookies</strong> — dle nastavení prohlížeče, max. 13 měsíců</li>
         </ul>
       </Section>
@@ -80,8 +89,8 @@ function PrivacyCs() {
           <li><strong>Právo na výmaz</strong> — za určitých podmínek můžete požádat o smazání vašich údajů</li>
           <li><strong>Právo na omezení zpracování</strong> — v určitých případech můžete žádat omezení zpracování</li>
           <li><strong>Právo na přenositelnost</strong> — máte právo získat vaše údaje ve strukturovaném formátu</li>
-          <li><strong>Právo vznést námitku</strong> — proti zpracování na základě oprávněného zájmu</li>
-          <li><strong>Právo odvolat souhlas</strong> — souhlas se zasíláním newsletteru můžete kdykoli odvolat</li>
+          <li><strong>Právo vznést námitku</strong> — proti zpracování na základě oprávněného zájmu, včetně přímého marketingu; pokud námitku vznesete, přestaneme vám nabídky posílat</li>
+          <li><strong>Právo odvolat souhlas</strong> — odběr novinek můžete kdykoli ukončit odkazem v e-mailu nebo zprávou na náš e-mail</li>
         </ul>
         <p>Svá práva uplatněte e-mailem na <strong>{COMPANY.email}</strong>. Žádost vyřídíme bez zbytečného odkladu, nejpozději do 30 dnů.</p>
       </Section>
@@ -137,16 +146,25 @@ function PrivacySk() {
           <li><strong>Plnenie zmluvy</strong> (čl. 6 ods. 1 písm. b) GDPR) — spracovanie objednávky, doručenie tovaru, vybavenie reklamácie</li>
           <li><strong>Plnenie právnych povinností</strong> (čl. 6 ods. 1 písm. c) GDPR) — vedenie účtovníctva, daňové doklady, povinnosti podľa zákona o ochrane spotrebiteľa</li>
           <li><strong>Oprávnený záujem</strong> (čl. 6 ods. 1 písm. f) GDPR) — ochrana pred podvodmi, zlepšovanie našich služieb, priamy marketing voči existujúcim zákazníkom</li>
-          <li><strong>Súhlas</strong> (čl. 6 ods. 1 písm. a) GDPR) — zasielanie newslettra (iba ak ste sa prihlásili na odber)</li>
+          <li><strong>Súhlas</strong> (čl. 6 ods. 1 písm. a) GDPR) — zasielanie noviniek, ak ste sa prihlásili formulárom na webe</li>
         </ul>
+        <p>
+          <strong>Novinky a zľavy po nákupe.</strong> Ak u nás nakúpite, môžeme vám na e-mail
+          z objednávky posielať ponuky vlastného obdobného tovaru — umožňuje to § 7 ods. 3 zákona
+          č. 480/2004 Zb. i oprávnený záujem podľa GDPR, bez samostatného súhlasu. Vždy k tomu ale
+          musíte mať možnosť povedať nie: priamo v objednávke zaškrtnutím políčka „Nechcem e-mailom
+          novinky a zľavy“ (potom vašu adresu do zoznamu odberateľov vôbec nezaradíme) a potom
+          kedykoľvek odhlasovacím odkazom, ktorý je v každom takom e-maile. Odhlásenie nemá žiadny
+          vplyv na vybavenie objednávky ani na transakčné e-maily (potvrdenie objednávky, informácie
+          o odoslaní) — tie vám posielame vždy, pretože sú súčasťou plnenia zmluvy.
+        </p>
       </Section>
 
       <Section title="4. Doba uchovávania údajov">
         <p>Osobné údaje uchovávame po dobu nevyhnutnú na splnenie účelu spracovania:</p>
         <ul>
           <li><strong>Údaje z objednávok</strong> — 10 rokov od uskutočnenia objednávky (daňová povinnosť)</li>
-          <li><strong>Zákaznícky účet</strong> — po dobu existencie účtu, najdlhšie 3 roky od poslednej aktivity</li>
-          <li><strong>Newsletter</strong> — do odvolania súhlasu</li>
+          <li><strong>Zoznam odberateľov noviniek</strong> — do odhlásenia (alebo do odvolania súhlasu, ak ste sa prihlásili formulárom)</li>
           <li><strong>Cookies</strong> — podľa nastavenia prehliadača, max. 13 mesiacov</li>
         </ul>
       </Section>
@@ -171,8 +189,8 @@ function PrivacySk() {
           <li><strong>Právo na výmaz</strong> — za určitých podmienok môžete požiadať o zmazanie vašich údajov</li>
           <li><strong>Právo na obmedzenie spracovania</strong> — v určitých prípadoch môžete žiadať obmedzenie spracovania</li>
           <li><strong>Právo na prenosnosť</strong> — máte právo získať vaše údaje v štruktúrovanom formáte</li>
-          <li><strong>Právo vzniesť námietku</strong> — proti spracovaniu na základe oprávneného záujmu</li>
-          <li><strong>Právo odvolať súhlas</strong> — súhlas so zasielaním newslettra môžete kedykoľvek odvolať</li>
+          <li><strong>Právo vzniesť námietku</strong> — proti spracovaniu na základe oprávneného záujmu vrátane priameho marketingu; ak námietku vznesiete, prestaneme vám ponuky posielať</li>
+          <li><strong>Právo odvolať súhlas</strong> — odber noviniek môžete kedykoľvek ukončiť odkazom v e-maile alebo správou na náš e-mail</li>
         </ul>
         <p>Svoje práva uplatnite e-mailom na <strong>{COMPANY.email}</strong>. Žiadosť vybavíme bez zbytočného odkladu, najneskôr do 30 dní.</p>
       </Section>
@@ -228,16 +246,25 @@ function PrivacyEn() {
           <li><strong>Performance of a contract</strong> (Art. 6(1)(b) GDPR) — processing your order, delivering goods, handling complaints</li>
           <li><strong>Compliance with legal obligations</strong> (Art. 6(1)(c) GDPR) — bookkeeping, tax documents, obligations under consumer protection law</li>
           <li><strong>Legitimate interest</strong> (Art. 6(1)(f) GDPR) — fraud prevention, improving our services, direct marketing to existing customers</li>
-          <li><strong>Consent</strong> (Art. 6(1)(a) GDPR) — sending the newsletter (only if you have subscribed)</li>
+          <li><strong>Consent</strong> (Art. 6(1)(a) GDPR) — sending news if you subscribed through the form on our site</li>
         </ul>
+        <p>
+          <strong>News and discounts after a purchase.</strong> If you buy from us, we may send offers
+          for our own similar goods to the e-mail address from your order — this is allowed by
+          Section 7(3) of Czech Act No. 480/2004 Coll. and by legitimate interest under the GDPR,
+          without separate consent. You must always be able to say no: directly in the order by
+          ticking “I don’t want news and discounts by e-mail” (we then never add your address to the
+          subscriber list) and afterwards at any time via the unsubscribe link included in every such
+          e-mail. Unsubscribing has no effect on your order or on transactional e-mails (order
+          confirmation, dispatch notice) — we always send those, as they are part of the contract.
+        </p>
       </Section>
 
       <Section title="4. Retention periods">
         <p>We keep personal data for as long as is necessary for the purpose of the processing:</p>
         <ul>
           <li><strong>Order data</strong> — 10 years from the date of the order (tax obligation)</li>
-          <li><strong>Customer account</strong> — for as long as the account exists, at most 3 years from the last activity</li>
-          <li><strong>Newsletter</strong> — until consent is withdrawn</li>
+          <li><strong>Subscriber list</strong> — until you unsubscribe (or withdraw consent, if you subscribed through the form)</li>
           <li><strong>Cookies</strong> — according to your browser settings, max. 13 months</li>
         </ul>
       </Section>
@@ -262,8 +289,8 @@ function PrivacyEn() {
           <li><strong>Right to erasure</strong> — under certain conditions you may request that your data be deleted</li>
           <li><strong>Right to restriction of processing</strong> — in certain cases you may request that processing be restricted</li>
           <li><strong>Right to data portability</strong> — you have the right to receive your data in a structured format</li>
-          <li><strong>Right to object</strong> — to processing based on legitimate interest</li>
-          <li><strong>Right to withdraw consent</strong> — you may withdraw consent to the newsletter at any time</li>
+          <li><strong>Right to object</strong> — to processing based on legitimate interest, including direct marketing; if you object, we will stop sending you offers</li>
+          <li><strong>Right to withdraw consent</strong> — you can stop receiving news at any time via the link in the e-mail or by writing to us</li>
         </ul>
         <p>Exercise your rights by e-mail at <strong>{COMPANY.email}</strong>. We will handle your request without undue delay and no later than 30 days.</p>
       </Section>

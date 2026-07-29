@@ -26,8 +26,8 @@ export default function CheckoutStepper({ step }: { step: 1 | 2 | 3 }) {
         const clickable = done && s.href;
 
         return (
-          <div key={s.n} className="flex items-center flex-1 last:flex-none">
-            <div className="flex flex-col items-center gap-1.5">
+          <div key={s.n} className="flex items-center flex-1 last:flex-none min-w-0">
+            <div className="flex flex-col items-center gap-1.5 min-w-0">
               {clickable ? (
                 <a href={s.href!} aria-label={t("backToStep", { step: s.label })}>
                   <span className="w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center bg-primary text-on-primary hover:brightness-110 transition-all">
@@ -41,12 +41,16 @@ export default function CheckoutStepper({ step }: { step: 1 | 2 | 3 }) {
                   {s.n}
                 </span>
               )}
-              <span className={`text-xs font-medium whitespace-nowrap ${active ? "text-text-base" : done ? "text-text-muted" : "text-text-subtle"}`}>
+              {/* Bez `whitespace-nowrap`: „Doprava a platba" se na 320px
+                  displeji do třetiny šířky nevejde a popisky sousedních kroků
+                  by se překryly. Teď se zalomí na dva řádky a `text-center`
+                  je drží pod svým kolečkem. */}
+              <span className={`text-[11px] sm:text-xs font-medium text-center leading-tight ${active ? "text-text-base" : done ? "text-text-muted" : "text-text-subtle"}`}>
                 {s.label}
               </span>
             </div>
             {i < steps.length - 1 && (
-              <div aria-hidden="true" className={`flex-1 h-px mx-3 mb-5 transition-colors ${done ? "bg-primary" : "bg-border"}`} />
+              <div aria-hidden="true" className={`flex-1 h-px mx-1.5 sm:mx-3 mb-5 transition-colors ${done ? "bg-primary" : "bg-border"}`} />
             )}
           </div>
         );

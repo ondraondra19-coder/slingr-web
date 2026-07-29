@@ -1,4 +1,23 @@
 // lib/featureFlags.ts
+//
+// ── HLAVNÍ VYPÍNAČ PLATEB ────────────────────────────────────────────────────
+// `false` = obchod jde procházet a zboží se dá dávat do košíku, ale objednávku
+// nikdo nedokončí a nic nezaplatí. `true` = normální provoz.
+//
+// Na co to je: než spustíš web naostro, a pak kdykoliv, když potřebuješ na
+// chvíli zavřít krám (opravy, dovolená, došlo zboží).
+//
+// Kontroluje se i na serveru (/api/checkout a /api/orders), ne jen v tlačítkách —
+// samotné schované tlačítko by šlo obejít přímým voláním API.
+//
+// Po přepnutí je potřeba web nasadit znovu (Vercel deploy), aby se změna
+// projevila i v prohlížeči zákazníka.
+export const PLATBY_ZAPNUTE = false;
+
+export function arePaymentsEnabled(): boolean {
+  return PLATBY_ZAPNUTE;
+}
+
 // Bankovní převod je dočasně vypnutý V PRODUKCI, dokud není hotová právně
 // korektní účtenka (chybí IČO — viz sellerBlock() v lib/email.ts) — nechceme
 // posílat reálným zákazníkům "přehled objednávky", co by měl být doklad, ale

@@ -3,12 +3,29 @@
 // První sekce homepage — celoobrazovkové video s tmavým overlayem a centrovaným
 // textem (styl blastro.cz). Klientská komponenta kvůli překladům (jazyk se čte
 // z cookie až po hydrataci, viz lib/locale.ts).
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useT } from "@/lib/useT";
 
 export default function VideoHero() {
   const t = useT("videohero");
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Kdo si v systému vypnul animace (iOS: Nastavení → Zpřístupnění → Pohyb),
+  // nechce ani smyčku videa přes celou obrazovku — u citlivých lidí umí vyvolat
+  // nevolnost. Video necháme na prvním snímku místo přehrávání; `currentTime`
+  // ho donutí snímek vykreslit, i když se pozastaví hned po načtení metadat.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    video.autoplay = false;
+    video.pause();
+    const showFirstFrame = () => { video.currentTime = 0; };
+    video.addEventListener("loadedmetadata", showFirstFrame);
+    return () => video.removeEventListener("loadedmetadata", showFirstFrame);
+  }, []);
 
   return (
     // Desktop: sekce má stejný poměr stran jako video (832×384 ≈ 13/6), takže se
@@ -18,14 +35,25 @@ export default function VideoHero() {
     <section className="relative w-full overflow-hidden bg-header h-[calc(100svh_-_4rem_-_env(safe-area-inset-top))] lg:h-auto lg:aspect-[832/384]">
 
       {/* Pozadí — video. Dekorativní (obsah nese text vedle), proto aria-hidden.
-          muted+playsInline je nutné, aby autoplay prošel na mobilech i v Safari. */}
+          muted+playsInline je nutné, aby autoplay prošel na mobilech i v Safari.
+
+          preload="metadata", ne "auto": soubor má 3,7 MB a s "auto" si ho
+          prohlížeč stahoval celý hned při načtení stránky — na mobilních datech
+          to je zbytečně drahé a zdržuje to vykreslení textu přes video.
+
+          TODO: doplnit `poster` s prvním snímkem videa. Než se video stáhne,
+          je hero jen tmavá plocha; s posterem by se rovnou ukázal obrázek.
+          Vyrobit se dá jedním příkazem:
+            ffmpeg -i public/videos/uvod.mp4 -vframes 1 -q:v 3 public/images/main/hero-poster.jpg
+          a pak sem přidat poster="/images/main/hero-poster.jpg". */}
       <video
+        ref={videoRef}
         className="absolute inset-0 w-full h-full object-cover"
         autoPlay
         muted
         loop
         playsInline
-        preload="auto"
+        preload="metadata"
         aria-hidden="true"
       >
         <source src="/videos/uvod.mp4" type="video/mp4" />

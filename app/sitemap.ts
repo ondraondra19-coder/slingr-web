@@ -11,6 +11,10 @@ const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://slingr.vercel.app
 
 // Statické informační stránky — košík, checkout a admin sem záměrně nepatří,
 // nejsou to stránky, které má smysl nabízet Googlu k indexaci.
+//
+// POZOR na /informace: přes název to není informační stránka, ale TŘETÍ KROK
+// checkoutu s formulářem na osobní údaje. Do sitemapy nepatří (dřív tady omylem
+// byla) a v app/robots.ts je zakázaná — když sem něco přidáváš, zkontroluj obojí.
 const STATIC_PAGES: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "/", priority: 1, changeFrequency: "daily" },
   { path: "/o-nas", priority: 0.5, changeFrequency: "monthly" },
@@ -18,7 +22,7 @@ const STATIC_PAGES: { path: string; priority: number; changeFrequency: MetadataR
   { path: "/faq", priority: 0.5, changeFrequency: "monthly" },
   { path: "/doprava", priority: 0.5, changeFrequency: "monthly" },
   { path: "/reklamace", priority: 0.4, changeFrequency: "monthly" },
-  { path: "/informace", priority: 0.4, changeFrequency: "monthly" },
+  { path: "/objednavky", priority: 0.4, changeFrequency: "monthly" },
   { path: "/napsat-recenzi", priority: 0.3, changeFrequency: "monthly" },
   { path: "/obchodni-podminky", priority: 0.2, changeFrequency: "yearly" },
   { path: "/ochrana-osobnich-udaju", priority: 0.2, changeFrequency: "yearly" },

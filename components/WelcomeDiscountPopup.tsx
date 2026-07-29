@@ -136,9 +136,11 @@ export default function WelcomeDiscountPopup() {
     // v tu chvíli patří jí. Objeví se hned, jak návštěvník o cookies rozhodne.
     if (!showBubble || cookieBarVisible) return null;
     return (
+      // Stejné odsazení nad gesto-lištu jako u ChatWidgetu — bublina sedí
+      // v protějším rohu, takže musí končit ve stejné výšce.
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 left-6 z-[195] inline-flex items-center gap-2 rounded-full bg-primary text-on-primary font-bold text-sm pl-4 pr-5 py-3 shadow-xl hover:brightness-105 active:scale-[0.98] transition-all"
+        className="fixed left-6 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] z-[195] inline-flex items-center gap-2 rounded-full bg-primary text-on-primary font-bold text-sm pl-4 pr-5 py-3 shadow-xl hover:brightness-105 active:scale-[0.98] transition-all"
       >
         <Tag size={16} strokeWidth={2.5} />
         {t("bubble", { percent: WELCOME_DISCOUNT_PERCENT })}

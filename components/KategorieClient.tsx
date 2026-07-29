@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { SlidersHorizontal, ChevronDown, X, Check, Truck } from "lucide-react";
 import type { Product, Category } from "@/lib/products";
-import { getProductName, getCategoryName } from "@/lib/products";
+import { getProductName, getCategoryName, LOW_STOCK_THRESHOLD } from "@/lib/products";
 import RatingWidget from "./RatingWidget";
 import DualRangeSlider from "./DualRangeSlider";
 import { useCurrency } from "@/lib/CurrencyContext";
-import { getPrice } from "@/lib/currency";
+import { getPrice, formatPrice } from "@/lib/currency";
+import { priceFilterBounds } from "@/lib/priceFilter";
+import { useModalBehavior, useDismissOnOutside } from "@/lib/useModalBehavior";
 import ProductPrice from "./ProductPrice";
 import { trackEvent } from "@/lib/analytics";
 import { useT } from "@/lib/useT";
@@ -19,9 +21,6 @@ import { LOCALE_TAGS } from "@/lib/locale";
 // stockData: { [slug]: number } — předáno ze server componentu kategorie page.tsx
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-// Do kolika kusů křičíme „Poslední kusy!" (sladěno s kartami na homepage).
-const LOW_STOCK_THRESHOLD = 10;
 
 // Brandová šrafovaná dlaždice pod fotkou — stejná jako v ProductRow.
 const TILE_STYLE: React.CSSProperties = {
@@ -71,13 +70,13 @@ export default function KategorieClient({
     { label: t("sortNameAsc"),   value: "name-asc"   },
   ];
 
-  // Filtry vždy počítáme v CZK
-  const allPrices = products.map(p => typeof p.price === "number" ? p.price : p.price.CZK ?? 0);
-  const PRICE_MIN = allPrices.length ? Math.min(...allPrices) : 0;
-  const PRICE_MAX = allPrices.length ? Math.max(...allPrices) : 1000;
+  // Filtr běží v měně, kterou má zákazník přepnutou — ve stejné, v jaké vidí
+  // ceny na kartách. Meze i krok počítá lib/priceFilter.ts (sdíleno s /hledani).
+  const { min: PRICE_MIN, max: PRICE_MAX, step: PRICE_STEP } =
+    useMemo(() => priceFilterBounds(products, currency), [products, currency]);
 
-  const [priceMin,         setPriceMin]         = useState(Math.floor(PRICE_MIN / 10) * 10);
-  const [priceMax,         setPriceMax]         = useState(Math.ceil(PRICE_MAX / 10) * 10);
+  const [priceMin,         setPriceMin]         = useState(PRICE_MIN);
+  const [priceMax,         setPriceMax]         = useState(PRICE_MAX);
   const [onlyInStock,      setOnlyInStock]      = useState(false);
   const [sort,             setSort]             = useState("default");
   const [sortOpen,         setSortOpen]         = useState(false);
@@ -85,17 +84,38 @@ export default function KategorieClient({
   const [priceOpen,        setPriceOpen]        = useState(false);
   const [availOpen,        setAvailOpen]        = useState(false);
 
-  const getCZK = (p: Product) => typeof p.price === "number" ? p.price : p.price.CZK ?? 0;
+  // Filtr na mobilu je překryv — pod ním se nesmí rolovat výpis produktů
+  // a musí jít zavřít Escapem. Viz lib/useModalBehavior.ts.
+  const closeMobileFilter = useCallback(() => setMobileFilterOpen(false), []);
+  useModalBehavior(mobileFilterOpen, closeMobileFilter);
+
+  // Rozbalené řazení se zavře ťuknutím vedle — bez toho zůstávalo viset.
+  const sortRef = useRef<HTMLDivElement>(null);
+  const closeSort = useCallback(() => setSortOpen(false), []);
+  useDismissOnOutside(sortOpen, sortRef, closeSort);
+
+  // Rozsah je v aktuální měně, ale uložené meze jsou ještě v té předchozí —
+  // po přepnutí je zahodíme, jinak by „do 1 290" zůstalo viset nad eury a
+  // filtr by vyhodil všechno. (Adjust-state-during-render vzor, ne efekt —
+  // stejně jako přepnutí platby na /objednavka.)
+  const [prevCurrencyCode, setPrevCurrencyCode] = useState(currency.code);
+  if (currency.code !== prevCurrencyCode) {
+    setPrevCurrencyCode(currency.code);
+    setPriceMin(PRICE_MIN);
+    setPriceMax(PRICE_MAX);
+  }
+
+  const priceOf = (p: Product) => getPrice(p.price, currency);
 
   let filtered = products.filter(p => {
-    const czk = getCZK(p);
-    const inPrice = czk >= priceMin && czk <= priceMax;
+    const price = priceOf(p);
+    const inPrice = price >= priceMin && price <= priceMax;
     const inStockOk = onlyInStock ? anyInStock(p, stockData) : true;
     return inPrice && inStockOk;
   });
 
-  if (sort === "price-asc")  filtered = [...filtered].sort((a, b) => getCZK(a) - getCZK(b));
-  if (sort === "price-desc") filtered = [...filtered].sort((a, b) => getCZK(b) - getCZK(a));
+  if (sort === "price-asc")  filtered = [...filtered].sort((a, b) => priceOf(a) - priceOf(b));
+  if (sort === "price-desc") filtered = [...filtered].sort((a, b) => priceOf(b) - priceOf(a));
   // Řadí se podle názvu ve zvoleném jazyce a jeho pravidly — "Č" patří v češtině
   // až za "C", ne mezi latinku, a v angličtině by se řadil jiný název.
   if (sort === "name-asc") {
@@ -108,8 +128,8 @@ export default function KategorieClient({
   const currentSort   = sortOptions.find(s => s.value === sort)!;
 
   function resetFilters() {
-    setPriceMin(Math.floor(PRICE_MIN / 10) * 10);
-    setPriceMax(Math.ceil(PRICE_MAX / 10) * 10);
+    setPriceMin(PRICE_MIN);
+    setPriceMax(PRICE_MAX);
     setOnlyInStock(false);
   }
 
@@ -129,10 +149,11 @@ export default function KategorieClient({
           {priceOpen && (
             <div className="px-5 pb-5">
               <DualRangeSlider
-                min={PRICE_MIN} max={PRICE_MAX}
+                min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP}
                 valueMin={priceMin} valueMax={priceMax}
                 onChangeMin={setPriceMin} onChangeMax={setPriceMax}
                 labelMin={t("priceMin")} labelMax={t("priceMax")}
+                formatValue={v => formatPrice(v, currency)}
               />
             </div>
           )}
@@ -208,7 +229,7 @@ export default function KategorieClient({
             </button>
 
             {/* Sort */}
-            <div className="relative">
+            <div className="relative" ref={sortRef}>
               <button
                 onClick={() => setSortOpen(v => !v)}
                 aria-label={t("sortLabel", { current: currentSort.label })}
@@ -286,7 +307,7 @@ export default function KategorieClient({
 
                   const stockLabel = !inStock
                     ? { dot: "bg-red-400",                 text: t("stockNone"), cls: "text-red-500"   }
-                    : best < 5
+                    : best <= LOW_STOCK_THRESHOLD
                     ? { dot: "bg-amber-400 animate-pulse", text: t("stockLow"),  cls: "text-amber-500" }
                     : { dot: "bg-green-500",               text: t("stockOk"),   cls: "text-green-600" };
 
@@ -379,7 +400,9 @@ export default function KategorieClient({
             className="absolute inset-0 bg-black/30 backdrop-blur-sm"
             onClick={() => setMobileFilterOpen(false)}
           />
-          <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-border rounded-t-2xl p-5 max-h-[80vh] overflow-y-auto">
+          {/* dvh + overscroll-contain: panel se vejde do reálné výšky okna a
+              dorolování na jeho konec už nepřetáhne stránku pod ním. */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-border rounded-t-2xl p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] max-h-[80dvh] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal size={15} className="text-primary-ink" />

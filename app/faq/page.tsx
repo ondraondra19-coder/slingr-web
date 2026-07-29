@@ -1,41 +1,34 @@
 "use client";
 
-import { useState } from "react";
+// Stránka /faq — stejný systém jako /doprava a /reklamace: obsah leží přímo na
+// světlém pozadí, dělí ho vlasové linky. Žádné bílé karty s rámečkem, jediný
+// blok je tmavé CTA dole.
+//
+// Nadpis kategorie drží vlastní sloupec vlevo (na lg lepivý), otázky tečou
+// vpravo. Rozbalená odpověď se otevírá přes grid-rows (0fr → 1fr), ne přes
+// pevné max-h — dlouhá odpověď se tak nikdy neuřízne.
+import { useState, useId } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import {
-  ChevronRight,
-  Plus,
-  Truck,
-  RotateCcw,
-  ShieldCheck,
-  CreditCard,
-  Package,
-  Headphones,
-} from "lucide-react";
+import { ChevronRight, Plus, ArrowRight, HelpCircle } from "lucide-react";
+import { useT, type T } from "@/lib/useT";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
-import { useT, type T } from "@/lib/useT";
-
 type FaqCategory = {
   id: string;
-  icon: typeof Truck;
   label: string;
-  color: string;
-  bg: string;
   questions: { q: string; a: string }[];
 };
 
 // Otázky i odpovědi žijí v messages/*.json — tady zůstává jen struktura
-// (pořadí, ikony). Klíče jsou vypsané, ne skládané přes `t(\`${id}Q${n}\`)`,
+// (pořadí). Klíče jsou vypsané, ne skládané přes `t(\`${id}Q${n}\`)`,
 // aby je našel scripts/check-messages.mjs.
 function buildCategories(t: T): FaqCategory[] {
-  const style = { color: "text-primary-ink", bg: "bg-primary/8" };
   return [
     {
-      id: "doprava", icon: Truck, label: t("catShipping"), ...style,
+      id: "doprava", label: t("catShipping"),
       questions: [
         { q: t("shippingQ1"), a: t("shippingA1") },
         { q: t("shippingQ2"), a: t("shippingA2") },
@@ -44,7 +37,7 @@ function buildCategories(t: T): FaqCategory[] {
       ],
     },
     {
-      id: "vraceni", icon: RotateCcw, label: t("catReturns"), ...style,
+      id: "vraceni", label: t("catReturns"),
       questions: [
         { q: t("returnsQ1"), a: t("returnsA1") },
         { q: t("returnsQ2"), a: t("returnsA2") },
@@ -52,7 +45,7 @@ function buildCategories(t: T): FaqCategory[] {
       ],
     },
     {
-      id: "platba", icon: CreditCard, label: t("catPayment"), ...style,
+      id: "platba", label: t("catPayment"),
       questions: [
         { q: t("paymentQ1"), a: t("paymentA1") },
         { q: t("paymentQ2"), a: t("paymentA2") },
@@ -60,7 +53,7 @@ function buildCategories(t: T): FaqCategory[] {
       ],
     },
     {
-      id: "produkty", icon: Package, label: t("catProducts"), ...style,
+      id: "produkty", label: t("catProducts"),
       questions: [
         { q: t("productsQ1"), a: t("productsA1") },
         { q: t("productsQ2"), a: t("productsA2") },
@@ -69,7 +62,7 @@ function buildCategories(t: T): FaqCategory[] {
       ],
     },
     {
-      id: "podpora", icon: Headphones, label: t("catSupport"), ...style,
+      id: "podpora", label: t("catSupport"),
       questions: [
         { q: t("supportQ1"), a: t("supportA1") },
         { q: t("supportQ2"), a: t("supportA2") },
@@ -77,7 +70,7 @@ function buildCategories(t: T): FaqCategory[] {
       ],
     },
     {
-      id: "zabezpeceni", icon: ShieldCheck, label: t("catSecurity"), ...style,
+      id: "zabezpeceni", label: t("catSecurity"),
       questions: [
         { q: t("securityQ1"), a: t("securityA1") },
         { q: t("securityQ2"), a: t("securityA2") },
@@ -86,133 +79,71 @@ function buildCategories(t: T): FaqCategory[] {
   ];
 }
 
-// ── Single accordion item ─────────────────────────────────────────────────────
+// ── Jedna otázka ──────────────────────────────────────────────────────────────
 
-function AccordionItem({
-  question,
-  answer,
-  isOpen,
-  onToggle,
-  index,
+function Question({
+  question, answer, isOpen, onToggle, isFirst,
 }: {
   question: string;
   answer: string;
   isOpen: boolean;
   onToggle: () => void;
-  index: number;
+  isFirst: boolean;
 }) {
+  const panelId = useId();
+
   return (
-    <div
-      className={`border-b border-border last:border-0 transition-colors duration-200 ${
-        isOpen ? "bg-surface/60" : ""
-      }`}
-    >
+    <div>
+      {/* První otázka nemá horní odsazení, aby začínala přesně v jedné rovině
+          s číslem sekce v levém sloupci. */}
       <button
         onClick={onToggle}
-        className="w-full flex items-start gap-4 px-6 py-5 text-left group"
         aria-expanded={isOpen}
+        aria-controls={panelId}
+        className={`w-full flex items-start justify-between gap-6 pb-5 text-left group ${isFirst ? "pt-0" : "pt-5"}`}
       >
-        <span className="shrink-0 w-6 h-6 rounded-full bg-surface border border-border flex items-center justify-center mt-0.5">
-          <span className="text-[10px] font-bold text-text-subtle tabular-nums">
-            {String(index + 1).padStart(2, "0")}
-          </span>
-        </span>
-
-        <span className="flex-1 text-text-base font-semibold text-sm sm:text-base leading-snug group-hover:text-primary-ink transition-colors duration-150">
+        <span className={`text-base font-semibold leading-snug transition-colors ${isOpen ? "text-primary-ink" : "text-text-base group-hover:text-primary-ink"}`}>
           {question}
         </span>
-
-        <span
-          className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 mt-0.5 ${
-            isOpen
-              ? "border-primary bg-primary text-on-primary rotate-45"
-              : "border-border-strong text-text-muted"
-          }`}
-        >
-          <Plus size={12} strokeWidth={2.5} />
-        </span>
+        <Plus
+          size={16}
+          strokeWidth={2.5}
+          aria-hidden="true"
+          className={`shrink-0 mt-1 transition-all duration-300 ${isOpen ? "rotate-45 text-primary-ink" : "text-text-subtle group-hover:text-text-muted"}`}
+        />
       </button>
 
+      {/* 0fr → 1fr místo max-h: odpověď se rozbalí přesně na svou výšku,
+          takže ani ta nejdelší nekončí uříznutá. */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-        }`}
+        id={panelId}
+        className={`grid transition-all duration-300 ease-in-out ${isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
       >
-        <p className="px-6 pb-6 text-text-muted text-sm sm:text-base leading-relaxed pl-16">
-          {answer}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-// ── Category section ──────────────────────────────────────────────────────────
-
-function CategorySection({
-  category,
-  openKey,
-  setOpenKey,
-}: {
-  category: FaqCategory;
-  openKey: string | null;
-  setOpenKey: (k: string | null) => void;
-}) {
-  const t = useT("faq");
-  const Icon = category.icon;
-
-  return (
-    <div id={category.id} className="scroll-mt-24">
-      <div className="flex items-center gap-3 mb-4">
-        <div className={`w-9 h-9 rounded-xl ${category.bg} flex items-center justify-center shrink-0`}>
-          <Icon size={17} className={category.color} />
+        <div className="overflow-hidden">
+          <p className="text-text-muted text-sm sm:text-[15px] leading-relaxed pb-6 pr-8 max-w-3xl">
+            {answer}
+          </p>
         </div>
-        <h2 className="text-lg font-bold text-text-base">{category.label}</h2>
-        <span className="ml-auto text-text-subtle text-xs font-medium">
-          {t.plural(category.questions.length, "questionCount")}
-        </span>
-      </div>
-
-      <div className="bg-white rounded-2xl border border-border overflow-hidden shadow-sm">
-        {category.questions.map((item, i) => {
-          const key = `${category.id}-${i}`;
-          return (
-            <AccordionItem
-              key={key}
-              question={item.q}
-              answer={item.a}
-              isOpen={openKey === key}
-              onToggle={() => setOpenKey(openKey === key ? null : key)}
-              index={i}
-            />
-          );
-        })}
       </div>
     </div>
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+// ── Stránka ───────────────────────────────────────────────────────────────────
 
 export default function FaqPage() {
   const t = useT("faq");
   const [openKey, setOpenKey] = useState<string | null>(null);
-  const [activeCategory, setActiveCategory] = useState<string>("doprava");
 
   const categories = buildCategories(t);
   const totalQuestions = categories.reduce((s, c) => s + c.questions.length, 0);
-
-  function scrollTo(id: string) {
-    setActiveCategory(id);
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
 
   return (
     <>
       <Header />
       <main className="min-h-screen bg-surface">
 
-        {/* Hero */}
+        {/* ── Hero ── */}
         <div className="bg-header relative overflow-hidden">
           <div
             className="absolute inset-0 opacity-[0.04] pointer-events-none"
@@ -221,7 +152,7 @@ export default function FaqPage() {
               backgroundSize: "28px 28px",
             }}
           />
-          <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-primary/8 blur-3xl pointer-events-none" />
 
           <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-14 lg:py-20 relative z-10">
             <nav className="flex items-center gap-2 text-xs text-white/30 mb-8">
@@ -239,86 +170,101 @@ export default function FaqPage() {
               </h1>
               <p className="text-white/50 text-base leading-relaxed">
                 {t("intro", { count: totalQuestions })}{" "}
-                <a href="/kontakt" className="text-primary-ink hover:underline font-medium">
+                <Link href="/kontakt" className="text-primary-ink hover:underline font-medium">
                   {t("introLink")}
-                </a>
+                </Link>
               </p>
             </div>
           </div>
         </div>
 
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-12 py-10 lg:py-14">
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
 
-            {/* Sidebar */}
-            <aside className="w-full lg:w-56 xl:w-64 shrink-0 lg:sticky lg:top-8 lg:self-start">
-              <p className="text-text-subtle text-[11px] font-bold uppercase tracking-widest mb-3 px-1">
-                {t("categories")}
-              </p>
-              <nav className="flex flex-row lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible pb-1 lg:pb-0" style={{ scrollbarWidth: "none" }}>
-                {categories.map(cat => {
-                  const Icon = cat.icon;
-                  return (
-                    <button
-                      key={cat.id}
-                      onClick={() => scrollTo(cat.id)}
-                      className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 whitespace-nowrap lg:w-full text-left ${
-                        activeCategory === cat.id
-                          ? "bg-white border border-border shadow-sm text-text-base"
-                          : "text-text-muted hover:text-text-base hover:bg-white/60"
-                      }`}
-                    >
-                      <div className={`w-6 h-6 rounded-lg ${cat.bg} flex items-center justify-center shrink-0`}>
-                        <Icon size={13} className={cat.color} />
-                      </div>
-                      <span className="hidden sm:block">{cat.label}</span>
-                    </button>
-                  );
-                })}
-              </nav>
-            </aside>
+          {/* ── Rychlé odskoky ── */}
+          {/* Jen text oddělený tečkami, žádné pilulky ani tlačítka. Na úzkém
+              displeji se dá vodorovně odrolovat. */}
+          <nav
+            aria-label={t("categories")}
+            className="flex items-center gap-x-6 gap-y-2 flex-wrap py-6"
+          >
+            {categories.map((cat) => (
+              <a
+                key={cat.id}
+                href={`#${cat.id}`}
+                className="text-text-muted text-sm hover:text-primary-ink transition-colors whitespace-nowrap"
+              >
+                {cat.label}
+              </a>
+            ))}
+          </nav>
 
-            {/* Obsah */}
-            <div className="flex-1 min-w-0 flex flex-col gap-10">
-              {categories.map(cat => (
-                <CategorySection
-                  key={cat.id}
-                  category={cat}
-                  openKey={openKey}
-                  setOpenKey={setOpenKey}
-                />
-              ))}
-
-              {/* Spodní CTA s jedním tlačítkem */}
-              <div className="rounded-2xl bg-header p-8 sm:p-10 flex flex-col sm:flex-row items-center gap-6 relative overflow-hidden">
-                <div
-                  className="absolute inset-0 opacity-[0.04]"
-                  style={{
-                    backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
-                    backgroundSize: "24px 24px",
-                  }}
-                />
-                <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-primary/10 blur-3xl" />
-                
-                <div className="relative z-10 flex-1 text-center sm:text-left">
-                  <p className="text-white font-bold text-xl mb-1">{t("ctaTitle")}</p>
-                  <p className="text-white/50 text-sm">
-                    {t("ctaDesc")}
+          <div className="pb-12 lg:pb-16 flex flex-col gap-14 lg:gap-20">
+            {categories.map((cat, catIndex) => (
+              /* Linka nahoře jde přes OBA sloupce — nadpis i otázky pod ní tak
+                 čtou jako jedna skupina. Je o odstín silnější než linky mezi
+                 otázkami, ať je jasné, která dělí sekce a která jen řádky. */
+              <section
+                key={cat.id}
+                id={cat.id}
+                className="scroll-mt-8 border-t-2 border-text-base/25 pt-8 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 lg:gap-16"
+              >
+                <div className="lg:sticky lg:top-8 lg:self-start">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-text-subtle mb-3 tabular-nums">
+                    {String(catIndex + 1).padStart(2, "0")}
+                  </p>
+                  <h2 className="text-2xl font-extrabold text-text-base tracking-tight leading-tight">
+                    {cat.label}
+                  </h2>
+                  <p className="text-text-subtle text-sm mt-3">
+                    {t.plural(cat.questions.length, "questionCount")}
                   </p>
                 </div>
 
-                <div className="relative z-10 shrink-0">
-                  <a
-                    href="/kontakt"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-on-primary text-sm font-bold hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-primary/20"
-                  >
-                    {t("ctaButton")}
-                  </a>
+                <div className="min-w-0 divide-y divide-border">
+                  {cat.questions.map((item, i) => {
+                    const key = `${cat.id}-${i}`;
+                    return (
+                      <Question
+                        key={key}
+                        question={item.q}
+                        answer={item.a}
+                        isOpen={openKey === key}
+                        onToggle={() => setOpenKey(openKey === key ? null : key)}
+                        isFirst={i === 0}
+                      />
+                    );
+                  })}
                 </div>
-              </div>
-            </div>
+              </section>
+            ))}
 
+            {/* ── CTA ── */}
+            <div className="rounded-2xl bg-header relative overflow-hidden p-10 lg:p-14 flex flex-col sm:flex-row items-center justify-between gap-8">
+              <div
+                className="absolute inset-0 opacity-[0.04]"
+                style={{
+                  backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
+                  backgroundSize: "24px 24px",
+                }}
+              />
+              <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-primary/10 blur-3xl" />
+              <HelpCircle className="absolute -bottom-10 -left-10 w-48 h-48 text-white/[0.03]" aria-hidden="true" />
+
+              <div className="relative z-10">
+                <p className="text-white font-extrabold text-2xl mb-2">{t("ctaTitle")}</p>
+                <p className="text-white/70 text-sm">{t("ctaDesc")}</p>
+              </div>
+
+              <Link
+                href="/kontakt"
+                className="relative z-10 shrink-0 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-primary text-on-primary font-semibold text-sm hover:brightness-110 active:scale-[0.97] transition-all shadow-lg shadow-primary/20"
+              >
+                {t("ctaButton")}
+                <ArrowRight size={15} aria-hidden="true" />
+              </Link>
+            </div>
           </div>
+
         </div>
       </main>
       <Footer />

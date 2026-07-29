@@ -65,3 +65,19 @@ body {
   from { transform: translateY(-100%); }
   to   { transform: translateY(0); }
 }
+
+/* ── FORMULÁŘOVÁ POLE NA MOBILU ──
+   Safari na iPhonu přiblíží celou stránku ve chvíli, kdy člověk ťukne do pole
+   s písmem menším než 16 px — a samo už neodzoomuje. Pole na webu jsou vysázená
+   `text-sm` (14 px), takže se to dělo v celé objednávce: u jména, e-mailu,
+   telefonu i adresy. Pod hranicí `sm` proto pole vždy vysázíme 16 px; na
+   desktopu (od 640 px výš) zůstává původní velikost, tam žádný zoom nehrozí.
+
+   16px je pevná mez daná Safari, ne volba designu — nesnižovat. */
+@media (max-width: 639px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

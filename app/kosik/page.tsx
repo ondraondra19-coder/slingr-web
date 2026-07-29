@@ -14,6 +14,7 @@ import type { Currency } from "@/lib/currency";
 import DiscountWidget from "@/components/DiscountWidget";
 import CheckoutStepper from "@/components/CheckoutStepper";
 import { useT } from "@/lib/useT";
+import { arePaymentsEnabled } from "@/lib/featureFlags";
 
 // Kurátorské pořadí bestsellerů. Slugy musí existovat v lib/products.ts —
 // neexistující se tiše zahodí, proto se seznam níž doplňuje zbytkem katalogu,
@@ -68,6 +69,7 @@ export default function KosikPage() {
   const t = useT("cart");
   const tc = useT("common");
   const { locale } = useLang();
+  const paymentsOn = arePaymentsEnabled();
   const [mounted, setMounted] = useState(false);
   // Mount flag proti hydratačnímu nesouladu (košík žije v localStorage).
   // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -336,14 +338,26 @@ export default function KosikPage() {
                           <DiscountWidget />
                         </div>
 
+                        {/* Vypnuté platby zastavíme hned v košíku — nemá smysl
+                            nechat zákazníka vyplnit celou objednávku a odmítnout
+                            ho až na konci. Viz PLATBY_ZAPNUTE v featureFlags.ts. */}
                         <div className="px-6 pb-6">
-                          <button
-                            onClick={handleCheckout}
-                            className="w-full py-4 rounded-2xl bg-primary text-on-primary font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                          >
-                            {t("continueToShipping")} <ArrowRight size={15} />
-                          </button>
-                          <p className="text-text-subtle text-xs text-center mt-3">{t("securePayment")}</p>
+                          {paymentsOn ? (
+                            <>
+                              <button
+                                onClick={handleCheckout}
+                                className="w-full py-4 rounded-2xl bg-primary text-on-primary font-bold text-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                              >
+                                {t("continueToShipping")} <ArrowRight size={15} />
+                              </button>
+                              <p className="text-text-subtle text-xs text-center mt-3">{t("securePayment")}</p>
+                            </>
+                          ) : (
+                            <div className="rounded-2xl border border-border bg-surface p-5 text-center">
+                              <p className="text-text-base font-bold text-sm">{t("paused")}</p>
+                              <p className="text-text-muted text-xs leading-relaxed mt-1.5">{t("pausedDesc")}</p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -5,27 +5,12 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import {
-  ChevronRight, ShieldCheck, Truck, RotateCcw, Headphones,
-  HelpCircle, ArrowRight, Target, Sparkles, HeartHandshake, Quote,
+  ChevronRight, HelpCircle, ArrowRight, Target, Sparkles, HeartHandshake, Quote,
 } from "lucide-react";
 import { useT } from "@/lib/useT";
 
 export default function ONasPage() {
   const t = useT("about");
-
-  const stats = [
-    { value: t("stat1Value"), label: t("stat1Label") },
-    { value: t("stat2Value"), label: t("stat2Label") },
-    { value: t("stat3Value"), label: t("stat3Label") },
-    { value: t("stat4Value"), label: t("stat4Label") },
-  ];
-
-  const values = [
-    { icon: ShieldCheck, title: t("value1Title"), desc: t("value1Desc") },
-    { icon: Truck,       title: t("value2Title"), desc: t("value2Desc") },
-    { icon: RotateCcw,   title: t("value3Title"), desc: t("value3Desc") },
-    { icon: Headphones,  title: t("value4Title"), desc: t("value4Desc") },
-  ];
 
   const promises = [
     { icon: Target,         title: t("promise1Title"), desc: t("promise1Desc") },
@@ -44,7 +29,10 @@ export default function ONasPage() {
       <main className="min-h-screen bg-dark">
 
         {/* Hero — fotka přes celou šířku */}
-        <div className="relative w-full h-[80vh] min-h-[480px] overflow-hidden bg-secondary">
+        {/* svh, ne vh: na mobilu se `vh` počítá k výšce BEZ adresního řádku,
+            takže hero při rolování poskakuje. `svh` bere menší (jistou) výšku
+            — stejně jako VideoHero na homepage. */}
+        <div className="relative w-full h-[80svh] min-h-[480px] overflow-hidden bg-secondary">
           <Image src="/images/page/hero-product.jpg" alt="" fill className="object-cover" priority />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
 
@@ -79,33 +67,6 @@ export default function ONasPage() {
             </div>
             <div className="relative h-80 rounded-2xl overflow-hidden bg-secondary">
               <Image src="/images/page/setup.jpg" alt="" fill className="object-cover" />
-            </div>
-          </div>
-
-          {/* Čísla */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-20">
-            {stats.map((s) => (
-              <div key={s.label} className="rounded-2xl border border-border bg-secondary/40 p-6 text-center">
-                <p className="text-3xl lg:text-4xl font-extrabold text-primary-ink tracking-tight tabular-nums">{s.value}</p>
-                <p className="text-text-muted text-xs sm:text-sm mt-1.5 leading-snug">{s.label}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Hodnoty */}
-          <div className="mb-20">
-            <p className="text-text-subtle text-xs font-semibold uppercase tracking-widest mb-3 text-center">{t("valuesEyebrow")}</p>
-            <h2 className="text-3xl font-extrabold text-text-base mb-10 text-center">{t("valuesTitle")}</h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-              {values.map((v) => (
-                <div key={v.title} className="flex flex-col items-center text-center gap-3">
-                  <div className="w-14 h-14 rounded-full border-2 border-primary/30 flex items-center justify-center">
-                    <v.icon size={22} className="text-primary-ink" />
-                  </div>
-                  <p className="text-text-base font-semibold text-sm">{v.title}</p>
-                  <p className="text-text-muted text-sm leading-relaxed">{v.desc}</p>
-                </div>
-              ))}
             </div>
           </div>
 

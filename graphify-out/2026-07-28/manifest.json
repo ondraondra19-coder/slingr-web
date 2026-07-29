@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "app/api/checkout/route.ts": {
-    "mtime": 1785244497.5237436,
-    "ast_hash": "13db0acb4ee50eae5d50d153c6e00424",
+    "mtime": 1785163041.494273,
+    "ast_hash": "8ce01d2dabb5d1aeefe9db3a66e4956c",
     "semantic_hash": ""
   },
   "app/api/checkout/session/route.ts": {
@@ -145,8 +145,8 @@
     "semantic_hash": ""
   },
   "app/api/orders/route.ts": {
-    "mtime": 1785244516.0420623,
-    "ast_hash": "cb272ad09221571004f8e45e1ffd7c48",
+    "mtime": 1785163056.820873,
+    "ast_hash": "aed537c9d54964579d3bd86b5b9de56e",
     "semantic_hash": ""
   },
   "app/api/products/route.ts": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "app/informace/page.tsx": {
-    "mtime": 1785244651.8016102,
-    "ast_hash": "8a5f3d2928450db567b5a70c4800e36c",
+    "mtime": 1785241303.801234,
+    "ast_hash": "8f583b856ac479c78af3d85a9a4e2be1",
     "semantic_hash": ""
   },
   "app/kategorie/[slug]/page.tsx": {
@@ -210,8 +210,8 @@
     "semantic_hash": ""
   },
   "app/kosik/page.tsx": {
-    "mtime": 1785244568.416134,
-    "ast_hash": "3f3ca84bd16a93459310f325bbb245f5",
+    "mtime": 1784834300.445486,
+    "ast_hash": "9473a6cea1bc10cf972cdc4cc38e4a07",
     "semantic_hash": ""
   },
   "app/layout.tsx": {
@@ -235,8 +235,8 @@
     "semantic_hash": ""
   },
   "app/objednavka/page.tsx": {
-    "mtime": 1785244618.458529,
-    "ast_hash": "36ae9a34826b705f41b7fbd56efe7ba1",
+    "mtime": 1785164515.0988116,
+    "ast_hash": "272f7760b18e2c2225e95e29688f80b3",
     "semantic_hash": ""
   },
   "app/objednavka/uspech/page.tsx": {
@@ -460,18 +460,18 @@
     "semantic_hash": ""
   },
   "messages/cs.json": {
-    "mtime": 1785248072.9919302,
-    "ast_hash": "c611cebc5c618f4778b60dba209eadb3",
+    "mtime": 1785242227.3558998,
+    "ast_hash": "438b3f4673ab587a526f36e5848f540b",
     "semantic_hash": ""
   },
   "messages/en.json": {
-    "mtime": 1785248093.6492908,
-    "ast_hash": "5b212ba312256554aab928838c2d9fed",
+    "mtime": 1785242243.551642,
+    "ast_hash": "270be08e01da2abaf374bbc7b50e11e4",
     "semantic_hash": ""
   },
   "messages/sk.json": {
-    "mtime": 1785248087.5347328,
-    "ast_hash": "f848ec70117f8bccd60f6928b203cdc0",
+    "mtime": 1785242239.316854,
+    "ast_hash": "8f05d69fd8973f8857e5afce9433e650",
     "semantic_hash": ""
   },
   "next.config.ts": {
@@ -660,8 +660,8 @@
     "semantic_hash": ""
   },
   "lib/featureFlags.ts": {
-    "mtime": 1785244852.9577048,
-    "ast_hash": "2cfe5cd4a842e0e073402150bee92c22",
+    "mtime": 1784671858.1807654,
+    "ast_hash": "97727ca7cb73253181caa2b51f5e9eff",
     "semantic_hash": ""
   },
   "lib/consent.ts": {
@@ -880,8 +880,8 @@
     "semantic_hash": ""
   },
   "lib/udaje.ts": {
-    "mtime": 1785244481.8436296,
-    "ast_hash": "42a1b6766bab902f6de35e0939a6da8f",
+    "mtime": 1785241118.4894328,
+    "ast_hash": "dba33ea7474fc23bae329281a64ba31b",
     "semantic_hash": ""
   },
   "public/images/products/penove-plechovky/main.png": {

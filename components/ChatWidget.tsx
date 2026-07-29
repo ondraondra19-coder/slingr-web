@@ -70,7 +70,10 @@ export default function ChatWidget() {
   if (pathname?.startsWith("/admin")) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    // Odsazení počítá s gesto-lištou iPhonu (safe-area): se samotným bottom-6
+    // (24 px) bublina zasahovala do pruhu, kde ji systém přebíjí vlastním
+    // gestem, takže se špatně trefovala.
+    <div className="fixed right-6 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] z-50 flex flex-col items-end gap-3">
 
       {/* Formulář */}
       {open && (

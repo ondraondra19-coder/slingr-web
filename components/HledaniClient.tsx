@@ -5,25 +5,25 @@
 // fulltext (sdílené jádro lib/productSearch) a filtry/řazení. Prázdný dotaz =
 // režim „procházení" (ukáže všechno). Merchandising: skladem napřed.
 
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { SlidersHorizontal, ChevronDown, X, Check, Truck, Search } from "lucide-react";
 import type { Product } from "@/lib/products";
-import { categories, getProductName, getCategoryName } from "@/lib/products";
+import { categories, getProductName, getCategoryName, LOW_STOCK_THRESHOLD } from "@/lib/products";
 import { buildFuse, searchProducts, normalize } from "@/lib/productSearch";
 import { addRecentSearch } from "@/lib/recentSearches";
 import { trackEvent } from "@/lib/analytics";
 import { useCurrency } from "@/lib/CurrencyContext";
-import { getPrice } from "@/lib/currency";
+import { getPrice, formatPrice } from "@/lib/currency";
+import { priceFilterBounds } from "@/lib/priceFilter";
+import { useModalBehavior, useDismissOnOutside } from "@/lib/useModalBehavior";
 import ProductPrice from "./ProductPrice";
 import DualRangeSlider from "./DualRangeSlider";
 import RatingWidget from "./RatingWidget";
 import { useT } from "@/lib/useT";
 import { useLang } from "@/lib/LangContext";
 import { LOCALE_TAGS } from "@/lib/locale";
-
-const LOW_STOCK_THRESHOLD = 10;
 
 const TILE_STYLE: React.CSSProperties = {
   backgroundColor: "#eaf8f4",
@@ -42,8 +42,6 @@ function maxStock(product: Product, stockData: Record<string, number>): number {
   if (s !== undefined) return s;
   return product.inStock ? product.stock : 0;
 }
-
-const getCZK = (p: Product) => (typeof p.price === "number" ? p.price : p.price.CZK ?? 0);
 
 export default function HledaniClient({
   products,
@@ -66,13 +64,13 @@ export default function HledaniClient({
   const isSearching = trimmed.length >= 2;
 
   // ── Filtry ─────────────────────────────────────────────────────────────────
-  const allPrices = products.map(getCZK);
-  const PRICE_MIN = allPrices.length ? Math.min(...allPrices) : 0;
-  const PRICE_MAX = allPrices.length ? Math.max(...allPrices) : 1000;
+  // Ve zvolené měně, stejně jako na kategorii — viz lib/priceFilter.ts.
+  const { min: PRICE_MIN, max: PRICE_MAX, step: PRICE_STEP } =
+    useMemo(() => priceFilterBounds(products, currency), [products, currency]);
 
   const [selectedCats, setSelectedCats] = useState<Set<string>>(new Set());
-  const [priceMin, setPriceMin] = useState(Math.floor(PRICE_MIN / 10) * 10);
-  const [priceMax, setPriceMax] = useState(Math.ceil(PRICE_MAX / 10) * 10);
+  const [priceMin, setPriceMin] = useState(PRICE_MIN);
+  const [priceMax, setPriceMax] = useState(PRICE_MAX);
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [sort, setSort] = useState("default");
   const [sortOpen, setSortOpen] = useState(false);
@@ -80,6 +78,15 @@ export default function HledaniClient({
   const [catOpen, setCatOpen] = useState(true);
   const [priceOpen, setPriceOpen] = useState(false);
   const [availOpen, setAvailOpen] = useState(false);
+
+  // Filtr na mobilu je překryv — zamkne stránku pod sebou, zavírá se Escapem.
+  const closeMobileFilter = useCallback(() => setMobileFilterOpen(false), []);
+  useModalBehavior(mobileFilterOpen, closeMobileFilter);
+
+  // Rozbalené řazení se zavře ťuknutím vedle — viz KategorieClient.
+  const sortRef = useRef<HTMLDivElement>(null);
+  const closeSort = useCallback(() => setSortOpen(false), []);
+  useDismissOnOutside(sortOpen, sortRef, closeSort);
 
   const sortOptions = [
     { label: t("sortRelevance"), value: "default" },
@@ -123,17 +130,28 @@ export default function HledaniClient({
     return () => clearTimeout(id);
   }, [isSearching, trimmed, resultsLen]);
 
+  // Po přepnutí měny jsou uložené meze ještě v té staré — zahodíme je, jinak
+  // by filtr vyhodil celý sortiment. Viz stejný vzor v KategorieClient.
+  const [prevCurrencyCode, setPrevCurrencyCode] = useState(currency.code);
+  if (currency.code !== prevCurrencyCode) {
+    setPrevCurrencyCode(currency.code);
+    setPriceMin(PRICE_MIN);
+    setPriceMax(PRICE_MAX);
+  }
+
+  const priceOf = (p: Product) => getPrice(p.price, currency);
+
   // ── Filtrování + řazení ─────────────────────────────────────────────────────
   let filtered = base.filter((p) => {
-    const czk = getCZK(p);
-    const inPrice = czk >= priceMin && czk <= priceMax;
+    const price = priceOf(p);
+    const inPrice = price >= priceMin && price <= priceMax;
     const inCat = selectedCats.size === 0 || p.categories.some((c) => selectedCats.has(c));
     const inStockOk = onlyInStock ? anyInStock(p, stockData) : true;
     return inPrice && inCat && inStockOk;
   });
 
-  if (sort === "price-asc") filtered = [...filtered].sort((a, b) => getCZK(a) - getCZK(b));
-  else if (sort === "price-desc") filtered = [...filtered].sort((a, b) => getCZK(b) - getCZK(a));
+  if (sort === "price-asc") filtered = [...filtered].sort((a, b) => priceOf(a) - priceOf(b));
+  else if (sort === "price-desc") filtered = [...filtered].sort((a, b) => priceOf(b) - priceOf(a));
   else if (sort === "name-asc") {
     filtered = [...filtered].sort((a, b) =>
       getProductName(a, locale).localeCompare(getProductName(b, locale), LOCALE_TAGS[locale]),
@@ -153,8 +171,8 @@ export default function HledaniClient({
 
   function resetFilters() {
     setSelectedCats(new Set());
-    setPriceMin(Math.floor(PRICE_MIN / 10) * 10);
-    setPriceMax(Math.ceil(PRICE_MAX / 10) * 10);
+    setPriceMin(PRICE_MIN);
+    setPriceMax(PRICE_MAX);
     setOnlyInStock(false);
   }
 
@@ -218,7 +236,8 @@ export default function HledaniClient({
           {priceOpen && (
             <div className="px-5 pb-5">
               <DualRangeSlider
-                min={PRICE_MIN} max={PRICE_MAX}
+                min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP}
+                formatValue={v => formatPrice(v, currency)}
                 valueMin={priceMin} valueMax={priceMax}
                 onChangeMin={setPriceMin} onChangeMax={setPriceMax}
                 labelMin={tc("priceMin")} labelMax={tc("priceMax")}
@@ -315,7 +334,7 @@ export default function HledaniClient({
               {activeFilters && <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-primary" />}
             </button>
 
-            <div className="relative">
+            <div className="relative" ref={sortRef}>
               <button
                 onClick={() => setSortOpen((v) => !v)}
                 aria-label={tc("sortLabel", { current: currentSort.label })}
@@ -395,7 +414,7 @@ export default function HledaniClient({
 
                   const stockLabel = !inStock
                     ? { dot: "bg-red-400", text: tc("stockNone"), cls: "text-red-500" }
-                    : best < 5
+                    : best <= LOW_STOCK_THRESHOLD
                     ? { dot: "bg-amber-400 animate-pulse", text: tc("stockLow"), cls: "text-amber-500" }
                     : { dot: "bg-green-500", text: tc("stockOk"), cls: "text-green-600" };
 
@@ -483,7 +502,9 @@ export default function HledaniClient({
       {mobileFilterOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setMobileFilterOpen(false)} />
-          <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-border rounded-t-2xl p-5 max-h-[80vh] overflow-y-auto">
+          {/* Viz stejná úprava v KategorieClient — dvh, overscroll-contain a
+              odsazení pod gesto-lištu iPhonu. */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-border rounded-t-2xl p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] max-h-[80dvh] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal size={15} className="text-primary-ink" />

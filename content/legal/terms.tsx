@@ -18,14 +18,19 @@ import Link from "next/link";
 import { Section } from "@/components/legal/LegalLayout";
 import type { Locale } from "@/lib/locale";
 import { COMPANY, companyField } from "@/lib/companyInfo";
+import { isVatPayer } from "@/lib/udaje";
 import { SHIPPING_PRICES } from "@/lib/shipping/pricing";
+import { DOBIRKA_FEE } from "@/lib/fees";
 import { formatPrice, CURRENCIES } from "@/lib/currency";
 
-export const TERMS_EFFECTIVE_FROM = "1. 1. 2024";
+// TODO: nastavit na skutečné datum spuštění obchodu.
+export const TERMS_EFFECTIVE_FROM = "1. 8. 2026";
+export const TERMS_EFFECTIVE_FROM_EN = "1 August 2026";
 
 const czk = (n: number) => formatPrice(n, CURRENCIES.CZK);
 const boxPrice = () => czk(SHIPPING_PRICES.zasilkovna_box.CZK);
 const addrPrice = () => czk(SHIPPING_PRICES.zasilkovna_adresa.CZK);
+const codFee = () => czk(DOBIRKA_FEE.CZK);
 
 // ── Čeština — závazné znění ───────────────────────────────────────────────────
 
@@ -39,23 +44,25 @@ function TermsCs() {
       </Section>
 
       <Section title="2. Objednávka a uzavření smlouvy">
-        <p>Webové rozhraní obchodu obsahuje seznam zboží nabízeného prodávajícím k prodeji. Ceny zboží jsou uvedeny včetně DPH. Nabídka prodeje zboží a ceny tohoto zboží zůstávají v platnosti po dobu, kdy jsou zobrazovány ve webovém rozhraní.</p>
-        <p>Objednávku provedete vyplněním objednávkového formuláře. Před odesláním objednávky je vám umožněno zkontrolovat a měnit zadané údaje. Objednávku odešlete kliknutím na tlačítko „Dokončit objednávku“.</p>
+        <p>Webové rozhraní obchodu obsahuje seznam zboží nabízeného prodávajícím k prodeji. {isVatPayer ? "Ceny zboží jsou uvedeny včetně DPH." : "Prodávající není plátcem DPH; uvedené ceny jsou konečné."} Nabídka prodeje zboží a ceny tohoto zboží zůstávají v platnosti po dobu, kdy jsou zobrazovány ve webovém rozhraní.</p>
+        <p>Objednávku provedete vyplněním objednávkového formuláře. Před odesláním objednávky je vám umožněno zkontrolovat a měnit zadané údaje. Objednávku odešlete kliknutím na tlačítko „Objednat s povinností platby“; odesláním objednávky berete na vědomí, že je spojena s povinností zaplatit.</p>
         <p>Smlouva je uzavřena okamžikem doručení potvrzení objednávky na váš e-mail. Prodávající si vyhrazuje právo objednávku nepotvrdit v případě vyprodání zásob nebo zjevné chyby v ceně zboží.</p>
       </Section>
 
       <Section title="3. Ceny a platební podmínky">
-        <p>Aktuální ceny jsou vždy uvedeny u jednotlivých produktů včetně DPH. Prodávající si vyhrazuje právo ceny měnit bez předchozího upozornění.</p>
+        <p>Aktuální ceny jsou vždy uvedeny u jednotlivých produktů. {isVatPayer ? "Ceny jsou uvedeny včetně DPH." : "Prodávající není plátcem DPH; uvedené ceny jsou konečné."} Prodávající si vyhrazuje právo ceny měnit bez předchozího upozornění; pro již uzavřenou smlouvu platí cena zobrazená v okamžiku objednání.</p>
         <p>Akceptované způsoby platby:</p>
         <ul>
           <li><strong>Online kartou</strong> — Visa, Mastercard, Apple Pay (platba proběhne okamžitě)</li>
           <li><strong>Bankovním převodem</strong> — zboží expedujeme po připsání platby na náš účet</li>
-          <li><strong>Dobírkou</strong> — platba při převzetí zásilky (příplatek 39 Kč)</li>
+          <li><strong>Dobírkou</strong> — platba při převzetí zásilky (příplatek {codFee()})</li>
         </ul>
+        <p>Aktuální nabídka způsobů platby se zobrazuje v objednávce; ne všechny způsoby musí být dostupné ve všech měnách.</p>
       </Section>
 
       <Section title="4. Doprava a dodací podmínky">
-        <p>Zboží expedujeme v pracovní dny. Objednávky přijaté do 14:00 odesíláme tentýž den.</p>
+        <p>Zboží expedujeme v pracovní dny, zpravidla do 24 hodin od potvrzení objednávky. Objednávky přijaté do 14:00 obvykle odesíláme ještě tentýž pracovní den.</p>
+        <p><strong>Zboží doručujeme pouze na adresy v České republice.</strong> Objednávky s doručením mimo Českou republiku prodávající nepřijímá.</p>
         <p>Dostupné způsoby dopravy:</p>
         <ul>
           <li><strong>Zásilkovna — výdejní místo</strong> — vyzvednutí na Z-BOXu nebo výdejním místě dle výběru, {boxPrice()}</li>
@@ -68,8 +75,8 @@ function TermsCs() {
       </Section>
 
       <Section title="5. Odstoupení od smlouvy">
-        <p>Jako spotřebitel máte právo odstoupit od smlouvy bez udání důvodu do <strong>14 dnů</strong> od převzetí zboží. My vám nad rámec zákona nabízíme rozšířenou lhůtu <strong>30 dní</strong>.</p>
-        <p>Pro odstoupení nás kontaktujte e-mailem na <strong>{COMPANY.email}</strong>. Zboží zašlete zpět na adresu <strong>{companyField(COMPANY.warehouseAddress, "ADRESA SKLADU")}</strong> nejpozději do 14 dnů od oznámení odstoupení. Náklady na vrácení zboží nese kupující.</p>
+        <p>Jako spotřebitel máte právo odstoupit od smlouvy bez udání důvodu do <strong>14 dnů</strong> od převzetí zboží.</p>
+        <p>Pro odstoupení nás kontaktujte e-mailem na <strong>{COMPANY.email}</strong>, vyplňte formulář na stránce <Link href="/reklamace" className="text-primary-ink hover:underline font-bold">Reklamace a vrácení zboží</Link>, nebo použijte vzorový formulář v příloze těchto podmínek. Zboží zašlete zpět na adresu <strong>{companyField(COMPANY.warehouseAddress, "ADRESA SKLADU")}</strong> nejpozději do 14 dnů od oznámení odstoupení. Náklady na vrácení zboží nese kupující.</p>
         <p>Kupní cenu vrátíme do 14 dnů od obdržení vráceného zboží stejnou platební metodou, jakou jste použili při nákupu, pokud se nedohodneme jinak.</p>
         <p>Právo na odstoupení se nevztahuje na zboží upravené dle přání kupujícího nebo na zboží podléhající rychlé zkáze.</p>
       </Section>
@@ -83,16 +90,54 @@ function TermsCs() {
       </Section>
 
       <Section title="7. Mimosoudní řešení sporů">
-        <p>K mimosoudnímu řešení spotřebitelských sporů je příslušná Česká obchodní inspekce, Štěpánská 567/15, 120 00 Praha 2, web: <a href="https://www.coi.cz" target="_blank" rel="noopener noreferrer">www.coi.cz</a>.</p>
-        <p>Spotřebitel může rovněž využít platformu pro online řešení sporů dostupnou na <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a>.</p>
+        <p>K mimosoudnímu řešení spotřebitelských sporů je příslušná Česká obchodní inspekce, Štěpánská 567/15, 120 00 Praha 2, web: <a href="https://www.coi.cz" target="_blank" rel="noopener noreferrer">www.coi.cz</a>. Návrh na zahájení řízení může spotřebitel podat nejpozději do jednoho roku ode dne, kdy u prodávajícího poprvé uplatnil své právo.</p>
       </Section>
 
       <Section title="8. Závěrečná ustanovení">
         <p>Tyto podmínky jsou platné a účinné od <strong>{TERMS_EFFECTIVE_FROM}</strong>. Prodávající si vyhrazuje právo podmínky měnit; aktuální verze bude vždy zveřejněna na těchto stránkách.</p>
+        <p>Prodávající není ve vztahu ke kupujícímu vázán žádnými kodexy chování ve smyslu § 1826 odst. 1 písm. e) občanského zákoníku.</p>
         <p>Vztahy těmito podmínkami neupravené se řídí právním řádem České republiky, zejména zákonem č. 89/2012 Sb., občanský zákoník, a zákonem č. 634/1992 Sb., o ochraně spotřebitele.</p>
         <p>Tyto podmínky jsou vyhotoveny v českém jazyce. Případné cizojazyčné verze jsou pouze informativním překladem; v případě rozporu je rozhodující české znění.</p>
       </Section>
+
+      <Section title="Příloha — Vzorový formulář pro odstoupení od smlouvy">
+        <p>Vyplňte a odešlete tento formulář jen v případě, že chcete odstoupit od smlouvy. Formulář si můžete vytisknout přímo z této stránky, nebo místo něj použít online formulář na stránce <Link href="/reklamace" className="text-primary-ink hover:underline font-bold">Reklamace a vrácení zboží</Link>.</p>
+        <WithdrawalForm
+          addressee="Adresát"
+          lines={[
+            "Oznamuji, že tímto odstupuji od smlouvy o nákupu tohoto zboží:",
+            "Datum objednání / datum obdržení:",
+            "Jméno a příjmení spotřebitele:",
+            "Adresa spotřebitele:",
+            "Podpis spotřebitele (pouze pokud je formulář zasílán v listinné podobě):",
+            "Datum:",
+          ]}
+        />
+      </Section>
     </>
+  );
+}
+
+// Vzorový formulář pro odstoupení (příloha č. 1 k nařízení vlády č. 363/2013 Sb.).
+// Zákon chce, aby ho prodávající spotřebiteli poskytl — online formulář na
+// /reklamace ho nahrazuje, ale k vytištění musí být i tenhle.
+function WithdrawalForm({ addressee, lines }: { addressee: string; lines: string[] }) {
+  return (
+    <div className="not-prose border border-border rounded-xl p-5 sm:p-6 my-4 text-sm">
+      <p className="font-bold text-text-base mb-1">{addressee}:</p>
+      <p className="text-text-muted leading-relaxed mb-5">
+        {companyField(COMPANY.name, "NÁZEV FIRMY")}, {companyField(COMPANY.address, "ADRESA SÍDLA")}<br />
+        {COMPANY.email}
+      </p>
+      <div className="flex flex-col gap-5">
+        {lines.map((line) => (
+          <div key={line}>
+            <p className="text-text-base">{line}</p>
+            <div className="border-b border-dashed border-border-strong h-6" />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -108,23 +153,25 @@ function TermsSk() {
       </Section>
 
       <Section title="2. Objednávka a uzavretie zmluvy">
-        <p>Webové rozhranie obchodu obsahuje zoznam tovaru ponúkaného predávajúcim na predaj. Ceny tovaru sú uvedené vrátane DPH. Ponuka predaja tovaru a ceny tohto tovaru zostávajú v platnosti po dobu, kedy sú zobrazované vo webovom rozhraní.</p>
-        <p>Objednávku vykonáte vyplnením objednávkového formulára. Pred odoslaním objednávky je vám umožnené skontrolovať a meniť zadané údaje. Objednávku odošlete kliknutím na tlačidlo „Dokončiť objednávku“.</p>
+        <p>Webové rozhranie obchodu obsahuje zoznam tovaru ponúkaného predávajúcim na predaj. {isVatPayer ? "Ceny tovaru sú uvedené vrátane DPH." : "Predávajúci nie je platiteľom DPH; uvedené ceny sú konečné."} Ponuka predaja tovaru a ceny tohto tovaru zostávajú v platnosti po dobu, kedy sú zobrazované vo webovom rozhraní.</p>
+        <p>Objednávku vykonáte vyplnením objednávkového formulára. Pred odoslaním objednávky je vám umožnené skontrolovať a meniť zadané údaje. Objednávku odošlete kliknutím na tlačidlo „Objednať s povinnosťou platby“; odoslaním objednávky beriete na vedomie, že je spojená s povinnosťou zaplatiť.</p>
         <p>Zmluva je uzavretá okamihom doručenia potvrdenia objednávky na váš e-mail. Predávajúci si vyhradzuje právo objednávku nepotvrdiť v prípade vypredania zásob alebo zjavnej chyby v cene tovaru.</p>
       </Section>
 
       <Section title="3. Ceny a platobné podmienky">
-        <p>Aktuálne ceny sú vždy uvedené pri jednotlivých produktoch vrátane DPH. Predávajúci si vyhradzuje právo ceny meniť bez predchádzajúceho upozornenia.</p>
+        <p>Aktuálne ceny sú vždy uvedené pri jednotlivých produktoch. {isVatPayer ? "Ceny sú uvedené vrátane DPH." : "Predávajúci nie je platiteľom DPH; uvedené ceny sú konečné."} Predávajúci si vyhradzuje právo ceny meniť bez predchádzajúceho upozornenia; pre už uzavretú zmluvu platí cena zobrazená v okamihu objednania.</p>
         <p>Akceptované spôsoby platby:</p>
         <ul>
           <li><strong>Online kartou</strong> — Visa, Mastercard, Apple Pay (platba prebehne okamžite)</li>
           <li><strong>Bankovým prevodom</strong> — tovar expedujeme po pripísaní platby na náš účet</li>
-          <li><strong>Dobierkou</strong> — platba pri prevzatí zásielky (príplatok 39 Kč)</li>
+          <li><strong>Dobierkou</strong> — platba pri prevzatí zásielky (príplatok {codFee()})</li>
         </ul>
+        <p>Aktuálna ponuka spôsobov platby sa zobrazuje v objednávke; nie všetky spôsoby musia byť dostupné vo všetkých menách.</p>
       </Section>
 
       <Section title="4. Doprava a dodacie podmienky">
-        <p>Tovar expedujeme v pracovné dni. Objednávky prijaté do 14:00 odosielame v ten istý deň.</p>
+        <p>Tovar expedujeme v pracovné dni, spravidla do 24 hodín od potvrdenia objednávky. Objednávky prijaté do 14:00 zvyčajne odosielame ešte v ten istý pracovný deň.</p>
+        <p><strong>Tovar doručujeme iba na adresy v Českej republike.</strong> Objednávky s doručením mimo Českej republiky predávajúci neprijíma.</p>
         <p>Dostupné spôsoby dopravy:</p>
         <ul>
           <li><strong>Zásielkovňa — výdajné miesto</strong> — vyzdvihnutie na Z-BOXe alebo výdajnom mieste podľa výberu, {boxPrice()}</li>
@@ -137,8 +184,8 @@ function TermsSk() {
       </Section>
 
       <Section title="5. Odstúpenie od zmluvy">
-        <p>Ako spotrebiteľ máte právo odstúpiť od zmluvy bez udania dôvodu do <strong>14 dní</strong> od prevzatia tovaru. My vám nad rámec zákona ponúkame rozšírenú lehotu <strong>30 dní</strong>.</p>
-        <p>Pre odstúpenie nás kontaktujte e-mailom na <strong>{COMPANY.email}</strong>. Tovar zašlite späť na adresu <strong>{companyField(COMPANY.warehouseAddress, "ADRESA SKLADU")}</strong> najneskôr do 14 dní od oznámenia odstúpenia. Náklady na vrátenie tovaru znáša kupujúci.</p>
+        <p>Ako spotrebiteľ máte právo odstúpiť od zmluvy bez udania dôvodu do <strong>14 dní</strong> od prevzatia tovaru.</p>
+        <p>Pre odstúpenie nás kontaktujte e-mailom na <strong>{COMPANY.email}</strong>, vyplňte formulár na stránke <Link href="/reklamace" className="text-primary-ink hover:underline font-bold">Reklamácie a vrátenie tovaru</Link>, alebo použite vzorový formulár v prílohe týchto podmienok. Tovar zašlite späť na adresu <strong>{companyField(COMPANY.warehouseAddress, "ADRESA SKLADU")}</strong> najneskôr do 14 dní od oznámenia odstúpenia. Náklady na vrátenie tovaru znáša kupujúci.</p>
         <p>Kúpnu cenu vrátime do 14 dní od obdržania vráteného tovaru rovnakou platobnou metódou, akú ste použili pri nákupe, pokiaľ sa nedohodneme inak.</p>
         <p>Právo na odstúpenie sa nevzťahuje na tovar upravený podľa priania kupujúceho alebo na tovar podliehajúci rýchlej skaze.</p>
       </Section>
@@ -152,14 +199,29 @@ function TermsSk() {
       </Section>
 
       <Section title="7. Mimosúdne riešenie sporov">
-        <p>Na mimosúdne riešenie spotrebiteľských sporov je príslušná Česká obchodná inšpekcia, Štěpánská 567/15, 120 00 Praha 2, web: <a href="https://www.coi.cz" target="_blank" rel="noopener noreferrer">www.coi.cz</a>.</p>
-        <p>Spotrebiteľ môže takisto využiť platformu na online riešenie sporov dostupnú na <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a>.</p>
+        <p>Na mimosúdne riešenie spotrebiteľských sporov je príslušná Česká obchodná inšpekcia, Štěpánská 567/15, 120 00 Praha 2, web: <a href="https://www.coi.cz" target="_blank" rel="noopener noreferrer">www.coi.cz</a>. Návrh na začatie konania môže spotrebiteľ podať najneskôr do jedného roka odo dňa, keď u predávajúceho prvýkrát uplatnil svoje právo.</p>
       </Section>
 
       <Section title="8. Záverečné ustanovenia">
         <p>Tieto podmienky sú platné a účinné od <strong>{TERMS_EFFECTIVE_FROM}</strong>. Predávajúci si vyhradzuje právo podmienky meniť; aktuálna verzia bude vždy zverejnená na týchto stránkach.</p>
+        <p>Predávajúci nie je vo vzťahu ku kupujúcemu viazaný žiadnymi kódexmi správania v zmysle § 1826 ods. 1 písm. e) občianskeho zákonníka.</p>
         <p>Vzťahy týmito podmienkami neupravené sa riadia právnym poriadkom Českej republiky, najmä zákonom č. 89/2012 Zb., občiansky zákonník, a zákonom č. 634/1992 Zb., o ochrane spotrebiteľa.</p>
         <p>Tieto podmienky sú vyhotovené v českom jazyku. Prípadné cudzojazyčné verzie sú iba informatívnym prekladom; v prípade rozporu je rozhodujúce české znenie.</p>
+      </Section>
+
+      <Section title="Príloha — Vzorový formulár na odstúpenie od zmluvy">
+        <p>Vyplňte a odošlite tento formulár len v prípade, že chcete odstúpiť od zmluvy. Formulár si môžete vytlačiť priamo z tejto stránky, alebo namiesto neho použiť online formulár na stránke <Link href="/reklamace" className="text-primary-ink hover:underline font-bold">Reklamácie a vrátenie tovaru</Link>.</p>
+        <WithdrawalForm
+          addressee="Adresát"
+          lines={[
+            "Oznamujem, že týmto odstupujem od zmluvy o nákupe tohto tovaru:",
+            "Dátum objednania / dátum obdržania:",
+            "Meno a priezvisko spotrebiteľa:",
+            "Adresa spotrebiteľa:",
+            "Podpis spotrebiteľa (iba ak sa formulár zasiela v listinnej podobe):",
+            "Dátum:",
+          ]}
+        />
       </Section>
     </>
   );
@@ -177,23 +239,25 @@ function TermsEn() {
       </Section>
 
       <Section title="2. Orders and formation of the contract">
-        <p>The store’s web interface contains a list of goods offered for sale by the seller. Prices are stated including VAT. The offer to sell the goods and their prices remain valid for as long as they are displayed in the web interface.</p>
-        <p>You place an order by completing the order form. Before submitting the order, you are able to check and change the details you have entered. You submit the order by clicking the “Place order” button.</p>
+        <p>The store’s web interface contains a list of goods offered for sale by the seller. {isVatPayer ? "Prices are stated including VAT." : "The seller is not a VAT payer; the prices stated are final."} The offer to sell the goods and their prices remain valid for as long as they are displayed in the web interface.</p>
+        <p>You place an order by completing the order form. Before submitting the order, you are able to check and change the details you have entered. You submit the order by clicking the “Order with obligation to pay” button; by submitting the order you acknowledge that it entails an obligation to pay.</p>
         <p>The contract is formed at the moment the order confirmation is delivered to your e-mail. The seller reserves the right not to confirm an order in the event that stock has run out or the price of the goods is manifestly incorrect.</p>
       </Section>
 
       <Section title="3. Prices and payment terms">
-        <p>Current prices are always stated with each product, including VAT. The seller reserves the right to change prices without prior notice.</p>
+        <p>Current prices are always stated with each product. {isVatPayer ? "Prices include VAT." : "The seller is not a VAT payer; the prices stated are final."} The seller reserves the right to change prices without prior notice; for a contract already concluded, the price displayed at the time of ordering applies.</p>
         <p>Accepted payment methods:</p>
         <ul>
           <li><strong>Card online</strong> — Visa, Mastercard, Apple Pay (payment is taken immediately)</li>
           <li><strong>Bank transfer</strong> — we ship the goods once the payment reaches our account</li>
-          <li><strong>Cash on delivery</strong> — payment on receipt of the parcel (39 CZK surcharge)</li>
+          <li><strong>Cash on delivery</strong> — payment on receipt of the parcel ({codFee()} surcharge)</li>
         </ul>
+        <p>The payment methods currently on offer are shown during checkout; not every method is available in every currency.</p>
       </Section>
 
       <Section title="4. Delivery terms">
-        <p>We dispatch goods on working days. Orders received before 2pm are sent the same day.</p>
+        <p>We dispatch goods on working days, as a rule within 24 hours of order confirmation. Orders received before 2pm are usually sent the same working day.</p>
+        <p><strong>We deliver to addresses in the Czech Republic only.</strong> The seller does not accept orders for delivery outside the Czech Republic.</p>
         <p>Available delivery methods:</p>
         <ul>
           <li><strong>Zásilkovna — pickup point</strong> — collection from a Z-BOX or a pickup point of your choice, {boxPrice()}</li>
@@ -206,8 +270,8 @@ function TermsEn() {
       </Section>
 
       <Section title="5. Withdrawal from the contract">
-        <p>As a consumer, you have the right to withdraw from the contract without giving a reason within <strong>14 days</strong> of receiving the goods. Beyond what the law requires, we offer an extended period of <strong>30 days</strong>.</p>
-        <p>To withdraw, contact us by e-mail at <strong>{COMPANY.email}</strong>. Send the goods back to <strong>{companyField(COMPANY.warehouseAddress, "WAREHOUSE ADDRESS")}</strong> no later than 14 days after notifying us of the withdrawal. The buyer bears the cost of returning the goods.</p>
+        <p>As a consumer, you have the right to withdraw from the contract without giving a reason within <strong>14 days</strong> of receiving the goods.</p>
+        <p>To withdraw, contact us by e-mail at <strong>{COMPANY.email}</strong>, fill in the form on the <Link href="/reklamace" className="text-primary-ink hover:underline font-bold">Complaints and returns</Link> page, or use the model form appended to these Terms. Send the goods back to <strong>{companyField(COMPANY.warehouseAddress, "WAREHOUSE ADDRESS")}</strong> no later than 14 days after notifying us of the withdrawal. The buyer bears the cost of returning the goods.</p>
         <p>We will refund the purchase price within 14 days of receiving the returned goods, using the same payment method you used for the purchase, unless we agree otherwise.</p>
         <p>The right of withdrawal does not apply to goods customised to the buyer’s wishes or to goods liable to deteriorate rapidly.</p>
       </Section>
@@ -221,14 +285,29 @@ function TermsEn() {
       </Section>
 
       <Section title="7. Out-of-court dispute resolution">
-        <p>The body competent for out-of-court resolution of consumer disputes is the Czech Trade Inspection Authority, Štěpánská 567/15, 120 00 Prague 2, web: <a href="https://www.coi.cz" target="_blank" rel="noopener noreferrer">www.coi.cz</a>.</p>
-        <p>Consumers may also use the online dispute resolution platform available at <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a>.</p>
+        <p>The body competent for out-of-court resolution of consumer disputes is the Czech Trade Inspection Authority, Štěpánská 567/15, 120 00 Prague 2, web: <a href="https://www.coi.cz" target="_blank" rel="noopener noreferrer">www.coi.cz</a>. A consumer may file a proposal to open proceedings no later than one year from the day they first exercised their right with the seller.</p>
       </Section>
 
       <Section title="8. Final provisions">
-        <p>These Terms are valid and effective from <strong>1 January 2024</strong>. The seller reserves the right to amend the Terms; the current version will always be published on these pages.</p>
+        <p>These Terms are valid and effective from <strong>{TERMS_EFFECTIVE_FROM_EN}</strong>. The seller reserves the right to amend the Terms; the current version will always be published on these pages.</p>
+        <p>The seller is not bound by any codes of conduct in relation to the buyer within the meaning of Section 1826(1)(e) of the Civil Code.</p>
         <p>Matters not governed by these Terms are subject to the law of the Czech Republic, in particular Act No. 89/2012 Coll., the Civil Code, and Act No. 634/1992 Coll., on Consumer Protection.</p>
         <p>These Terms are drawn up in the Czech language. Any foreign-language versions are an informative translation only; in the event of any discrepancy, the Czech wording prevails.</p>
+      </Section>
+
+      <Section title="Annex — Model withdrawal form">
+        <p>Complete and send this form only if you wish to withdraw from the contract. You can print it straight from this page, or use the online form on the <Link href="/reklamace" className="text-primary-ink hover:underline font-bold">Complaints and returns</Link> page instead.</p>
+        <WithdrawalForm
+          addressee="Addressee"
+          lines={[
+            "I hereby give notice that I withdraw from the contract for the purchase of the following goods:",
+            "Date of order / date of receipt:",
+            "Name of the consumer:",
+            "Address of the consumer:",
+            "Signature of the consumer (only if this form is sent on paper):",
+            "Date:",
+          ]}
+        />
       </Section>
     </>
   );

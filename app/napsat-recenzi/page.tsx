@@ -346,7 +346,8 @@ export default function RecenzePage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Pod sm: pod sebou — viz stejná úprava na /kontakt. */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="review-name" className="block text-text-muted text-xs font-medium mb-1.5">{t("nameLabel")} <span aria-hidden="true">*</span></label>
                       <input id="review-name" value={name} onChange={e => setName(e.target.value)} placeholder={t("namePlaceholder")}

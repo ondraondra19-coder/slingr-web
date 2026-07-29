@@ -9,6 +9,7 @@ import Image from "next/image";
 import {
     CheckCircle2, ShoppingBag, Mail, Clock, Banknote, Package,
     ArrowRight, MapPin, Truck, ShieldCheck, Phone, Building2, Copy, Check, Tag, Smartphone,
+    AlertTriangle,
 } from "lucide-react";
 import { useCurrency } from "@/lib/CurrencyContext";
 import { formatPrice, getPrice } from "@/lib/currency";
@@ -115,19 +116,23 @@ function InlineCopy({ value }: { value: string }) {
     );
 }
 
-function BankovniPrevod({ totalStr, vsymbol, amount, currencyCode }: { totalStr: string; vsymbol: string; amount: number; currencyCode: string }) {
+// `vsymbol === null` má dva různé významy podle `loading`: než se stránka
+// dohydratuje, číslo objednávky prostě ještě neznáme (ukáže se kostra), a až
+// potom může znamenat „objednávka nemá číslo". Bez toho rozlišení by legitimní
+// zákazník na okamžik uviděl varování, než se údaje načtou.
+function BankovniPrevod({ totalStr, vsymbol, amount, currencyCode, loading }: { totalStr: string; vsymbol: string | null; amount: number; currencyCode: string; loading: boolean }) {
     const t = useT("success");
     const accountDisplay = process.env.NEXT_PUBLIC_BANK_ACCOUNT_DISPLAY;
     const iban = process.env.NEXT_PUBLIC_BANK_ACCOUNT_IBAN;
     const bankName = process.env.NEXT_PUBLIC_BANK_NAME;
     // USD nemá smysl — bankovní převod se pro USD vůbec nenabízí (viz
     // /objednavka), takže sem se dostane jen CZK/EUR.
-    const showQr = Boolean(iban) && (currencyCode === "CZK" || currencyCode === "EUR");
+    const showQr = Boolean(iban) && vsymbol !== null && (currencyCode === "CZK" || currencyCode === "EUR");
 
     const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!showQr || !iban) return;
+        if (!showQr || !iban || !vsymbol) return;
         const spd = buildSpdString({ iban, amount, currency: currencyCode, variableSymbol: vsymbol, message: "Dekujeme za objednavku" });
         let cancelled = false;
         QRCode.toDataURL(spd, { width: 200, margin: 1 })
@@ -143,7 +148,20 @@ function BankovniPrevod({ totalStr, vsymbol, amount, currencyCode }: { totalStr:
                 <h2 className="text-2xl font-extrabold text-text-base tracking-tight mb-2">{t("transferTitle")}</h2>
                 <p className="text-text-muted text-sm leading-relaxed max-w-lg">{t("transferDesc")}</p>
             </div>
-            {!accountDisplay ? (
+            {/* Bez variabilního symbolu platební údaje NEUKAZUJEME. Zákazník by
+                poslal peníze bez identifikace a my bychom je neměli k čemu
+                přiřadit — to je horší než ho poslat za námi. */}
+            {loading ? (
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 animate-pulse">
+                    <div className="lg:col-span-3 h-44 rounded-2xl bg-surface border border-border" />
+                    <div className="lg:col-span-2 h-44 rounded-2xl bg-surface border border-border" />
+                </div>
+            ) : !vsymbol ? (
+                <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <AlertTriangle size={16} className="shrink-0 mt-0.5 text-amber-500" aria-hidden="true" />
+                    <p className="text-xs text-amber-900 leading-relaxed">{t("transferNoSymbol")}</p>
+                </div>
+            ) : !accountDisplay ? (
                 <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
                     <div className="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center text-[10px] font-black text-white">!</div>
                     <p className="text-xs text-amber-900 leading-relaxed">{t("transferNotSetUp")}</p>
@@ -161,7 +179,10 @@ function BankovniPrevod({ totalStr, vsymbol, amount, currencyCode }: { totalStr:
                             </div>
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* Variabilní symbol a částka — vedle sebe až od sm.
+                        Osmimístný VS s kopírovacím tlačítkem se do poloviny
+                        úzkého displeje nevejde. */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <p className="text-[10px] font-bold uppercase tracking-widest text-text-subtle mb-1.5">{t("variableSymbol")}</p>
                             <div className="flex items-center justify-between bg-white border border-border rounded-xl px-4 py-3">
@@ -195,7 +216,7 @@ function BankovniPrevod({ totalStr, vsymbol, amount, currencyCode }: { totalStr:
                 </div>
             </div>
             )}
-            {accountDisplay && (
+            {accountDisplay && vsymbol && !loading && (
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
                     { icon: Banknote, label: t("transferStep1"), desc: t("transferStep1Desc") },
@@ -439,7 +460,11 @@ function SuccessContent() {
     const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
     const [hydrated, setHydrated] = useState(false);
     const [stableOrderId, setStableOrderId] = useState<string>("");
-    const [, setLoadError] = useState(false);
+    // Platbu kartou se nepodařilo ověřit (Stripe ji nezná, nebo nebyla
+    // zaplacena). Nesmí se pak vykreslit úspěšná varianta — viz `if (loadError)`
+    // před hlavním returnem. Dřív se sem jen zapisovalo a nikdo to nečetl,
+    // takže i neúspěšná platba skončila hláškou „✓ Zaplaceno".
+    const [loadError, setLoadError] = useState(false);
     const [apiTotal, setApiTotal] = useState<number | null>(null);
 
     const rawMethod = searchParams.get("method") ?? "";
@@ -448,16 +473,29 @@ function SuccessContent() {
     const sessionId = searchParams.get("session_id");
     const orderIdParam = searchParams.get("order_id");
 
+    // Kartou se sem dá dostat JEDINĚ přesměrováním ze Stripe, a to vždycky přidá
+    // session_id (viz success_url v /api/checkout). Když chybí, není co ověřit —
+    // buď někdo otevřel adresu přímo, nebo se checkout přerušil. Plyne to čistě
+    // z URL, takže se to počítá při renderu, ne efektem se setState.
+    const missingCardSession = method === "karta" && !sessionId;
+
     useEffect(() => {
+        // Bez session_id se nemá co načítat ani ověřovat — stránka vykreslí
+        // stav „platbu jsme nenašli" (viz `missingCardSession` u returnu níž).
+        if (missingCardSession) return;
+
         // Dokud neznáme skutečné ID objednávky, zobrazíme dočasnou hodnotu —
         // jakmile dorazí (níže), přepíšeme ji na variabilní symbol odvozený
         // ze SKUTEČNÉHO order.id, ať sedí se souhrnem v potvrzovacím e-mailu.
+        // Když číslo neznáme, zůstane prázdné a stránka to řekne narovinu.
+        // ŽÁDNÉ vymýšlení náhodného čísla: dřív se tu při chybějícím order_id
+        // (= /api/orders objednávku neuložilo) vygenerovalo náhodné pětimístné
+        // číslo a ukázalo se zákazníkovi jako číslo objednávky. U převodu se
+        // z něj navíc stal variabilní symbol, podle kterého by poslal peníze —
+        // platbu bychom pak neměli jak spárovat.
         if (orderIdParam) {
-            // Dočasné ID z URL parametru; níže se přepíše skutečným order.id.
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setStableOrderId(orderIdToVariableSymbol(orderIdParam));
-        } else if (!sessionId) {
-            setStableOrderId((Math.floor(Math.random() * 90000) + 10000).toString());
         }
 
         // Platba kartou — NEspoléháme na localStorage (to může obsahovat
@@ -536,7 +574,14 @@ function SuccessContent() {
         identifyUser(info.email, info.jmeno ? { name: info.jmeno } : undefined);
     }, [hydrated, info.email, info.jmeno]);
 
-    const vsymbol = stableOrderId.replace(/\D/g, "").slice(-8).padStart(8, "0");
+    // Číslo objednávky známe jen tehdy, když ho server opravdu vrátil. Prázdné
+    // `stableOrderId` po dohydratování znamená „objednávku se nepodařilo
+    // zaevidovat" — nesmí se z něj vyrábět ani číslo, ani variabilní symbol
+    // (padStart by z prázdna udělal „00000000").
+    const hasOrderNumber = stableOrderId !== "";
+    const vsymbol = hasOrderNumber
+        ? stableOrderId.replace(/\D/g, "").slice(-8).padStart(8, "0")
+        : null;
 
     const subtotal = items.reduce((s, i) => s + getPrice(i.priceRaw, currency) * i.quantity, 0);
     const dopravaPrice = orderData?.dopravaPrices ? getPrice(orderData.dopravaPrices, currency) : 0;
@@ -546,6 +591,55 @@ function SuccessContent() {
 
     const statusLabel = method === "prevod" ? t("statusAwaitingPayment") : method === "dobirka" ? t("statusReady") : t("statusPaid");
     const methodLabel = paymentLabel(tc, method, t("cardMethodShort"));
+
+    // Platba kartou se nepotvrdila — místo úspěchu ukážeme, co se stalo a jak
+    // dál. Zákazníkovi tady záměrně netvrdíme nic o penězích kromě toho, že
+    // jsme mu nic neúčtovali (objednávka nevznikla), a nabídneme oba kroky,
+    // které může chtít: dokončit nákup znovu, nebo se nás zeptat.
+    if (loadError || missingCardSession) {
+        return (
+            <>
+                <Header />
+                <main className="min-h-screen bg-surface">
+                    <div className="bg-header relative overflow-hidden">
+                        <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+                        <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-14 lg:py-20 relative z-10">
+                            <nav className="flex items-center gap-2 text-xs text-white/30 mb-8">
+                                <Link href="/" className="hover:text-white/60 transition-colors">{tc("home")}</Link>
+                                <span aria-hidden="true" className="opacity-40 mx-1">›</span>
+                                <Link href="/kosik" className="hover:text-white/60 transition-colors">{tc("cart")}</Link>
+                            </nav>
+                            <div className="flex items-start gap-6">
+                                <div className="shrink-0 w-16 h-16 rounded-2xl bg-amber-400/15 border border-amber-300/25 flex items-center justify-center">
+                                    <AlertTriangle size={28} className="text-amber-300" aria-hidden="true" />
+                                </div>
+                                <div>
+                                    <p className="text-amber-300 text-xs font-bold uppercase tracking-[0.18em] mb-2">{t("unverifiedEyebrow")}</p>
+                                    <h1 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight tracking-tight mb-3">{t("unverifiedTitle")}</h1>
+                                    <p className="text-white/50 text-base leading-relaxed max-w-xl">{t("unverifiedDesc")}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-12 lg:py-16">
+                        <div className="max-w-xl bg-white rounded-2xl border border-border shadow-sm p-8">
+                            <p className="text-sm text-text-muted leading-relaxed mb-6">{t("unverifiedHint")}</p>
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <Link href="/kosik" className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-primary text-on-primary font-bold text-sm hover:brightness-110 active:scale-[0.98] transition-all">
+                                    <ShoppingBag size={16} aria-hidden="true" /> {t("unverifiedBackToCart")}
+                                </Link>
+                                <Link href="/kontakt" className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full border border-border bg-surface text-text-base font-bold text-sm hover:bg-border/50 transition-colors">
+                                    <Mail size={15} aria-hidden="true" /> {t("unverifiedContact")}
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+                <Footer />
+            </>
+        );
+    }
 
     return (
         <>
@@ -572,12 +666,24 @@ function SuccessContent() {
                                     <p className="text-primary-ink text-xs font-bold uppercase tracking-[0.18em] mb-2">{t("eyebrow")}</p>
                                     <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight tracking-tight mb-3">{t("title")}</h1>
                                     <p className="text-white/50 text-base leading-relaxed">
-                                        Objednávka{" "}
-                                        {stableOrderId
-                                            ? <span className="font-mono text-white/80 font-bold">#{stableOrderId}</span>
-                                            : <span className="inline-block w-24 h-4 rounded bg-white/10 animate-pulse align-middle" />
-                                        }
-                                        {" "}byla úspěšně zaevidována.
+                                        {!hydrated ? (
+                                            <span className="inline-block w-64 h-4 rounded bg-white/10 animate-pulse align-middle" />
+                                        ) : hasOrderNumber ? (
+                                            (() => {
+                                                // Číslo je uprostřed věty a chceme ho vysázet jinak než
+                                                // zbytek — proto se překlad rozdělí na {number}.
+                                                const [before, after] = t("orderRecorded").split("{number}");
+                                                return (
+                                                    <>
+                                                        {before}
+                                                        <span className="font-mono text-white/80 font-bold">#{stableOrderId}</span>
+                                                        {after}
+                                                    </>
+                                                );
+                                            })()
+                                        ) : (
+                                            t("orderNumberMissing")
+                                        )}
                                     </p>
                                 </div>
                             </div>
@@ -598,7 +704,7 @@ function SuccessContent() {
                         {/* Platební sekce */}
                         <div className="xl:col-span-2">
                             <div className="bg-white rounded-2xl border border-border shadow-sm p-8 lg:p-10">
-                                {method === "prevod" && <BankovniPrevod totalStr={celkemStr} vsymbol={vsymbol} amount={celkem} currencyCode={currency.code} />}
+                                {method === "prevod" && <BankovniPrevod totalStr={celkemStr} vsymbol={vsymbol} amount={celkem} currencyCode={currency.code} loading={!hydrated} />}
                                 {method === "dobirka" && <Dobirka totalStr={celkemStr} isZasilkovnaBox={orderData?.doprava === "zasilkovna_box"} />}
                                 {method === "karta" && <KartaStripe totalStr={celkemStr} orderId={stableOrderId || "—"} />}
                             </div>

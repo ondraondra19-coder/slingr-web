@@ -5,6 +5,7 @@ import { getProductsForDisplay } from "@/lib/productDiscounts";
 import { getStockMap } from "@/lib/stock";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import KategorieClient from "@/components/KategorieClient";
 
 export function generateStaticParams() {
@@ -70,6 +71,7 @@ export default async function KategoriePage({
         products={products}
         stockData={stockData}
       />
+      <Footer />
     </>
   );
 }
