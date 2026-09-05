@@ -28,10 +28,24 @@ import {
 // Prodleva, než popup vyskočí — ať nenaskočí do rozjeté animace hero sekce.
 const OPEN_DELAY_MS = 1500;
 
+// Cesty, kde se popup ani bublina NIKDY neukážou.
+//
+// Kromě adminu je to celý nákupní proces. Zjistilo se to při testovacích
+// objednávkách: popup vyskočil zrovna ve chvíli výběru platby a spolkl klik,
+// takže se vybralo něco jiného, než na co člověk klikal. Podruhé se pod ním
+// posunulo rozložení stránky a zaškrtlo se „Doručit na jinou adresu" —
+// zákazník, který si toho nevšimne, si pošle balík jinam.
+//
+// Nabízet slevu na novinky někomu, kdo už má zboží v košíku a vyplňuje
+// adresu, navíc nedává smysl — v nejcitlivějším kroku ho to jen odvádí.
+//
+// Porovnává se PREFIXEM, takže "/objednavka" pokryje i "/objednavka/uspech".
+const SKRYTE_CESTY = ["/admin", "/kosik", "/objednavka", "/informace"];
+
 export default function WelcomeDiscountPopup() {
   const t = useT("welcomeDiscount");
   const pathname = usePathname();
-  const isAdmin = pathname?.startsWith("/admin") ?? false;
+  const jeSkrytaCesta = SKRYTE_CESTY.some((p) => pathname?.startsWith(p)) ?? false;
 
   const [open, setOpen] = useState(false);
   const [showBubble, setShowBubble] = useState(false);
@@ -56,7 +70,7 @@ export default function WelcomeDiscountPopup() {
   }, []);
 
   useEffect(() => {
-    if (isAdmin) return; // v adminu nic nenabízíme (stejně jako ChatWidget a lišta)
+    if (jeSkrytaCesta) return; // admin a nákupní proces — viz SKRYTE_CESTY
     const saved = readWelcomeDiscountState();
     if (saved) {
       if (saved.status === "claimed") setSent(true);
@@ -70,7 +84,7 @@ export default function WelcomeDiscountPopup() {
     if (cookieBarVisible) return;
     const timer = setTimeout(() => setOpen(true), OPEN_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [isAdmin, cookieBarVisible]);
+  }, [jeSkrytaCesta, cookieBarVisible]);
 
   const dismiss = useCallback(() => {
     setOpen(false);
@@ -129,7 +143,7 @@ export default function WelcomeDiscountPopup() {
     }
   }
 
-  if (isAdmin) return null;
+  if (jeSkrytaCesta) return null;
 
   if (!open) {
     // Bublina se nekreslí, dokud dole visí cookie lišta — spodek obrazovky
