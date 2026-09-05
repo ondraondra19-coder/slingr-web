@@ -8,6 +8,7 @@ import CookieBanner from "@/components/CookieBanner";
 import WelcomeDiscountPopup from "@/components/WelcomeDiscountPopup";
 import PostHogProvider from "@/components/PostHogProvider";
 import { LangProvider } from "@/lib/LangContext";
+import { SITE_URL } from "@/lib/siteUrl";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,6 +21,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  // Základ pro skládání ABSOLUTNÍCH adres v náhledech při sdílení odkazu.
+  // Facebook, WhatsApp a spol. si stránku stahují zvenku, takže relativní
+  // "/opengraph-image.png" jim nic neřekne — musí dostat plnou adresu
+  // i s doménou. Tohle zařídí, že ji Next doplní sám.
+  //
+  // Bere se z lib/siteUrl.ts, takže po nastavení NEXT_PUBLIC_SITE_URL
+  // (ostrá doména) se to přepne samo a sem se sahat nemusí.
+  metadataBase: new URL(SITE_URL),
   // `default` je titulek homepage a fallback; `template` se použije všude, kde
   // stránka nastaví vlastní `title` (např. kategorie → "Zbraně | Slingr").
   // Produkty si nastavují `title.absolute`, protože značku už nesou v názvu.

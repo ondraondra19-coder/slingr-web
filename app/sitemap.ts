@@ -6,8 +6,7 @@ import type { MetadataRoute } from "next";
 import { products, categories } from "@/lib/products";
 import { getAllPosts } from "@/lib/blog";
 import { isMagazineEnabled } from "@/lib/featureFlags";
-
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://slingr.vercel.app").replace(/\/$/, "");
+import { SITE_URL } from "@/lib/siteUrl";
 
 // Statické informační stránky — košík, checkout a admin sem záměrně nepatří,
 // nejsou to stránky, které má smysl nabízet Googlu k indexaci.

@@ -10,12 +10,11 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProduktClient from "@/components/ProduktClient";
+import { SITE_URL } from "@/lib/siteUrl";
 
 export function generateStaticParams() {
   return staticProducts.map((p) => ({ slug: p.slug }));
 }
-
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://slingr.vercel.app").replace(/\/$/, "");
 
 // Zkrátí popis na ~160 znaků na hranici slova — do <meta description> a náhledů
 // při sdílení. Delší text vyhledávače stejně oříznou.

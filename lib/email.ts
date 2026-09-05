@@ -11,13 +11,13 @@ import { approxConvert } from "./discounts";
 import { buildSpdString, orderIdToVariableSymbol } from "./qrPlatba";
 import { generatePaymentReceiptPdf } from "./pdf";
 import { UDAJE, adresaSidla } from "./udaje";
+import { SITE_URL } from "./siteUrl";
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? `Slingr <${UDAJE.email}>`;
 const SUPPORT_EMAIL = UDAJE.email;
 // Kam chodí interní upozornění (nová zpráva, nová reklamace). Zatím shodné se
 // SUPPORT_EMAIL — až bude potřeba jiná adresa, stačí sáhnout sem.
 const ADMIN_EMAIL = SUPPORT_EMAIL;
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://slingr.vercel.app").replace(/\/$/, "");
 // Jasný tyrkys — pozadí tlačítek (s tmavým textem) a akcenty na tmavém pozadí.
 const BRAND_COLOR = "#28bfa6";
 // Tmavý tyrkys — text na SVĚTLÉM pozadí (odkazy, částky). Jasný tyrkys má na
