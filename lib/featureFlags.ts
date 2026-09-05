@@ -13,15 +13,14 @@
 // Po přepnutí je potřeba web nasadit znovu (Vercel deploy), aby se změna
 // projevila i v prohlížeči zákazníka.
 //
-// ── STAV K 6. 9. 2026: ZAPNUTO KVŮLI TESTOVÁNÍ ───────────────────────────────
-// Ve Stripu jsou zatím TESTOVACÍ klíče (sk_test_/pk_test_), takže se skutečné
-// peníze strhnout nedají — reálná karta se odmítne a projde jen testovací
-// (4242 4242 4242 4242). Zapnuto proto, aby šel na nasazeném webu vyzkoušet
-// celý průchod objednávkou včetně webhooku.
+// ── STAV K 6. 9. 2026: VYPNUTO ───────────────────────────────────────────────
+// Testovací nákupy proběhly a prošly všechny tři platby i obě dopravy, takže
+// vypínač jde zpátky na `false`. Kdyby zůstal na `true`, byl by krám otevřený
+// s testovacími Stripe klíči — zákazník by „zaplatil" a nikdy nic nezaplatil.
 //
-// AŽ TESTOVÁNÍ SKONČÍ: vrátit na `false`, dokud nebude web opravdu spuštěný.
-// Jinak zůstane krám otevřený s platbami, které nic nestrhnou.
-export const PLATBY_ZAPNUTE = true;
+// Naostro se zapíná až podle seznamu na ploše (Slingr-launch-checklist.md):
+// IČO → doména → ověřený Resend → klíče Packety → ostré klíče Stripu.
+export const PLATBY_ZAPNUTE = false;
 
 export function arePaymentsEnabled(): boolean {
   return PLATBY_ZAPNUTE;
