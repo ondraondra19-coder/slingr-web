@@ -12,7 +12,16 @@
 //
 // Po přepnutí je potřeba web nasadit znovu (Vercel deploy), aby se změna
 // projevila i v prohlížeči zákazníka.
-export const PLATBY_ZAPNUTE = false;
+//
+// ── STAV K 6. 9. 2026: ZAPNUTO KVŮLI TESTOVÁNÍ ───────────────────────────────
+// Ve Stripu jsou zatím TESTOVACÍ klíče (sk_test_/pk_test_), takže se skutečné
+// peníze strhnout nedají — reálná karta se odmítne a projde jen testovací
+// (4242 4242 4242 4242). Zapnuto proto, aby šel na nasazeném webu vyzkoušet
+// celý průchod objednávkou včetně webhooku.
+//
+// AŽ TESTOVÁNÍ SKONČÍ: vrátit na `false`, dokud nebude web opravdu spuštěný.
+// Jinak zůstane krám otevřený s platbami, které nic nestrhnou.
+export const PLATBY_ZAPNUTE = true;
 
 export function arePaymentsEnabled(): boolean {
   return PLATBY_ZAPNUTE;
