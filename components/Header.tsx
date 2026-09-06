@@ -119,7 +119,7 @@ export default function Header() {
     <header className="w-full bg-header relative z-50 pt-[env(safe-area-inset-top)]">
 
       {/* ── MAIN HEADER — logo · kategorie · ikonky v jedné řadě ── */}
-      <div className="relative max-w-screen-2xl mx-auto px-4 lg:px-12 flex items-center justify-between h-16 lg:h-28 gap-4">
+      <div className="relative max-w-screen-2xl mx-auto px-4 lg:px-12 flex items-center justify-between h-16 lg:h-24 gap-4">
 
         {/* Logo */}
         <Link
@@ -141,7 +141,7 @@ export default function Header() {
             alt={t("logoAlt")}
             width={567}
             height={179}
-            className="h-12 lg:h-20 w-auto object-contain"
+            className="h-10 lg:h-14 w-auto object-contain"
             priority
           />
         </Link>
