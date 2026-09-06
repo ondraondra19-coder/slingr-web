@@ -183,9 +183,9 @@
     "safetyWarn4": "Před každým použitím zkontroluj gumu. Popraskanou nebo natrženou vyměň."
   },
   "footer": {
-    "newsletter": "Buďte první, kdo se dozví o novinkách",
-    "newsletterDesc": "Slevy, nové produkty a tipy přímo do schránky. Odhlásit se lze kdykoliv.",
-    "subscribe": "Odebírat",
+    "newsletter": "Sleva {percent} % na první nákup",
+    "newsletterDesc": "Nech nám e-mail — slevový kód ti hned pošleme. Pak už jen novinky a tipy, odhlásit se můžeš kdykoliv.",
+    "subscribe": "Chci slevu",
     "subscribed": "Přihlášení proběhlo úspěšně",
     "emailPlaceholder": "váš@email.cz",
     "emailError": "Zadejte platný e-mail",
@@ -209,8 +209,8 @@
     "terms": "Obchodní podmínky",
     "privacy": "Ochrana osobních údajů",
     "cookies": "Cookies",
-    "subscribedTitle": "Hotovo, jsi v klubu!",
-    "subscribedDesc": "Novinky, slevy a tipy ti pošleme na e-mail."
+    "subscribedTitle": "Kód je na cestě!",
+    "subscribedDesc": "Slevový kód jsme právě poslali na tvůj e-mail. Uplatníš ho v košíku."
   },
   "infogrid": {
     "teamTitle": "Poznej náš tým",
@@ -281,7 +281,8 @@
     "errorRateLimited": "Příliš mnoho pokusů. Zkuste to prosím později.",
     "errorUnavailable": "Přihlášení k odběru zatím není k dispozici.",
     "errorFailed": "Přihlášení se nezdařilo. Zkuste to prosím znovu.",
-    "errorNetwork": "Přihlášení se nezdařilo. Zkontrolujte připojení."
+    "errorNetwork": "Přihlášení se nezdařilo. Zkontrolujte připojení.",
+    "errorSendFailed": "E-mail se nepodařilo odeslat. Zkontroluj adresu a zkus to znovu."
   },
   "discount": {
     "codePlaceholder": "Slevový kód",
@@ -336,9 +337,7 @@
     "shippingTitle": "Doprava po ČR",
     "shippingDesc": "Doručení až k tobě domů.",
     "returnsTitle": "Vrácení do 14 dní",
-    "returnsDesc": "Nesedlo? V klidu to vezmeme zpět.",
-    "supportTitle": "Poradíme s výběrem",
-    "supportDesc": "Nevíš si rady? Napiš nám."
+    "returnsDesc": "Nesedlo? V klidu to vezmeme zpět."
   },
   "categorygrid": {
     "warrantyTitle": "Měkká munice, bezpečná zábava pro děti",
@@ -891,7 +890,6 @@
     "successTitle": "Kód je na cestě!",
     "successDesc": "Slevový kód jsme právě poslali na tvůj e-mail. Uplatníš ho v košíku.",
     "startShopping": "Jdu nakupovat",
-    "bubble": "Sleva {percent} %",
     "close": "Zavřít",
     "errorInvalidEmail": "Zadejte platný e-mail",
     "errorRateLimited": "Příliš mnoho pokusů. Zkuste to prosím později.",

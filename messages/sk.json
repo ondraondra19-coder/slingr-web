@@ -183,9 +183,9 @@
     "safetyWarn4": "Pred každým použitím skontroluj gumu. Popraskanú alebo natrhnutú vymeň."
   },
   "footer": {
-    "newsletter": "Buďte prví, kto sa dozvie o novinkách",
-    "newsletterDesc": "Zľavy, nové produkty a tipy priamo do schránky. Odhlásiť sa dá kedykoľvek.",
-    "subscribe": "Odoberať",
+    "newsletter": "Zľava {percent} % na prvý nákup",
+    "newsletterDesc": "Nechaj nám e-mail — zľavový kód ti hneď pošleme. Potom už len novinky a tipy, odhlásiť sa môžeš kedykoľvek.",
+    "subscribe": "Chcem zľavu",
     "subscribed": "Prihlásenie prebehlo úspešne",
     "emailPlaceholder": "vas@email.sk",
     "emailError": "Zadajte platný e-mail",
@@ -209,8 +209,8 @@
     "terms": "Obchodné podmienky",
     "privacy": "Ochrana osobných údajov",
     "cookies": "Cookies",
-    "subscribedTitle": "Hotovo, si v klube!",
-    "subscribedDesc": "Novinky, zľavy a tipy ti pošleme na e-mail."
+    "subscribedTitle": "Kód je na ceste!",
+    "subscribedDesc": "Zľavový kód sme práve poslali na tvoj e-mail. Uplatníš ho v košíku."
   },
   "infogrid": {
     "teamTitle": "Spoznaj náš tím",
@@ -281,7 +281,8 @@
     "errorRateLimited": "Príliš veľa pokusov. Skúste to prosím neskôr.",
     "errorUnavailable": "Prihlásenie na odber zatiaľ nie je k dispozícii.",
     "errorFailed": "Prihlásenie sa nepodarilo. Skúste to prosím znova.",
-    "errorNetwork": "Prihlásenie sa nepodarilo. Skontrolujte pripojenie."
+    "errorNetwork": "Prihlásenie sa nepodarilo. Skontrolujte pripojenie.",
+    "errorSendFailed": "E-mail sa nepodarilo odoslať. Skontroluj adresu a skús to znova."
   },
   "discount": {
     "codePlaceholder": "Zľavový kód",
@@ -336,9 +337,7 @@
     "shippingTitle": "Doprava po ČR",
     "shippingDesc": "Doručenie až k tebe domov.",
     "returnsTitle": "Vrátenie do 14 dní",
-    "returnsDesc": "Nesadlo? V pokoji to vezmeme späť.",
-    "supportTitle": "Poradíme s výberom",
-    "supportDesc": "Nevieš si rady? Napíš nám."
+    "returnsDesc": "Nesadlo? V pokoji to vezmeme späť."
   },
   "categorygrid": {
     "warrantyTitle": "Mäkká munícia, bezpečná zábava pre deti",
@@ -891,7 +890,6 @@
     "successTitle": "Kód je na ceste!",
     "successDesc": "Zľavový kód sme práve poslali na tvoj e-mail. Uplatníš ho v košíku.",
     "startShopping": "Idem nakupovať",
-    "bubble": "Zľava {percent} %",
     "close": "Zavrieť",
     "errorInvalidEmail": "Zadajte platný e-mail",
     "errorRateLimited": "Príliš veľa pokusov. Skúste to prosím neskôr.",

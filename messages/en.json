@@ -183,9 +183,9 @@
     "safetyWarn4": "Check the rubber before every use. Replace it if it is cracked or torn."
   },
   "footer": {
-    "newsletter": "Be the first to hear about what's new",
-    "newsletterDesc": "Discounts, new products and tips straight to your inbox. Unsubscribe anytime.",
-    "subscribe": "Subscribe",
+    "newsletter": "{percent}% off your first order",
+    "newsletterDesc": "Leave us your email and we'll send the code right away. After that just news and tips — unsubscribe anytime.",
+    "subscribe": "Get the code",
     "subscribed": "You've subscribed successfully",
     "emailPlaceholder": "you@email.com",
     "emailError": "Please enter a valid email",
@@ -209,8 +209,8 @@
     "terms": "Terms & Conditions",
     "privacy": "Privacy Policy",
     "cookies": "Cookies",
-    "subscribedTitle": "You're in!",
-    "subscribedDesc": "We'll send news, deals and tips straight to your inbox."
+    "subscribedTitle": "Your code is on its way!",
+    "subscribedDesc": "We've just sent the discount code to your email. Use it in the cart."
   },
   "infogrid": {
     "teamTitle": "Meet our team",
@@ -281,7 +281,8 @@
     "errorRateLimited": "Too many attempts. Please try again later.",
     "errorUnavailable": "Newsletter sign-up isn't available yet.",
     "errorFailed": "Sign-up failed. Please try again.",
-    "errorNetwork": "Sign-up failed. Please check your connection."
+    "errorNetwork": "Sign-up failed. Please check your connection.",
+    "errorSendFailed": "We couldn't send the email. Check the address and try again."
   },
   "discount": {
     "codePlaceholder": "Discount code",
@@ -336,9 +337,7 @@
     "shippingTitle": "Shipping across CZ",
     "shippingDesc": "Delivered right to your door.",
     "returnsTitle": "14-day returns",
-    "returnsDesc": "Not a fit? We'll happily take it back.",
-    "supportTitle": "We'll help you choose",
-    "supportDesc": "Not sure? Message us."
+    "returnsDesc": "Not a fit? We'll happily take it back."
   },
   "categorygrid": {
     "warrantyTitle": "Soft ammo, safe fun for kids",
@@ -891,7 +890,6 @@
     "successTitle": "The code is on its way!",
     "successDesc": "We've just sent the discount code to your email. Apply it in the cart.",
     "startShopping": "Start shopping",
-    "bubble": "{percent}% off",
     "close": "Close",
     "errorInvalidEmail": "Please enter a valid email",
     "errorRateLimited": "Too many attempts. Please try again later.",

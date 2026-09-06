@@ -1,6 +1,11 @@
 // app/api/newsletter/route.ts
-// Veřejný endpoint — přihlášení k odběru novinek z formuláře v patičce.
-// Kontakt se ukládá do Resend Audience (viz lib/newsletter.ts).
+// Veřejný endpoint — holé přihlášení k odběru novinek: kontakt se uloží do
+// Resend Audience (viz lib/newsletter.ts) a nic se neposílá.
+//
+// POZOR, ZE STRÁNEK HO DNES NIKDO NEVOLÁ. Formulář v patičce přešel na
+// /api/welcome-discount, protože k přihlášení posílá i slevový kód. Endpoint
+// tu zůstává pro přihlášení bez slevy (kampaň, samostatná landing page); až
+// bude jisté, že se nehodí, může zmizet.
 //
 // Chyby vrací `code`, ne hotovou větu: text se skládá až na klientovi podle
 // zvoleného jazyka (messages/*.json → namespace `newsletter`). Server jazyk

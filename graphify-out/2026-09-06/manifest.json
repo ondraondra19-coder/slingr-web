@@ -215,8 +215,8 @@
     "semantic_hash": ""
   },
   "app/layout.tsx": {
-    "mtime": 1788646099.5784173,
-    "ast_hash": "74e630ca8553f6758653de1a1227055b",
+    "mtime": 1785164622.92071,
+    "ast_hash": "81cb928ff9151ef164b6419c0a614058",
     "semantic_hash": ""
   },
   "app/napsat-recenzi/page.tsx": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "app/produkt/[slug]/page.tsx": {
-    "mtime": 1788646085.4689524,
-    "ast_hash": "bb726a2a043b75b6206f84ea476dc035",
+    "mtime": 1785242651.269078,
+    "ast_hash": "53cf14ed0b0c1e027a04a40810941e40",
     "semantic_hash": ""
   },
   "app/reklamace/page.tsx": {
@@ -330,8 +330,8 @@
     "semantic_hash": ""
   },
   "components/TrustBar.tsx": {
-    "mtime": 1788699745.8200977,
-    "ast_hash": "7cfd8184d5b4ac7adb2946375a15e123",
+    "mtime": 1784836211.9692593,
+    "ast_hash": "5bbfcd781374ee51d7574266bd086a67",
     "semantic_hash": ""
   },
   "eslint.config.mjs": {
@@ -460,18 +460,18 @@
     "semantic_hash": ""
   },
   "messages/cs.json": {
-    "mtime": 1788699927.5648184,
-    "ast_hash": "3ce7aad87769f467c93f8a5651d4ed0c",
+    "mtime": 1785248072.9919302,
+    "ast_hash": "c611cebc5c618f4778b60dba209eadb3",
     "semantic_hash": ""
   },
   "messages/en.json": {
-    "mtime": 1788699927.5875318,
-    "ast_hash": "91a5423b2edebd5c75f8ca926a848ce6",
+    "mtime": 1785248093.6492908,
+    "ast_hash": "5b212ba312256554aab928838c2d9fed",
     "semantic_hash": ""
   },
   "messages/sk.json": {
-    "mtime": 1788699927.5777829,
-    "ast_hash": "23179dd0141925acf43be33d85d21bb9",
+    "mtime": 1785248087.5347328,
+    "ast_hash": "f848ec70117f8bccd60f6928b203cdc0",
     "semantic_hash": ""
   },
   "next.config.ts": {
@@ -545,13 +545,13 @@
     "semantic_hash": ""
   },
   "app/robots.ts": {
-    "mtime": 1788646085.4689524,
-    "ast_hash": "b0c5ed2a32bfcde7f40ea429225120cc",
+    "mtime": 1785162883.4779453,
+    "ast_hash": "1377c4a69e9f88023519c20fee5c2180",
     "semantic_hash": ""
   },
   "app/sitemap.ts": {
-    "mtime": 1788646085.4689524,
-    "ast_hash": "393444060f5655170ef3db8af4d3683f",
+    "mtime": 1785162875.6861846,
+    "ast_hash": "f14c7a5862022f4d0528c02530dff4a7",
     "semantic_hash": ""
   },
   "lib/shipping/index.ts": {
@@ -640,8 +640,8 @@
     "semantic_hash": ""
   },
   "lib/email.ts": {
-    "mtime": 1788646085.4689524,
-    "ast_hash": "47f3d14a49ae40609bbf05cb68bba3a8",
+    "mtime": 1785072246.1336932,
+    "ast_hash": "cf31eb7481f361138ac5dc4e1db2f0fd",
     "semantic_hash": ""
   },
   "lib/analytics.ts": {
@@ -660,8 +660,8 @@
     "semantic_hash": ""
   },
   "lib/featureFlags.ts": {
-    "mtime": 1788650346.5229013,
-    "ast_hash": "8ca502f37f4e6448da573d0af0043b80",
+    "mtime": 1785244852.9577048,
+    "ast_hash": "2cfe5cd4a842e0e073402150bee92c22",
     "semantic_hash": ""
   },
   "lib/consent.ts": {
@@ -675,8 +675,8 @@
     "semantic_hash": ""
   },
   "app/api/newsletter/route.ts": {
-    "mtime": 1788699971.1595616,
-    "ast_hash": "0818861d5992b7e10c94dfea86528a91",
+    "mtime": 1784288340.0397394,
+    "ast_hash": "17a57353eb7db25bc6529e7a5e145f7e",
     "semantic_hash": ""
   },
   "lib/newsletter.ts": {
@@ -745,8 +745,8 @@
     "semantic_hash": ""
   },
   "components/FooterNewsletter.tsx": {
-    "mtime": 1788699971.1595616,
-    "ast_hash": "8fc9f05b1091af01bf952675ba46d7b3",
+    "mtime": 1784839668.9991763,
+    "ast_hash": "321b4f255d1efab1e8965e5a30a13b52",
     "semantic_hash": ""
   },
   "components/HomeLink.tsx": {
@@ -900,13 +900,13 @@
     "semantic_hash": ""
   },
   "app/api/welcome-discount/route.ts": {
-    "mtime": 1788699971.1595616,
-    "ast_hash": "6f5bcc5973db645df11891544248d719",
+    "mtime": 1784507100.0489156,
+    "ast_hash": "9a27cc89335c5f32a6a9c4ba3f64e8e2",
     "semantic_hash": ""
   },
   "components/WelcomeDiscountPopup.tsx": {
-    "mtime": 1788699782.111274,
-    "ast_hash": "4f34d26dac347c87af14d3c39bc3f52e",
+    "mtime": 1785165005.025291,
+    "ast_hash": "d052e0c026ed170e08a9e2c82d93dd71",
     "semantic_hash": ""
   },
   "lib/emailValidation.ts": {
@@ -915,8 +915,8 @@
     "semantic_hash": ""
   },
   "lib/welcomeDiscount.ts": {
-    "mtime": 1788699971.1595616,
-    "ast_hash": "4cb2597991742d337c6bf6a74705ce66",
+    "mtime": 1784672582.4167323,
+    "ast_hash": "8e0fcda18be1ca14254a87574c01d054",
     "semantic_hash": ""
   },
   "public/images/products/startovaci-set/main.png": {
@@ -1007,11 +1007,6 @@
   "public/images/products/prak-x1/img-1.jpg": {
     "mtime": 1785243265.834786,
     "ast_hash": "0118b6fc7e7ac326c723088c05d65107",
-    "semantic_hash": ""
-  },
-  "lib/siteUrl.ts": {
-    "mtime": 1788646026.1450613,
-    "ast_hash": "3d2a1e3e9498a7066cf9ca31eb657b5c",
     "semantic_hash": ""
   }
 }

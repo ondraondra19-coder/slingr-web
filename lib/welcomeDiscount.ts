@@ -1,6 +1,7 @@
 // lib/welcomeDiscount.ts
-// Uvítací sleva za e-mail — popup, který vyskočí při první návštěvě
-// (components/WelcomeDiscountPopup.tsx).
+// Uvítací sleva za e-mail. Nabízí se na dvou místech: popup při první návštěvě
+// (components/WelcomeDiscountPopup.tsx) a formulář v patičce, který je na každé
+// stránce (components/FooterNewsletter.tsx). Obojí volá /api/welcome-discount.
 //
 // Tenhle modul je záměrně bez Redisu i bez Reactu, takže ho může importovat
 // klientská komponenta i serverová route (/api/welcome-discount). Samotné

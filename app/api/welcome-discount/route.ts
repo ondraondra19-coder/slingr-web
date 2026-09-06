@@ -1,6 +1,7 @@
 // app/api/welcome-discount/route.ts
-// Veřejný endpoint — uvítací popup se slevou za e-mail
-// (components/WelcomeDiscountPopup.tsx).
+// Veřejný endpoint — sleva za e-mail. Volá ho uvítací popup
+// (components/WelcomeDiscountPopup.tsx) i formulář v patičce
+// (components/FooterNewsletter.tsx); patička je pro toho, kdo popup zavřel.
 //
 // Dělá tři věci: přidá kontakt do Resend Audience, zajistí existenci kódu
 // v Redisu a pošle kód e-mailem.

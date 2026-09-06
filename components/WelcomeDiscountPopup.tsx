@@ -1,15 +1,20 @@
 "use client";
 
 // components/WelcomeDiscountPopup.tsx
-// Uvítací nabídka: e-mail výměnou za slevový kód. Vyskočí při první návštěvě,
-// pak už jen na vyžádání přes bublinu vlevo dole.
+// Uvítací nabídka: e-mail výměnou za slevový kód. Vyskočí JEDNOU při první
+// návštěvě a víc už se sama neukáže.
 //
-// SOUŽITÍ S COOKIE LIŠTOU: obojí je na obrazovce naráz (lišta dole, popup nad
-// ní). Proto tenhle popup NESMÍ lištu překrýt ani zablokovat:
-//  - z-index je pod lištou (ta má z-[200]), takže ztmavení jde pod ni a
-//    tlačítka souhlasu zůstanou klikatelná,
-//  - dokud lišta visí, popup se odsadí od spodku, aby ji nezakryl, a bublina
-//    pro znovuotevření se vůbec nekreslí (spodek patří liště).
+// KDO JI ZAVŘE, DOSTANE SE KE SLEVĚ V PATIČCE. Dřív tu po zavření zůstala
+// viset bublina vlevo dole — na mobilu překážela přes celé procházení webu
+// a k tomu se prala o spodek obrazovky s chatem a cookie lištou. Nabídka se
+// proto přestěhovala do formuláře novinek v patičce (components/FooterNewsletter.tsx),
+// který je na každé stránce, nic nepřekrývá a je to stejný obchod: e-mail
+// za kód. Nepřidávej sem prosím žádný plovoucí prvek zpátky.
+//
+// SOUŽITÍ S COOKIE LIŠTOU: obojí může být na obrazovce naráz (lišta dole,
+// popup nad ní). Proto tenhle popup NESMÍ lištu překrýt ani zablokovat:
+// z-index je pod lištou (ta má z-[200]), takže ztmavení jde pod ni a tlačítka
+// souhlasu zůstanou klikatelná, a dokud lišta visí, popup se odsadí od spodku.
 // Kdyby se sahalo na výšku lišty v CookieBanner.tsx, projeď i odsazení tady.
 //
 // Zavření křížkem i klikem vedle = "dismissed", popup se sám znovu neotevře.
@@ -28,7 +33,7 @@ import {
 // Prodleva, než popup vyskočí — ať nenaskočí do rozjeté animace hero sekce.
 const OPEN_DELAY_MS = 1500;
 
-// Cesty, kde se popup ani bublina NIKDY neukážou.
+// Cesty, kde se popup NIKDY neukáže.
 //
 // Kromě adminu je to celý nákupní proces. Zjistilo se to při testovacích
 // objednávkách: popup vyskočil zrovna ve chvíli výběru platby a spolkl klik,
@@ -48,7 +53,6 @@ export default function WelcomeDiscountPopup() {
   const jeSkrytaCesta = SKRYTE_CESTY.some((p) => pathname?.startsWith(p)) ?? false;
 
   const [open, setOpen] = useState(false);
-  const [showBubble, setShowBubble] = useState(false);
   const [cookieBarVisible, setCookieBarVisible] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -71,12 +75,9 @@ export default function WelcomeDiscountPopup() {
 
   useEffect(() => {
     if (jeSkrytaCesta) return; // admin a nákupní proces — viz SKRYTE_CESTY
-    const saved = readWelcomeDiscountState();
-    if (saved) {
-      if (saved.status === "claimed") setSent(true);
-      setShowBubble(true);
-      return;
-    }
+    // Cokoliv uloženého ("claimed" i "dismissed") = nabídku už jednou viděl,
+    // podruhé ji do cesty nestavíme. Kdo si to rozmyslí, najde ji v patičce.
+    if (readWelcomeDiscountState()) return;
     // Dokud běží lišta se souhlasem, popup nevyskočí — dva blokující překryvy
     // přes sebe se na první návštěvě rvaly o místo (popup se ořízl) a hlavně
     // odváděly pozornost od volby cookies. Po rozhodnutí lišta zmizí, sync()
@@ -88,7 +89,6 @@ export default function WelcomeDiscountPopup() {
 
   const dismiss = useCallback(() => {
     setOpen(false);
-    setShowBubble(true);
     // Přidělený kód přebíjí "dismissed" — kdo e-mail zadal, ať o kód nepřijde.
     const saved = readWelcomeDiscountState();
     if (saved?.status === "claimed") return;
@@ -145,22 +145,7 @@ export default function WelcomeDiscountPopup() {
 
   if (jeSkrytaCesta) return null;
 
-  if (!open) {
-    // Bublina se nekreslí, dokud dole visí cookie lišta — spodek obrazovky
-    // v tu chvíli patří jí. Objeví se hned, jak návštěvník o cookies rozhodne.
-    if (!showBubble || cookieBarVisible) return null;
-    return (
-      // Stejné odsazení nad gesto-lištu jako u ChatWidgetu — bublina sedí
-      // v protějším rohu, takže musí končit ve stejné výšce.
-      <button
-        onClick={() => setOpen(true)}
-        className="fixed left-6 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] z-[195] inline-flex items-center gap-2 rounded-full bg-primary text-on-primary font-bold text-sm pl-4 pr-5 py-3 shadow-xl hover:brightness-105 active:scale-[0.98] transition-all"
-      >
-        <Tag size={16} strokeWidth={2.5} />
-        {t("bubble", { percent: WELCOME_DISCOUNT_PERCENT })}
-      </button>
-    );
-  }
+  if (!open) return null;
 
   return (
     <div

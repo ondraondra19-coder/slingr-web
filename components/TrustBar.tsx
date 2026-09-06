@@ -1,6 +1,6 @@
 "use client";
 
-import { ShieldCheck, Truck, RotateCcw, Headphones } from "lucide-react";
+import { ShieldCheck, Truck, RotateCcw } from "lucide-react";
 import { useT } from "@/lib/useT";
 
 export default function TrustBar() {
@@ -9,19 +9,25 @@ export default function TrustBar() {
   // Klíče schválně vypsané, ne skládané přes `t(`${key}Title`)` — takhle je
   // najde scripts/check-messages.mjs a pozná, že se používají.
   // Pořadí: bezpečnost jako první — pro rodiče je to hlavní argument.
+  //
+  // NA MOBILU JEN PRVNÍ DVĚ. Na úzké obrazovce se čtyři dlaždice roztáhly přes
+  // dvě obrazovky a člověk se k produktům prorolovával kolem samých slibů.
+  // `mobile: false` = položka se ukáže až od lg (viz `hidden lg:flex` níž).
   const items = [
-    { icon: ShieldCheck, title: t("safetyTitle"),   desc: t("safetyDesc")   },
-    { icon: Truck,       title: t("shippingTitle"), desc: t("shippingDesc") },
-    { icon: RotateCcw,   title: t("returnsTitle"),  desc: t("returnsDesc")  },
-    { icon: Headphones,  title: t("supportTitle"),  desc: t("supportDesc")  },
+    { icon: ShieldCheck, title: t("safetyTitle"),   desc: t("safetyDesc"),   mobile: true  },
+    { icon: Truck,       title: t("shippingTitle"), desc: t("shippingDesc"), mobile: true  },
+    { icon: RotateCcw,   title: t("returnsTitle"),  desc: t("returnsDesc"),  mobile: false },
   ];
 
   return (
     <section className="bg-accent py-14 lg:py-16">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 sm:gap-x-10 gap-y-12">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 sm:gap-x-10 gap-y-12">
           {items.map((item) => (
-            <div key={item.title} className="flex flex-col items-center text-center gap-4">
+            <div
+              key={item.title}
+              className={`flex-col items-center text-center gap-4 ${item.mobile ? "flex" : "hidden lg:flex"}`}
+            >
               {/* Velká ikona v bílém čtverci — vynikne na malinovém pozadí, žádné
                   oddělovací linky. */}
               <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-white shadow-sm flex items-center justify-center">

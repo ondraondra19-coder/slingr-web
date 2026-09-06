@@ -7,10 +7,25 @@
 // tomuhle jedinému formuláři. Kvůli němu se do prohlížeče posílal i všechen
 // statický obsah patičky včetně dvanácti ikon. Interaktivní je tady jen tenhle
 // formulář — zbytek patičky je od teď serverový a žádný JS nepotřebuje.
+//
+// TENHLE FORMULÁŘ JE ZÁROVEŇ DRUHÁ CESTA K UVÍTACÍ SLEVĚ. Popup s nabídkou
+// vyskočí jen jednou při první návštěvě (components/WelcomeDiscountPopup.tsx);
+// kdo ho zavře, dostane se ke kódu tady. Dřív po popupu zůstávala viset
+// bublina vlevo dole — na mobilu překážela a prala se o spodek obrazovky
+// s chatem i cookie lištou. Patička je na každé stránce a nic nepřekrývá.
+//
+// Proto se posílá na /api/welcome-discount, ne na /api/newsletter: obojí uloží
+// kontakt do Resend Audience, ale tenhle endpoint k tomu pošle e-mail se
+// slevovým kódem. Dvě různá místa se stejným polem na e-mail, kde jedno slevu
+// dá a druhé ne, by byla jen past na zákazníka.
 import { useState } from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Tag } from "lucide-react";
 import { useT } from "@/lib/useT";
 import { isValidEmail } from "@/lib/emailValidation";
+import {
+  writeWelcomeDiscountState,
+  WELCOME_DISCOUNT_PERCENT,
+} from "@/lib/welcomeDiscount";
 
 export default function Newsletter() {
   const t = useT("footer");
@@ -29,6 +44,9 @@ export default function Newsletter() {
       case "invalid_email":   return tn("errorInvalidEmail");
       case "rate_limited":    return tn("errorRateLimited");
       case "not_configured":  return tn("errorUnavailable");
+      // Kód chodí výhradně e-mailem, takže neodeslaný e-mail = žádná sleva.
+      // Musí se říct nahlas, ne schovat pod "hotovo" (viz /api/welcome-discount).
+      case "send_failed":     return tn("errorSendFailed");
       default:                return tn("errorFailed");
     }
   }
@@ -42,13 +60,15 @@ export default function Newsletter() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/newsletter", {
+      const res = await fetch("/api/welcome-discount", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
       });
       if (res.ok) {
         setSubmitted(true);
+        // Ať už uvítací popup nevyskočí někomu, kdo kód právě dostal tudy.
+        writeWelcomeDiscountState({ status: "claimed" });
       } else {
         const data = await res.json().catch(() => null);
         setError(messageForCode(data?.code));
@@ -60,8 +80,8 @@ export default function Newsletter() {
     }
   }
 
-  // Po úspěšném přihlášení nahradíme CELÝ blok čistým potvrzením — ať tam
-  // nezůstane viset výzva „Buďte první…", když už je uživatel přihlášený.
+  // Po úspěšném odeslání nahradíme CELÝ blok čistým potvrzením — ať tam
+  // nezůstane viset výzva se slevou, když už kód letí do schránky.
   if (submitted) {
     return (
       <div className="border-b border-white/8">
@@ -85,14 +105,20 @@ export default function Newsletter() {
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-10">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
 
-          {/* Left */}
-          <div className="flex-1">
-            <p className="text-white font-bold text-base mb-1">
-              {t("newsletter")}
-            </p>
-            <p className="text-white/60 text-sm">
-              {t("newsletterDesc")}
-            </p>
+          {/* Left — ikona v kolečku stejně jako v potvrzení výš, ať blok
+              po odeslání jen vymění obsah a nepodskočí. */}
+          <div className="flex-1 flex items-center gap-4">
+            <div className="w-11 h-11 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+              <Tag size={18} strokeWidth={2.5} className="text-primary" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="text-white font-bold text-base mb-1">
+                {t("newsletter", { percent: WELCOME_DISCOUNT_PERCENT })}
+              </p>
+              <p className="text-white/60 text-sm">
+                {t("newsletterDesc")}
+              </p>
+            </div>
           </div>
 
           {/* Form */}
