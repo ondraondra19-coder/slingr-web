@@ -10,8 +10,8 @@
     "semantic_hash": ""
   },
   "app/admin/AdminDashboard.tsx": {
-    "mtime": 1784755660.3617113,
-    "ast_hash": "a244af3a84988ec4e6564a9088f2b74b",
+    "mtime": 1788704598.847444,
+    "ast_hash": "41afd9f09f0ce6cc4889cdb6e015aefb",
     "semantic_hash": ""
   },
   "app/admin/AnalyticsPanel.tsx": {
@@ -290,13 +290,13 @@
     "semantic_hash": ""
   },
   "components/Footer.tsx": {
-    "mtime": 1784839677.903259,
-    "ast_hash": "b16ffeefcc1c260738adaea10ee6c603",
+    "mtime": 1788704598.8393962,
+    "ast_hash": "ada83eac42b7df3a5b99b31b45423cfe",
     "semantic_hash": ""
   },
   "components/Header.tsx": {
-    "mtime": 1785164820.7239337,
-    "ast_hash": "dcd492348c364e5c275acba1a687fe00",
+    "mtime": 1788704598.8393962,
+    "ast_hash": "602b043035b6d207906c5e94e5e8992a",
     "semantic_hash": ""
   },
   "components/InfoGrid.tsx": {
@@ -572,16 +572,6 @@
   "CLAUDE.md": {
     "mtime": 1783856257.5022733,
     "ast_hash": "8a6643a420fdad6bfb583523bc6cef16",
-    "semantic_hash": ""
-  },
-  "public/images/main/logo-black.png": {
-    "mtime": 1784384941.604862,
-    "ast_hash": "6bb06fb36f469b42f4083108f973b3a6",
-    "semantic_hash": ""
-  },
-  "public/images/main/logo-white.png": {
-    "mtime": 1784396720.5065327,
-    "ast_hash": "a0fbb9f84f203f3be83f3cca71008d3b",
     "semantic_hash": ""
   },
   "public/images/page/hero-product.jpg": {
@@ -865,8 +855,8 @@
     "semantic_hash": ""
   },
   "public/images/products/prak-x1/main.png": {
-    "mtime": 1784475498.6771355,
-    "ast_hash": "b057fc68486a861fc5eb2e4c58337302",
+    "mtime": 1788704260.6507072,
+    "ast_hash": "ccc91a070e3a817b19cfec06a1825652",
     "semantic_hash": ""
   },
   "public/images/products/micky/main.png": {
@@ -1012,6 +1002,16 @@
   "lib/siteUrl.ts": {
     "mtime": 1788646026.1450613,
     "ast_hash": "3d2a1e3e9498a7066cf9ca31eb657b5c",
+    "semantic_hash": ""
+  },
+  "public/images/help/nalepka.png": {
+    "mtime": 1788703948.3232536,
+    "ast_hash": "0f74127d340cffba7597e110afb15e6a",
+    "semantic_hash": ""
+  },
+  "public/images/main/logo.png": {
+    "mtime": 1788704584.9182951,
+    "ast_hash": "75e95b005dad7bb485fecaddd02945bd",
     "semantic_hash": ""
   }
 }

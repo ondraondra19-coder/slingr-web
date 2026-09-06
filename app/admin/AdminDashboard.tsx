@@ -247,11 +247,11 @@ export default function AdminDashboard({
           <div className="h-16 flex items-center justify-between px-6 border-b border-white/[0.05]">
             <div className="flex items-center gap-2">
               <Image
-                src="/images/main/logo-white.png"
+                src="/images/main/logo.png"
                 alt="Slingr"
-                width={500}
-                height={150}
-                className="h-12 w-auto object-contain"
+                width={518}
+                height={263}
+                className="h-8 w-auto object-contain"
                 priority
               />
               <span className="text-[9px] font-mono font-medium bg-white/10 text-zinc-400 px-1 py-0.5 rounded uppercase tracking-wider">

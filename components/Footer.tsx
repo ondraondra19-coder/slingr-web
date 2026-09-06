@@ -83,11 +83,11 @@ export default function Footer() {
             {/* Logo — HomeLink je klientský ostrůvek kvůli scrollu nahoru */}
             <HomeLink className="inline-block">
               <Image
-                src="/images/main/logo-white.png"
+                src="/images/main/logo.png"
                 alt="Slingr"
-                width={1024}
-                height={559}
-                className="h-20 w-auto object-contain"
+                width={518}
+                height={263}
+                className="h-10 w-auto object-contain"
               />
             </HomeLink>
 

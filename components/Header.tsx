@@ -132,12 +132,16 @@ export default function Header() {
           }}
           className="shrink-0 flex items-center"
         >
+          {/* Jediné logo webu (public/images/main/logo.png) — na tmavé i světlé
+              pozadí, průhledné okolí. Soubor je oříznutý natěsno, takže výška
+              v CSS = skutečná výška značky; kdyby se logo znovu exportovalo
+              s prázdným okrajem, zmenší se a je potřeba okraj zase odříznout. */}
           <Image
-            src="/images/main/logo-white.png"
+            src="/images/main/logo.png"
             alt={t("logoAlt")}
-            width={1000}
-            height={300}
-            className="h-16 lg:h-[5.5rem] w-auto object-contain"
+            width={518}
+            height={263}
+            className="h-10 lg:h-14 w-auto object-contain"
             priority
           />
         </Link>
