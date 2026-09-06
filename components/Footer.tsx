@@ -85,8 +85,8 @@ export default function Footer() {
               <Image
                 src="/images/main/logo.png"
                 alt="Slingr"
-                width={546}
-                height={295}
+                width={567}
+                height={179}
                 className="h-10 w-auto object-contain"
               />
             </HomeLink>
