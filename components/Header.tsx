@@ -139,8 +139,8 @@ export default function Header() {
           <Image
             src="/images/main/logo.png"
             alt={t("logoAlt")}
-            width={518}
-            height={263}
+            width={546}
+            height={295}
             className="h-10 lg:h-14 w-auto object-contain"
             priority
           />
