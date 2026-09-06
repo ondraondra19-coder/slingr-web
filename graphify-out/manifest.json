@@ -270,8 +270,8 @@
     "semantic_hash": ""
   },
   "components/CategoryGrid.tsx": {
-    "mtime": 1784838809.0423615,
-    "ast_hash": "592d82b24c706a53f072a60e4f6a4628",
+    "mtime": 1788700772.3192415,
+    "ast_hash": "7b8c8ad4ec28d802d86f97480a2af9be",
     "semantic_hash": ""
   },
   "components/ChatWidget.tsx": {
@@ -460,8 +460,8 @@
     "semantic_hash": ""
   },
   "messages/cs.json": {
-    "mtime": 1788699927.5648184,
-    "ast_hash": "3ce7aad87769f467c93f8a5651d4ed0c",
+    "mtime": 1788700781.5873222,
+    "ast_hash": "a2089d428dc5812aa8590de4b989f6e1",
     "semantic_hash": ""
   },
   "messages/en.json": {

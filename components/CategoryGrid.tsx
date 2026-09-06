@@ -14,8 +14,12 @@ export default function CategoryGrid() {
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-          {/* Levý — světlý (primary) */}
-          <div className="relative overflow-hidden rounded-2xl bg-primary min-h-[220px] flex items-center p-8 md:p-10">
+          {/* Levý — světlý (primary). NA MOBILU SE NEUKAZUJE: bez druhého
+              baneru vedle sebe se z dvojice stanou dva bloky pod sebou a mezi
+              produkty a magazínem vznikne dlouhý úsek samého sdělení. Tenhle
+              je jen věta bez odkazu, takže ustupuje tomu s dopravou a
+              tlačítkem. Od md (kde se mřížka láme na dva sloupce) jsou oba. */}
+          <div className="relative overflow-hidden rounded-2xl bg-primary min-h-[220px] hidden md:flex items-center p-8 md:p-10">
             {/* Dekorativní kruhy */}
             <div className="absolute -right-8 -top-8 w-48 h-48 rounded-full bg-white/10" />
             <div className="absolute -right-4 -bottom-12 w-64 h-64 rounded-full bg-white/5" />
